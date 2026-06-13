@@ -18,3 +18,7 @@ Biome > ESLint + Prettier. One tool, one config, handles linting and formatting 
 pnpm is faster and doesn't copy packages into `node_modules`, just symlinks them.
 
 `.vscode/settings.json` hides ugly files (`node_modules`, `.next`, `shadcn/ui`, lockfiles...) from the file explorer.
+
+---
+
+© 2026 AllForOne. Source is provided for reference only. No use, hosting, or redistribution without written permission.
