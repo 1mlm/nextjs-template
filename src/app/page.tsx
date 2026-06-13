@@ -1,5 +1,5 @@
 "use client";
-import { CursorAddSelection01Icon } from "@hugeicons/core-free-icons";
+import { Target03Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import useSound from "use-sound";
 import { Icon } from "@/components/Icon";
@@ -18,7 +18,7 @@ export default function Page() {
           play();
         }}
       >
-        <Icon icon={CursorAddSelection01Icon} /> +1
+        <Icon icon={Target03Icon} /> +1
       </Button>
       <p>Count: {count}</p>
     </div>

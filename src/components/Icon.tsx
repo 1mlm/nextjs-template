@@ -1,13 +1,9 @@
 import { HugeiconsIcon as HugeiconsIconBase } from "@hugeicons/react";
 import type { ComponentProps } from "react";
 
-export const DEFAULT_STROKE_WIDTH = 2;
-
-type IconProps = ComponentProps<typeof HugeiconsIconBase>;
-
 export function Icon({
-  strokeWidth = DEFAULT_STROKE_WIDTH,
+  strokeWidth = 2,
   ...props
-}: IconProps) {
-  return <HugeiconsIconBase strokeWidth={strokeWidth} {...props} />;
+}: ComponentProps<typeof HugeiconsIconBase>) {
+  return <HugeiconsIconBase {...{ strokeWidth }} {...props} />;
 }
