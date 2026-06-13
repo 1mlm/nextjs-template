@@ -1,13 +1,1 @@
-{
-  "files.exclude": {
-    "**/.git": true,
-    "*.mjs": true,
-    "package-lock.json": true,
-    "next-env*": true,
-    "*.tsbuildinfo": true,
-    "next.config.ts": true,
-    "biome.json": true,
-    "node_modules": true,
-    ".next": true
-  }
-}
+{}

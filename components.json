@@ -5,7 +5,7 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "styles/globals.css",
+    "css": "shadcn/styles/globals.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -13,13 +13,13 @@
   "iconLibrary": "hugeicons",
   "rtl": false,
   "aliases": {
-    "components": "@/shadcn/cpns",
-    "utils": "@/shadcn/lib/utils",
+    "components": "@/shadcn/components",
+    "utils": "@/shadcn/utils",
     "ui": "@/shadcn/ui",
     "lib": "@/shadcn/lib",
     "hooks": "@/shadcn/hooks"
   },
-  "menuColor": "default",
+  "menuColor": "default-translucent",
   "menuAccent": "subtle",
   "registries": {}
 }
