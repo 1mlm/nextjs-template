@@ -33,7 +33,3 @@ export function getColorStyle(colorId?: string | null): CSSProperties {
     color: `light-dark(${ramp[700]}, ${ramp[400]})`,
   };
 }
-
-// flat swatch/canvas/SVG fill
-export const getColorHex = (colorId?: string | null) =>
-  toColorRamp(colorId)[500];
