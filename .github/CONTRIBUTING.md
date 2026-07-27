@@ -12,7 +12,8 @@ scope: message
 - Lowercase, no period
 - Imperative mood: `add`, `fix`, `remove`, not `added`, `fixed`
 - Specific and compact: say what changed and why if non-obvious
-- Never abstract: not `Enhanced component for better UX`, not `Improved performance`, say i.e `refactor: Customtable to use onClick prop for ApplicationsPage.tsx`
+- No co-authoring. Never.
+- Never abstract: not `Enhanced component for better UX`, not `Improved performance`, say i.e `refactor: Customtable to use onClick prop for ApplicationsPage.tsx`, use many lines if necessary, using all necessary keywords to look for commits
 
 
 **Bad:**
