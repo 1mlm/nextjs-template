@@ -6,8 +6,14 @@
 - [`Tailwind CSS`](https://tailwindcss.com/) 4
 - [`shadcn`](https://ui.shadcn.com/) (Nova style, Neutral theme, Medium radius, [`Outfit`](https://fonts.google.com/specimen/Outfit) font)
 - [`Hugeicons`](https://hugeicons.com/)
+- [`nuqs`](https://nuqs.dev/) (URL-synced state, `q` as the default search param)
 - [`Biome`](https://biomejs.dev/)
 - [`pnpm`](https://pnpm.io/)
+
+## Included components
+
+- `SearchBar` — icon + input + result-count, synced to the URL via nuqs
+- `CustomTable` (`src/components/table/`) — filterable, sortable, paginated data table with xlsx/csv export ([`exceljs`](https://github.com/exceljs/exceljs)); see `src/app/table/page.tsx` for a full example
 
 ## Philosophy
 

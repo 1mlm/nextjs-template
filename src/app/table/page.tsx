@@ -13,7 +13,7 @@ import {
   Tag01Icon,
   UserIcon,
 } from "@hugeicons/core-free-icons";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
 import {
   CustomTable,
@@ -190,7 +190,9 @@ const columns: CustomTableColumn<Row>[] = [
   },
 ];
 
-export default function Page() {
+// CustomTable/SearchBar read the URL via nuqs (useSearchParams), which Next.js
+// requires a Suspense boundary around wherever it's statically prerendered
+function TableDemo() {
   const [resultCount, setResultCount] = useState(ROWS.length);
 
   return (
@@ -210,5 +212,13 @@ export default function Page() {
         onVisibleCountChange={setResultCount}
       />
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <TableDemo />
+    </Suspense>
   );
 }
