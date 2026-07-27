@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@plugin "@toolwind/corner-shape";
 
 :root {
   color-scheme: dark;
@@ -93,5 +94,17 @@
     }
   html {
     @apply font-sans;
+    }
+
+  /* Squircles everywhere without touching shadcn/ui sources */
+  [data-slot="button"],
+  [data-slot="input"],
+  [data-slot="input-group"] {
+    @apply corner-squircle;
+    }
+
+  /* Chrome autofill tints only the input; tint the whole group to match */
+  [data-slot="input-group"]:has(input:autofill) {
+    background-color: #e8f0fe;
     }
 }
