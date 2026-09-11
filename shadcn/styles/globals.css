@@ -4,7 +4,7 @@
 @plugin "@toolwind/corner-shape";
 
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 @theme inline {
@@ -96,10 +96,37 @@
     @apply font-sans;
     }
 
-  /* Squircles everywhere without touching shadcn/ui sources */
-  [data-slot="button"],
+  /* consistent thin scrollbar everywhere — otherwise most browsers (Windows
+     Chrome/Edge, Firefox with the flag off) fall back to their default
+     chunky one instead of the slim overlay style macOS shows natively */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+    }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 9999px;
+    }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+    }
+
+  /* Squircles everywhere without touching shadcn/ui sources. Button uses the
+     group/button class, not [data-slot="button"] — a button rendered as a
+     Dialog/Popover/etc trigger's asChild target loses its own data-slot to
+     the trigger's, but group/button is a plain class from buttonVariants'
+     base string and survives that merge */
+  [class*="group/button"],
   [data-slot="input"],
-  [data-slot="input-group"] {
+  [data-slot="input-group"],
+  [data-slot="badge"] {
     @apply corner-squircle;
     }
 
@@ -107,4 +134,41 @@
   [data-slot="input-group"]:has(input:autofill) {
     background-color: #e8f0fe;
     }
+}
+
+/* Radix menu items and cmdk options ship with cursor-default baked into
+   their own class strings (a Tailwind utility, which sits in a cascade layer
+   after @layer base above) — !important is the only thing that reliably
+   wins over that without touching shadcn/ui sources */
+[data-slot="dropdown-menu-item"],
+[data-slot="dropdown-menu-checkbox-item"],
+[data-slot="dropdown-menu-radio-item"],
+[data-slot="dropdown-menu-sub-trigger"],
+[data-slot="context-menu-item"],
+[data-slot="context-menu-checkbox-item"],
+[data-slot="context-menu-radio-item"],
+[data-slot="context-menu-sub-trigger"],
+[data-slot="command-item"] {
+  cursor: pointer !important;
+}
+
+/* DropdownMenuContent/ContextMenuContent's own descendant rules reset every
+   item — destructive-variant included — to the same neutral hover wash on
+   focus/hover, which cancels the destructive item's own red text/icon on
+   hover. Both are Tailwind utilities in the `utilities` layer, so this
+   override must sit in an earlier layer (`base`) — cascade layers reverse
+   order for !important, so an earlier layer's !important beats a later
+   layer's. Only restyled on :focus (Radix moves real DOM focus to an item on
+   hover, so this fires on hover too) — destructive items read as a normal
+   item at rest and only turn red as you're about to act on them */
+@layer base {
+  [data-slot="dropdown-menu-item"][data-variant="destructive"]:focus,
+  [data-slot="context-menu-item"][data-variant="destructive"]:focus {
+    background-color: color-mix(in oklab, var(--destructive) 10%, transparent) !important;
+    color: var(--destructive) !important;
+  }
+  [data-slot="dropdown-menu-item"][data-variant="destructive"]:focus *,
+  [data-slot="context-menu-item"][data-variant="destructive"]:focus * {
+    color: var(--destructive) !important;
+  }
 }

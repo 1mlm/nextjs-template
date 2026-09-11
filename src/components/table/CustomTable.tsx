@@ -40,6 +40,7 @@ import {
   parseSort,
   serializeSort,
 } from "./filtering";
+import { useScrollFade } from "./useScrollFade";
 
 const PAGE_SIZE = 25;
 
@@ -280,14 +281,22 @@ export function CustomTable<T>({
     selectedIds.has(getItemId(item)),
   );
 
+  const { scrollContainerRef, checkboxColumnRef, maskImage } = useScrollFade(
+    paginatedItems.length,
+  );
+
   return (
     <div className="rounded-md overflow-clip">
-      <div className="w-full overflow-x-auto">
+      <div
+        ref={scrollContainerRef}
+        className="w-full max-h-[70vh] overflow-auto"
+        style={{ maskImage, WebkitMaskImage: maskImage }}
+      >
         <table className="w-full caption-bottom text-sm">
           <TableHeader>
             <TableRow className="*:sticky *:top-0 *:outline *:outline-border *:text-center *:text-xs *:bg-muted *:px-4">
               {selectable && (
-                <TableHead>
+                <TableHead ref={checkboxColumnRef} className="left-0 z-20">
                   <div className="flex justify-center pr-2!">
                     <Checkbox
                       checked={getTriState(
@@ -327,7 +336,7 @@ export function CustomTable<T>({
                   className={cn(index % 2 === 1 && "bg-foreground/5")}
                 >
                   {selectable && (
-                    <TableCell className="border-r border-border/50">
+                    <TableCell className="sticky left-0 z-10 border-r border-border/50">
                       <div className="flex justify-center pr-2!">
                         <Skeleton className="size-4" />
                       </div>
@@ -356,7 +365,7 @@ export function CustomTable<T>({
                     )}
                   >
                     {selectable && (
-                      <TableCell className="border-r border-border/50 text-center">
+                      <TableCell className="sticky left-0 z-10 border-r border-border/50 text-center">
                         <div className="flex justify-center pr-2!">
                           <Checkbox
                             checked={selectedIds.has(id)}

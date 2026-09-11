@@ -9,6 +9,7 @@ import {
   Key01Icon,
   Link01Icon,
   Mail01Icon,
+  MoreVerticalIcon,
   StarIcon,
   Tag01Icon,
   UserIcon,
@@ -20,7 +21,9 @@ import {
   type CustomTableColumn,
   type CustomTableEnumValue,
 } from "@/components/table/CustomTable";
-import { Button } from "@/shadcn/ui/button";
+import { DeleteRowMenuItem } from "@/components/table/DeleteRowMenuItem";
+import { CopyMenuItem, RowMenu } from "@/components/table/RowMenu";
+import { useOptimisticRowRemoval } from "@/components/table/useOptimisticRowRemoval";
 
 type Row = {
   id: string;
@@ -88,6 +91,8 @@ const ROWS: Row[] = Array.from({ length: 43 }, (_, i) => {
     labels,
   };
 });
+
+const getRowId = (row: Row) => row.id;
 
 const toLabelTag = (label: string): CustomTableEnumValue => ({
   label,
@@ -173,27 +178,39 @@ const columns: CustomTableColumn<Row>[] = [
     searchable: false,
     getString: (row) => row.url,
   },
-  {
-    id: "actions",
-    label: "Actions",
-    icon: Delete02Icon,
-    type: "buttons",
-    getButtons: (row) => (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => alert(`Delete ${row.name}`)}
-      >
-        Delete
-      </Button>
-    ),
-  },
 ];
 
 // CustomTable/SearchBar read the URL via nuqs (useSearchParams), which Next.js
 // requires a Suspense boundary around wherever it's statically prerendered
 function TableDemo() {
   const [resultCount, setResultCount] = useState(ROWS.length);
+  const { visibleItems, markRemoved, unmarkRemoved } = useOptimisticRowRemoval(
+    ROWS,
+    getRowId,
+  );
+
+  const columnsWithActions: CustomTableColumn<Row>[] = [
+    ...columns,
+    {
+      id: "actions",
+      label: "Actions",
+      icon: Delete02Icon,
+      type: "buttons",
+      getButtons: (row) => (
+        <RowMenu ariaLabel={`Actions for ${row.name}`} icon={MoreVerticalIcon}>
+          <CopyMenuItem value={row.id} label="Copy ID" copiedLabel="Copied!" />
+          <DeleteRowMenuItem
+            label="Delete"
+            message={`${row.name} deleted`}
+            onOptimisticRemove={() => markRemoved(row.id)}
+            onRevert={() => unmarkRemoved(row.id)}
+            // demo only — nothing to actually persist to
+            commit={async () => ({ error: null })}
+          />
+        </RowMenu>
+      ),
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-4 p-5">
@@ -203,9 +220,9 @@ function TableDemo() {
         trailing={`${resultCount} ${resultCount === 1 ? "person" : "people"}`}
       />
       <CustomTable
-        {...{ columns }}
-        items={ROWS}
-        getItemId={(row) => row.id}
+        columns={columnsWithActions}
+        items={visibleItems}
+        getItemId={getRowId}
         selectable
         emptyLabel="people"
         exportFilePrefix="people"

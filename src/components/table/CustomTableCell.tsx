@@ -23,6 +23,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shadcn/ui/tooltip";
 import { cn } from "@/shadcn/utils";
+import { copyToClipboard } from "@/utils/clipboard";
 import { getColorStyle } from "@/utils/color";
 import {
   formatDetailedDuration,
@@ -57,7 +58,7 @@ function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(value);
+    copyToClipboard(value);
     setCopied(true);
     setTimeout(() => setCopied(false), 1000);
   };
