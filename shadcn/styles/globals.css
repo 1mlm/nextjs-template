@@ -31,6 +31,35 @@
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
+    /* the rest of the --chart-* namespace, used by @bklit's chart components
+       (stroke/fill/grid/tooltip/marker colors) - kept in light-dark() like
+       everything else here rather than the .dark-class values the shadcn
+       registry install generated, since this app never toggles a .dark
+       class. --chart-1..5 above stay the single source of truth for series
+       colors (--chart-line-primary/secondary just point at them) */
+    --chart-background: light-dark(oklch(1 0 0), oklch(0.145 0 0));
+    --chart-foreground: light-dark(oklch(0.145 0.004 285), oklch(0.45 0 0));
+    --chart-foreground-muted: light-dark(oklch(0.55 0.014 260), oklch(0.65 0.01 260));
+    --chart-line-primary: var(--chart-1);
+    --chart-line-secondary: var(--chart-2);
+    --chart-crosshair: light-dark(oklch(0.4 0.1828 274.34), oklch(0.45 0 0));
+    --chart-grid: light-dark(oklch(0.9 0 0), oklch(0.25 0 0));
+    --chart-brush-border: var(--chart-grid);
+    /* deliberately not light-dark() - a translucent dark tooltip reads fine
+       against either page theme, upstream doesn't vary it either */
+    --chart-tooltip-background: oklch(0.21 0.006 285 / 0.8);
+    --chart-tooltip-foreground: oklch(0.985 0 0);
+    --chart-tooltip-muted: oklch(0.65 0.01 260);
+    --chart-marker-background: light-dark(oklch(0.97 0.005 260), oklch(0.25 0.01 260));
+    --chart-marker-border: light-dark(oklch(0.85 0.01 260), oklch(0.4 0.01 260));
+    --chart-marker-foreground: light-dark(oklch(0.3 0.01 260), oklch(0.9 0 0));
+    --chart-label: light-dark(oklch(0.45 0.01 260), oklch(0.75 0.01 260));
+    --chart-scale-01: light-dark(oklch(0.98 0.003 106), oklch(0.28 0.03 270));
+    --chart-scale-02: light-dark(oklch(0.92 0.008 106), oklch(0.38 0.04 270));
+    --chart-scale-03: light-dark(oklch(0.82 0.015 106), oklch(0.48 0.05 270));
+    --chart-scale-04: light-dark(oklch(0.68 0.02 106), oklch(0.58 0.06 270));
+    --chart-scale-05: light-dark(oklch(0.55 0.025 106), oklch(0.68 0.07 270));
+    --chart-scale-pattern-color: light-dark(oklch(0.96 0.005 106), oklch(0.145 0 0));
     --radius: 0.875rem;
     --sidebar: light-dark(oklch(0.985 0 0), oklch(0.205 0 0));
     --sidebar-foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
@@ -64,6 +93,24 @@
     --color-chart-3: var(--chart-3);
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
+    --color-chart-background: var(--chart-background);
+    --color-chart-foreground: var(--chart-foreground);
+    --color-chart-foreground-muted: var(--chart-foreground-muted);
+    --color-chart-crosshair: var(--chart-crosshair);
+    --color-chart-grid: var(--chart-grid);
+    --color-chart-tooltip-background: var(--chart-tooltip-background);
+    --color-chart-tooltip-foreground: var(--chart-tooltip-foreground);
+    --color-chart-tooltip-muted: var(--chart-tooltip-muted);
+    --color-chart-marker-background: var(--chart-marker-background);
+    --color-chart-marker-border: var(--chart-marker-border);
+    --color-chart-marker-foreground: var(--chart-marker-foreground);
+    --color-chart-label: var(--chart-label);
+    --color-chart-scale-01: var(--chart-scale-01);
+    --color-chart-scale-02: var(--chart-scale-02);
+    --color-chart-scale-03: var(--chart-scale-03);
+    --color-chart-scale-04: var(--chart-scale-04);
+    --color-chart-scale-05: var(--chart-scale-05);
+    --color-chart-scale-pattern-color: var(--chart-scale-pattern-color);
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -126,7 +173,8 @@
   [class*="group/button"],
   [data-slot="input"],
   [data-slot="input-group"],
-  [data-slot="badge"] {
+  [data-slot="badge"],
+  [data-slot="card"] {
     @apply corner-squircle;
     }
 
