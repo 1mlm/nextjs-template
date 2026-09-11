@@ -1,13 +1,8 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.6/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
   "files": {
     "ignoreUnknown": false,
-    "includes": [
-      "**",
-      "!node_modules",
-      "!.next",
-      "!shadcn"
-    ]
+    "includes": ["**", "!node_modules", "!.next", "!shadcn"]
   },
   "css": {
     "parser": {
