@@ -1,13 +1,7 @@
 "use client";
 
 import { BrushCleaningIcon, InboxIcon } from "@hugeicons/core-free-icons";
-import {
-  parseAsInteger,
-  parseAsString,
-  useQueryState,
-  useQueryStates,
-} from "nuqs";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect } from "react";
 import { type HugeIcon, Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
 import { Checkbox } from "@/shadcn/ui/checkbox";
@@ -18,7 +12,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/shadcn/ui/pagination";
-import { Skeleton } from "@/shadcn/ui/skeleton";
 import {
   TableBody,
   TableCell,
@@ -29,22 +22,13 @@ import {
 import { cn } from "@/shadcn/utils";
 import { CustomTableCell } from "./CustomTableCell";
 import { CustomTableColumnHeader } from "./CustomTableColumnHeader";
+import { CustomTableSkeletonRows } from "./CustomTableSkeletonRows";
 import { ExtractButton } from "./ExtractButton";
-import {
-  type ColumnFilterField,
-  columnMatchesFilter,
-  compareColumnValues,
-  getColumnFilterFields,
-  getFilterKey,
-  getTriState,
-  parseSort,
-  serializeSort,
-} from "./filtering";
+import { type ColumnFilterField, getTriState } from "./filtering";
+import { useRowSelection } from "./useRowSelection";
 import { useScrollFade } from "./useScrollFade";
-
-const PAGE_SIZE = 25;
-
-const SKELETON_ROW_KEYS = Array.from({ length: 8 }, (_, i) => `skeleton-${i}`);
+import { useTableFilterSort } from "./useTableFilterSort";
+import { useTablePagination } from "./useTablePagination";
 
 export type CustomTableEnumValue = {
   label: string;
@@ -119,27 +103,6 @@ export function getColumnExportValue<T>(
   return column.getValue(item) ?? "";
 }
 
-// everything the global search box is allowed to match against for one row
-function getSearchableStrings<T>(
-  columns: CustomTableColumn<T>[],
-  item: T,
-): string[] {
-  return columns.flatMap((column) => {
-    if (column.type === "string") return [column.getString(item)];
-    if (column.type === "copy")
-      return column.searchable === false ? [] : [column.getString(item)];
-    if (column.type === "enum") {
-      const value = column.getValue(item);
-      return value !== undefined
-        ? [column.enumOptions[value]?.label ?? ""]
-        : [];
-    }
-    if (column.type === "tags")
-      return column.getTags(item).map((tag) => tag.label);
-    return [];
-  });
-}
-
 export function CustomTable<T>({
   items,
   columns,
@@ -172,114 +135,51 @@ export function CustomTable<T>({
   // shown in the empty state, e.g. "users" -> "No users to show"
   emptyLabel?: string;
 }) {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [search] = useQueryState(searchQueryKey, { defaultValue: "" });
-  const [sortRaw, setSortRaw] = useQueryState("sort", { defaultValue: "" });
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-
-  const filterParsers = useMemo(
-    () =>
-      Object.fromEntries(
-        filterable
-          ? columns.flatMap((column) =>
-              getColumnFilterFields(column).map((field) => [
-                getFilterKey(column.id, field),
-                parseAsString.withDefault(""),
-              ]),
-            )
-          : [],
-      ),
-    [columns, filterable],
-  );
-  const [filterValues, setFilterValues] = useQueryStates(filterParsers);
-
-  const getColumnField =
-    (columnId: string) =>
-    (field: ColumnFilterField): string =>
-      filterValues[getFilterKey(columnId, field)] ?? "";
-  const setColumnField = (
-    columnId: string,
-    field: ColumnFilterField,
-    value: string,
-  ) => setFilterValues({ [getFilterKey(columnId, field)]: value });
-
-  const sort = sortable ? parseSort(sortRaw) : null;
-  const hasActiveFilterOrSort =
-    Object.values(filterValues).some(Boolean) || sort !== null;
-  const resetFilterAndSort = () => {
-    setFilterValues(
-      Object.fromEntries(Object.keys(filterValues).map((key) => [key, ""])),
-    );
-    setSortRaw("");
-  };
-
-  const visibleItems = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    const filtered = items.filter((item) => {
-      if (
-        query &&
-        !getSearchableStrings(columns, item).some((s) =>
-          s.toLowerCase().includes(query),
-        )
-      )
-        return false;
-      if (!filterable) return true;
-      return columns.every((column) =>
-        columnMatchesFilter(
-          column,
-          item,
-          (field) => filterValues[getFilterKey(column.id, field)] ?? "",
-        ),
-      );
-    });
-    if (!sort) return filtered;
-    const sortColumn = columns.find((column) => column.id === sort.columnId);
-    if (!sortColumn) return filtered;
-    const sorted = [...filtered].sort((a, b) =>
-      compareColumnValues(sortColumn, a, b),
-    );
-    return sort.dir === "desc" ? sorted.reverse() : sorted;
-  }, [items, columns, search, sort, filterValues, filterable]);
+  const {
+    visibleItems,
+    sort,
+    hasActiveFilterOrSort,
+    resetFilterAndSort,
+    getColumnField,
+    setColumnField,
+    setColumnSort,
+    search,
+    sortRaw,
+    filterValues,
+  } = useTableFilterSort({
+    columns,
+    items,
+    filterable,
+    sortable,
+    searchQueryKey,
+  });
 
   useEffect(() => {
     onVisibleCountChange?.(visibleItems.length);
   }, [visibleItems, onVisibleCountChange]);
+
+  const {
+    page: currentPage,
+    setPage,
+    pageCount,
+    paginatedItems,
+  } = useTablePagination({ items: visibleItems, paginate });
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: only used to trigger the reset, not read
   useEffect(() => {
     setPage(1);
   }, [search, filterValues, sortRaw, setPage]);
 
-  const pageCount = paginate
-    ? Math.max(1, Math.ceil(visibleItems.length / PAGE_SIZE))
-    : 1;
-  const currentPage = Math.min(Math.max(page, 1), pageCount);
-  const paginatedItems = paginate
-    ? visibleItems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-    : visibleItems;
-
-  const toggleRow = (id: string) => {
-    const next = new Set(selectedIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSelectedIds(next);
-  };
-
-  const allSelected =
-    visibleItems.length > 0 && selectedIds.size === visibleItems.length;
-  const toggleAll = () =>
-    setSelectedIds(
-      allSelected ? new Set() : new Set(visibleItems.map(getItemId)),
-    );
+  const { selectedIds, toggleRow, toggleAll, selectedItems } = useRowSelection({
+    allItems: items,
+    visibleItems,
+    getItemId,
+  });
 
   const canResetFilterAndSort =
     (filterable || sortable) && hasActiveFilterOrSort;
   const hasSelection = Boolean(selectable) && selectedIds.size > 0;
   const showActionBar = canResetFilterAndSort || hasSelection || pageCount > 1;
-
-  const selectedItems = items.filter((item) =>
-    selectedIds.has(getItemId(item)),
-  );
 
   const { scrollContainerRef, checkboxColumnRef, maskImage } = useScrollFade(
     paginatedItems.length,
@@ -319,9 +219,7 @@ export function CustomTable<T>({
                     }
                     sort={sort?.columnId === column.id ? sort.dir : null}
                     onSortChange={(dir: "asc" | "desc" | null) =>
-                      setSortRaw(
-                        dir ? serializeSort({ columnId: column.id, dir }) : "",
-                      )
+                      setColumnSort(column.id, dir)
                     }
                   />
                 </TableHead>
@@ -329,29 +227,9 @@ export function CustomTable<T>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading &&
-              SKELETON_ROW_KEYS.map((key, index) => (
-                <TableRow
-                  key={key}
-                  className={cn(index % 2 === 1 && "bg-foreground/5")}
-                >
-                  {selectable && (
-                    <TableCell className="sticky left-0 z-10 border-r border-border/50">
-                      <div className="flex justify-center pr-2!">
-                        <Skeleton className="size-4" />
-                      </div>
-                    </TableCell>
-                  )}
-                  {columns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      className="border-r border-border/50 last:border-r-0"
-                    >
-                      <Skeleton className="h-4 w-full min-w-12" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+            {loading && (
+              <CustomTableSkeletonRows {...{ columns, selectable }} />
+            )}
             {!loading &&
               paginatedItems.map((item, index) => {
                 const id = getItemId(item);

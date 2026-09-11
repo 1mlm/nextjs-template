@@ -12,8 +12,11 @@ export function Icon({
   className,
   ...props
 }: ComponentProps<typeof HugeiconsIconBase>) {
-  return <HugeiconsIconBase
-    className={cn("size-[1em]", className)}
-    {...{ strokeWidth }}
-    {...props} />;
+  return (
+    <HugeiconsIconBase
+      className={cn("size-[1em]", className)}
+      {...{ strokeWidth }}
+      {...props}
+    />
+  );
 }
