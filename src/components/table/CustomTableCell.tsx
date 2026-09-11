@@ -30,6 +30,7 @@ import {
   formatExactDate,
   formatRelativeDate,
 } from "@/utils/date";
+import { CornerCountBadge } from "./CornerCountBadge";
 import type { CustomTableColumn, CustomTableEnumValue } from "./CustomTable";
 import { CustomTableEmptyValue } from "./CustomTableEmptyValue";
 
@@ -156,13 +157,10 @@ function TagsCell({
         </div>
         {hasOverflow && (
           <DialogTrigger asChild>
-            <button
-              type="button"
-              className="absolute -top-2 -right-1 inline-flex items-center gap-1 rounded-full bg-popover px-1.5 py-0.5 text-xs shadow-sm ring-1 ring-border"
-            >
+            <CornerCountBadge>
               {tags.length}
               <Icon icon={FullScreenIcon} className="size-3" />
-            </button>
+            </CornerCountBadge>
           </DialogTrigger>
         )}
       </div>
