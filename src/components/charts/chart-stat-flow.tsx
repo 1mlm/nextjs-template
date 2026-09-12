@@ -38,14 +38,15 @@ function formatStatValue(
 }
 
 function useNumberFlowElementReady(): boolean {
-  const [ready, setReady] = useState(
-    () =>
-      typeof customElements !== "undefined" &&
-      Boolean(customElements.get("number-flow-react")),
-  );
+  // always starts false on both server and client so the first client render
+  // matches the SSR output - flipping true happens in the effect below,
+  // which only runs after hydration commits. checking customElements
+  // synchronously in the initial state would return true on the client
+  // (the element registers itself on import) and mismatch the server render
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (ready) {
+    if (typeof customElements === "undefined") {
       return;
     }
     let cancelled = false;
@@ -57,7 +58,7 @@ function useNumberFlowElementReady(): boolean {
     return () => {
       cancelled = true;
     };
-  }, [ready]);
+  }, []);
 
   return ready;
 }
