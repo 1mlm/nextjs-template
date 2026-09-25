@@ -6,7 +6,7 @@ import { Button } from "@/shadcn/ui/button";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-2 p-4">
+    <div className="flex flex-1 flex-col items-center justify-center gap-2 p-4">
       <EmptyState
         icon={UnavailableIcon}
         message="This page doesn't exist (or it moved and nobody told us)"

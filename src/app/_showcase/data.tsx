@@ -4,6 +4,7 @@ import {
   ArrowRight01Icon,
   Bug02Icon,
   ChartLineData01Icon,
+  SidebarLeftIcon,
   Table01Icon,
   UnavailableIcon,
 } from "@hugeicons/core-free-icons";
@@ -12,6 +13,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
+import { useSidebar } from "@/shadcn/ui/sidebar";
 import { COLORS, getColorStyle } from "@/utils/color";
 import {
   formatDetailedDuration,
@@ -90,7 +92,24 @@ function ErrorPageDemo() {
   );
 }
 
+function SidebarDemo() {
+  const { toggleSidebar } = useSidebar();
+  return (
+    <Button variant="outline" onClick={toggleSidebar}>
+      <Icon icon={SidebarLeftIcon} />
+      Toggle sidebar (or ctrl+b)
+    </Button>
+  );
+}
+
 export const DATA_ITEMS: ShowcaseItem[] = [
+  {
+    name: "AppSidebar + MobileTopBar",
+    path: "src/app/_sidebar/",
+    description:
+      "the shell around this page. collapses to icons (remembered in a cookie), phones get a top bar with a bottom sheet menu. links live in nav.tsx",
+    Demo: SidebarDemo,
+  },
   {
     name: "COLORS + getColorStyle",
     path: "src/utils/color.ts",

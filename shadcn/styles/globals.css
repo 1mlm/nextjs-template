@@ -5,6 +5,10 @@
 
 :root {
   color-scheme: light dark;
+  /* shared by the sidebar width change and everything that moves with it
+     (AppSidebar's toggle + header), so they all land on the same frame */
+  --sidebar-duration: 300ms;
+  --sidebar-ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @theme inline {
@@ -175,7 +179,9 @@
   [data-slot="input-group"],
   [data-slot="badge"],
   [data-slot="card"],
-  [data-slot="popover-content"] {
+  [data-slot="popover-content"],
+  [data-slot="sidebar-inner"],
+  [data-slot="sidebar-inset"] {
     @apply corner-squircle;
     }
 
@@ -276,4 +282,16 @@
     opacity: 0.35;
     transform: perspective(240px) rotateX(50deg);
   }
+}
+
+/* shadcn's sidebar animates its width linearly in 200ms, swap in the shared
+   timing so AppSidebar's own transitions can match it frame for frame */
+[data-slot="sidebar-gap"],
+[data-slot="sidebar-container"] {
+  transition-duration: var(--sidebar-duration);
+  transition-timing-function: var(--sidebar-ease);
+}
+
+[data-slot="sidebar-inner"] {
+  border-radius: var(--radius-xl);
 }
