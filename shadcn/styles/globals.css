@@ -244,11 +244,16 @@
     --tw-enter-translate-y: 100%;
     --tw-exit-translate-y: 100%;
   }
-  [data-slot="dialog-footer"] {
-    margin-bottom: calc(-1rem - env(safe-area-inset-bottom));
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-    border-radius: 0;
-  }
+}
+
+/* shadcn's footer bleeds to the dialog edges with its own tinted strip and top
+   border. looks off, and inside a scrolling form the negative margins overflow
+   and make the whole thing scroll. just a plain right aligned button row */
+[data-slot="dialog-footer"] {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
 }
 
 /* time wheel options tilt and fade the further they scroll from the center,

@@ -66,10 +66,13 @@ export function FormDialog({
             const formData = new FormData(event.currentTarget);
             startTransition(() => formAction(formData));
           }}
-          className="flex min-h-0 min-w-0 flex-col gap-4 overflow-y-auto"
+          className="flex min-h-0 min-w-0 flex-col gap-4"
         >
-          {children}
-          <FormError>{error}</FormError>
+          {/* -m-1 p-1 so focus rings aren't clipped by the scroll box */}
+          <div className="-m-1 flex min-h-0 flex-col gap-4 overflow-y-auto p-1">
+            {children}
+            <FormError>{error}</FormError>
+          </div>
           <DialogFooter>
             <SubmitButton
               icon={submitIcon}
