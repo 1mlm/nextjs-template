@@ -97,20 +97,30 @@ function downloadAsCsv(rows: ExportRows, filename: string) {
   );
 }
 
-const EXPORT_FORMATS: {
-  id: string;
-  label: string;
-  extension: string;
-  download: (rows: ExportRows, filename: string) => void | Promise<void>;
-}[] = [
+enum ExportFormat {
+  Excel = "excel",
+  Csv = "csv",
+}
+
+const EXPORT_FORMATS: Record<
+  ExportFormat,
   {
-    id: "excel",
+    label: string;
+    extension: string;
+    download: (rows: ExportRows, filename: string) => void | Promise<void>;
+  }
+> = {
+  [ExportFormat.Excel]: {
     label: "Excel (.xlsx)",
     extension: "xlsx",
     download: downloadAsExcel,
   },
-  { id: "csv", label: "CSV (.csv)", extension: "csv", download: downloadAsCsv },
-];
+  [ExportFormat.Csv]: {
+    label: "CSV (.csv)",
+    extension: "csv",
+    download: downloadAsCsv,
+  },
+};
 
 export function ExtractDialog<T>({
   open,
@@ -125,13 +135,11 @@ export function ExtractDialog<T>({
   columns: CustomTableColumn<T>[];
   filePrefix: string;
 }) {
-  const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].id);
+  const [selectedFormat, setSelectedFormat] = useState(ExportFormat.Excel);
   const radioIdPrefix = useId();
 
   const handleConfirm = async () => {
-    const format =
-      EXPORT_FORMATS.find((option) => option.id === formatId) ??
-      EXPORT_FORMATS[0];
+    const format = EXPORT_FORMATS[selectedFormat];
     await format.download(
       buildExportRows(items, columns),
       buildExportFilename(filePrefix, format.extension),
@@ -150,11 +158,16 @@ export function ExtractDialog<T>({
             Choose a file format to download the selected rows.
           </DialogDescription>
         </DialogHeader>
-        <RadioGroup value={formatId} onValueChange={setFormatId}>
-          {EXPORT_FORMATS.map(({ id, label }) => (
+        <RadioGroup
+          value={selectedFormat}
+          onValueChange={(format: ExportFormat) => setSelectedFormat(format)}
+        >
+          {Object.values(ExportFormat).map((id) => (
             <div key={id} className="flex items-center gap-2">
               <RadioGroupItem value={id} id={`${radioIdPrefix}-${id}`} />
-              <Label htmlFor={`${radioIdPrefix}-${id}`}>{label}</Label>
+              <Label htmlFor={`${radioIdPrefix}-${id}`}>
+                {EXPORT_FORMATS[id].label}
+              </Label>
             </div>
           ))}
         </RadioGroup>

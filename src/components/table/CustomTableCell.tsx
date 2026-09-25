@@ -144,6 +144,7 @@ function TagsCell({
   itemLabel: string;
 }) {
   const hasOverflow = tags.length > 2;
+  const badges = tags.map((tag) => <EnumBadge key={tag.label} value={tag} />);
 
   return (
     <Dialog>
@@ -154,9 +155,7 @@ function TagsCell({
             hasOverflow && "max-h-14 mask-b-from-60%",
           )}
         >
-          {tags.map((tag) => (
-            <EnumBadge key={tag.label} value={tag} />
-          ))}
+          {badges}
         </div>
         {hasOverflow && (
           <DialogTrigger asChild>
@@ -173,11 +172,7 @@ function TagsCell({
             {tags.length} {itemLabel}
           </DialogTitle>
         </DialogHeader>
-        <div className="flex flex-wrap gap-1">
-          {tags.map((tag) => (
-            <EnumBadge key={tag.label} value={tag} />
-          ))}
-        </div>
+        <div className="flex flex-wrap gap-1">{badges}</div>
       </DialogContent>
     </Dialog>
   );
@@ -245,5 +240,5 @@ export function CustomTableCell<T>({
 
   const tags = column.getTags(item);
   if (tags.length === 0) return <CustomTableEmptyValue />;
-  return <TagsCell tags={tags} itemLabel={column.label.toLowerCase()} />;
+  return <TagsCell {...{ tags }} itemLabel={column.label.toLowerCase()} />;
 }

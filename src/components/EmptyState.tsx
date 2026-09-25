@@ -21,7 +21,7 @@ export function EmptyState({
   message: string;
   className?: string;
 }) {
-  if (variant === EmptyStateVariant.Compact) {
+  if (variant === EmptyStateVariant.Compact)
     return (
       <p
         className={cn(
@@ -32,7 +32,6 @@ export function EmptyState({
         {message}
       </p>
     );
-  }
 
   return (
     <div
