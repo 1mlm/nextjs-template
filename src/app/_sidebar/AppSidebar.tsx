@@ -32,22 +32,29 @@ function SidebarToggle() {
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
 
+  // the wrapper does the moving, not the Button: buttonVariants has an
+  // active:translate-y-px press nudge that would overwrite this translate on
+  // mousedown and yank the button out from under the cursor mid click
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-      onClick={toggleSidebar}
+    <div
       className={cn(
-        "absolute top-0 left-0 text-sidebar-foreground/60 transition-[translate,background-color,color] duration-(--sidebar-duration) ease-(--sidebar-ease) hover:bg-sidebar-accent hover:text-sidebar-foreground",
+        "absolute top-0 left-0 transition-[translate] duration-(--sidebar-duration) ease-(--sidebar-ease)",
         TOGGLE_POSITION,
       )}
     >
-      <Icon
-        icon={SidebarLeftIcon}
-        className="size-4 transition-transform duration-(--sidebar-duration) group-data-[collapsible=icon]:rotate-180"
-      />
-    </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        onClick={toggleSidebar}
+        className="text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+      >
+        <Icon
+          icon={SidebarLeftIcon}
+          className="size-4 transition-transform duration-(--sidebar-duration) group-data-[collapsible=icon]:rotate-180"
+        />
+      </Button>
+    </div>
   );
 }
 

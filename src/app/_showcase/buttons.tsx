@@ -87,7 +87,7 @@ export const BUTTON_ITEMS: ShowcaseItem[] = [
     name: "ConfirmButton",
     path: "src/components/ConfirmButton.tsx",
     description:
-      "arm, then wait out a countdown before confirm unlocks. second one also wants typed text",
+      "opens a popover where confirm unlocks after a countdown, nothing around it shifts. second one also wants typed text",
     Demo: () => (
       <>
         <ConfirmButton

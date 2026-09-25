@@ -1,19 +1,19 @@
 "use client";
 
-import { Cancel01Icon, Loading03Icon } from "@hugeicons/core-free-icons";
+import { Loading03Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MiniButton, MiniButtonTone } from "@/components/MiniButton";
+import { ResponsivePopover } from "@/components/ResponsivePopover";
 import { Button } from "@/shadcn/ui/button";
 import { Input } from "@/shadcn/ui/input";
-import { cn } from "@/shadcn/utils";
 
-// inline arm-then-confirm for destructive-ish stuff: click swaps in a
-// cancel/confirm pair and confirm stays locked for `holdSeconds`. `confirmText`
-// also makes you type that exact text first, for the really scary ones (deleting
-// an account). inline on purpose, no toast or window.confirm, the friction sits
-// right where you clicked
+// arm-then-confirm for destructive-ish stuff: the button opens a small popover
+// (bottom sheet on phones) where confirm stays locked for `holdSeconds`.
+// `confirmText` also makes you type that exact text first, for the really
+// scary ones (deleting an account). a popover so nothing around the button
+// shifts, no toast or window.confirm, the friction sits right where you clicked
 export function ConfirmButton({
   icon,
   label,
@@ -38,14 +38,14 @@ export function ConfirmButton({
   disabled?: boolean;
   onConfirm: () => Promise<void>;
 }) {
-  const [armed, setArmed] = useState(false);
+  const [open, setOpen] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(holdSeconds);
   const [pending, setPending] = useState(false);
   const [typedText, setTypedText] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!armed) return;
+    if (!open) return;
     setSecondsLeft(holdSeconds);
     setTypedText("");
     setError(null);
@@ -54,7 +54,7 @@ export function ConfirmButton({
       1000,
     );
     return () => clearInterval(interval);
-  }, [armed, holdSeconds]);
+  }, [open, holdSeconds]);
 
   const isHolding = secondsLeft > 0;
   const textMismatch = confirmText !== undefined && typedText !== confirmText;
@@ -65,7 +65,7 @@ export function ConfirmButton({
     setError(null);
     try {
       await onConfirm();
-      setArmed(false);
+      setOpen(false);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Something went wrong, try again",
@@ -75,36 +75,33 @@ export function ConfirmButton({
     }
   }
 
-  if (!armed)
-    return (
-      <MiniButton
-        {...{ icon, label, tone, className }}
-        onClick={() => setArmed(true)}
-      />
-    );
-
   return (
-    <div className="flex flex-col gap-1.5">
+    <ResponsivePopover
+      {...{ open }}
+      // stays open while the confirm is in flight so the result isn't lost
+      onOpenChange={(next) => !pending && setOpen(next)}
+      title={label}
+      trigger={<MiniButton {...{ icon, label, tone, className }} />}
+      className="flex flex-col gap-2 max-md:px-4 max-md:pb-6 md:w-64"
+    >
       {confirmText !== undefined && (
         <Input
           value={typedText}
           onChange={(e) => setTypedText(e.target.value)}
           onPaste={(e) => e.preventDefault()}
-          placeholder={confirmTextPlaceholder ?? confirmText}
+          placeholder={confirmTextPlaceholder ?? `type "${confirmText}"`}
           autoFocus
-          className="h-8"
         />
       )}
-      <div className="flex items-center gap-1">
+      <div className="flex justify-end gap-2">
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="sm"
           disabled={pending}
-          onClick={() => setArmed(false)}
+          onClick={() => setOpen(false)}
         >
-          <Icon icon={Cancel01Icon} />
-          <span className="sr-only">Cancel</span>
+          Cancel
         </Button>
         <Button
           type="button"
@@ -112,7 +109,7 @@ export function ConfirmButton({
           size="sm"
           disabled={locked || pending}
           onClick={handleConfirm}
-          className={cn("text-xs", className)}
+          className="tabular-nums"
         >
           <Icon
             icon={pending ? Loading03Icon : icon}
@@ -122,6 +119,6 @@ export function ConfirmButton({
         </Button>
       </div>
       {error && <span className="text-xs text-destructive">{error}</span>}
-    </div>
+    </ResponsivePopover>
   );
 }
