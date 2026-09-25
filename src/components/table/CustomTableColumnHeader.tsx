@@ -21,7 +21,7 @@ import {
   startOfYesterday,
   subHours,
 } from "date-fns";
-import { type ReactNode, useId } from "react";
+import { type KeyboardEvent, type ReactNode, useId } from "react";
 import { Icon } from "@/components/Icon";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { Button } from "@/shadcn/ui/button";
@@ -480,6 +480,14 @@ function SortSubmenuContent({
   );
 }
 
+// radix menus eat arrow keys (left closes the submenu) and letters (typeahead
+// jumps focus to an item) even while you're typing in a filter input
+const keepTypingKeysInsideInputs = (event: KeyboardEvent) => {
+  const isTypingInInput = event.target instanceof HTMLInputElement;
+  if (isTypingInInput && event.key !== "Escape" && event.key !== "Tab")
+    event.stopPropagation();
+};
+
 export function CustomTableColumnHeader<T>({
   column,
   items,
@@ -655,7 +663,9 @@ export function CustomTableColumnHeader<T>({
                     "w-56",
                 )}
               >
-                {filterContent}
+                <fieldset onKeyDown={keepTypingKeysInsideInputs}>
+                  {filterContent}
+                </fieldset>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>

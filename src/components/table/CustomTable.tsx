@@ -130,7 +130,9 @@ export function CustomTable<T>({
 
   const canResetFilterAndSort =
     (filterable || sortable) && hasActiveFilterOrSort;
-  const hasSelection = Boolean(selectable) && selectedIds.size > 0;
+  // selectedItems, not selectedIds, so a selected row that got deleted doesn't
+  // leave an empty action bar floating around
+  const hasSelection = Boolean(selectable) && selectedItems.length > 0;
   const showActionBar = canResetFilterAndSort || hasSelection || pageCount > 1;
 
   const { scrollContainerRef, checkboxColumnRef, maskImage } = useScrollFade(

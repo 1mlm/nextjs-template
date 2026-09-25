@@ -84,11 +84,13 @@ export function formatRelativeDate(
   if (Math.abs(days) < 7)
     return `${formatRelativeLabel(Math.abs(days), "day", days > 0)} at ${time}`;
 
+  // monday-snapped weeks can hit 5 inside one calendar month (mar 1 vs mar 31),
+  // stay on weeks there or it says "0 month ago"
   const weeks = getWeekDiff(target, now);
-  if (Math.abs(weeks) < 5)
+  const months = getMonthDiff(target, now);
+  if (Math.abs(weeks) < 5 || months === 0)
     return formatRelativeLabel(Math.abs(weeks), "week", weeks > 0);
 
-  const months = getMonthDiff(target, now);
   if (Math.abs(months) < 12)
     return formatRelativeLabel(Math.abs(months), "month", months > 0);
 

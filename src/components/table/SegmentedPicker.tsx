@@ -35,7 +35,7 @@ export function SegmentedPicker<T extends string>({
     <RadioGroup
       value={value ?? ""}
       onValueChange={onChange}
-      {...{ disabled }}
+      {...{ name, disabled }}
       className={stacked ? "flex flex-col gap-2" : "grid grid-cols-3 gap-2"}
     >
       {presentOptions.map(([optionValue, opt]) => {

@@ -177,6 +177,12 @@ function WheelColumn({
 }) {
   const columnRef = useRef<HTMLDivElement>(null);
   const scrollSettleTimeout = useRef<number>(undefined);
+  // the settle timer reads these fresh, another wheel may have changed the
+  // date (and so every option here) while this one was still scrolling
+  const latestProps = useRef({ options, selectedIndex, onSelect });
+  useEffect(() => {
+    latestProps.current = { options, selectedIndex, onSelect };
+  });
 
   useEffect(() => {
     if (columnRef.current)
@@ -192,8 +198,12 @@ function WheelColumn({
   const selectCenteredOptionOnceSettled = () => {
     window.clearTimeout(scrollSettleTimeout.current);
     scrollSettleTimeout.current = window.setTimeout(() => {
-      const scrollTop = columnRef.current?.scrollTop ?? 0;
-      const centeredIndex = Math.round(scrollTop / WHEEL_ITEM_HEIGHT_PX);
+      // popover closed mid-flick, don't pick anything
+      if (!columnRef.current) return;
+      const { options, selectedIndex, onSelect } = latestProps.current;
+      const centeredIndex = Math.round(
+        columnRef.current.scrollTop / WHEEL_ITEM_HEIGHT_PX,
+      );
       const centeredOption = options[centeredIndex];
       if (centeredOption && centeredIndex !== selectedIndex)
         onSelect(centeredOption.date);

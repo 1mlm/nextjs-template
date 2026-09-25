@@ -84,6 +84,7 @@ export function DateCell({ date }: { date: Date | undefined }) {
         <TooltipTrigger asChild>
           <button
             type="button"
+            aria-label="Show exact date"
             className="opacity-0 group-hover/date:opacity-100 focus-visible:opacity-100 transition-opacity"
           >
             <Icon icon={Clock01Icon} className="size-3" />

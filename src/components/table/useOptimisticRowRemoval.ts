@@ -2,6 +2,15 @@
 
 import { useCallback, useMemo, useState } from "react";
 
+const getSettledError = (
+  result: PromiseSettledResult<{ error: string | null }>,
+) => {
+  if (result.status === "fulfilled") return result.value.error;
+  return result.reason instanceof Error
+    ? result.reason.message
+    : "Something went wrong";
+};
+
 // hides a row the moment its delete is confirmed instead of waiting on the
 // server, rolls back on error. run your items through `visibleItems` before
 // handing them to CustomTable
@@ -44,8 +53,10 @@ export function useOptimisticRowRemoval<T, K>(
       const keys = rows.map(getKey);
       setPendingRemoved((prev) => new Set([...prev, ...keys]));
 
-      const results = await Promise.all(rows.map(deleteAction));
-      const failedKeys = rows.filter((_, i) => results[i].error).map(getKey);
+      // allSettled so one throwing delete doesn't strand every row in the batch hidden
+      const results = await Promise.allSettled(rows.map(deleteAction));
+      const errors = results.map(getSettledError);
+      const failedKeys = rows.filter((_, i) => errors[i]).map(getKey);
       if (failedKeys.length > 0)
         setPendingRemoved((prev) => {
           const next = new Set(prev);
@@ -53,7 +64,7 @@ export function useOptimisticRowRemoval<T, K>(
           return next;
         });
 
-      return { error: results.find((result) => result.error)?.error ?? null };
+      return { error: errors.find(Boolean) ?? null };
     },
     [getKey],
   );
