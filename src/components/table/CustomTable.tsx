@@ -141,7 +141,7 @@ export function CustomTable<T>({
     <div className="rounded-md overflow-clip">
       <div
         ref={scrollContainerRef}
-        className="w-full max-h-[70vh] overflow-auto"
+        className="relative w-full max-h-[70vh] overflow-auto"
         style={{ maskImage, WebkitMaskImage: maskImage }}
       >
         <table className="w-full caption-bottom text-sm">

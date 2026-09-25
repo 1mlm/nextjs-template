@@ -220,3 +220,32 @@
     color: var(--destructive) !important;
   }
 }
+
+/* on phones every dialog slides up as a bottom sheet instead of a floating
+   box. pure css so it covers every dialog at once, no js, no hydration
+   flicker. unlayered on purpose so it beats the utility classes, and width
+   needs !important to beat inline widths some dialogs set */
+@media (max-width: 767px) {
+  [data-slot="dialog-content"] {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    translate: none;
+    width: 100% !important;
+    max-width: none;
+    max-height: 90dvh;
+    overflow-y: auto;
+    border-radius: 1rem 1rem 0 0;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    --tw-duration: 200ms;
+    --tw-enter-scale: 1;
+    --tw-exit-scale: 1;
+    --tw-enter-translate-y: 100%;
+    --tw-exit-translate-y: 100%;
+  }
+  [data-slot="dialog-footer"] {
+    margin-bottom: calc(-1rem - env(safe-area-inset-bottom));
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    border-radius: 0;
+  }
+}

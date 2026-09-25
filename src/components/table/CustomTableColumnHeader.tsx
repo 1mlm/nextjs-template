@@ -23,6 +23,7 @@ import {
 } from "date-fns";
 import { type ReactNode, useId } from "react";
 import { Icon } from "@/components/Icon";
+import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { Button } from "@/shadcn/ui/button";
 import { Calendar } from "@/shadcn/ui/calendar";
 import { Checkbox } from "@/shadcn/ui/checkbox";
@@ -38,8 +39,17 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/ui/dropdown-menu";
 import { Input } from "@/shadcn/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/shadcn/ui/sheet";
 import { cn } from "@/shadcn/utils";
 import { toggleListItem } from "@/utils/array";
+import { triggerHaptic } from "@/utils/haptics";
 import { EnumBadge } from "./CustomTableCell";
 import {
   ColumnType,
@@ -489,11 +499,15 @@ export function CustomTableColumnHeader<T>({
   sort: SortDirection | null;
   onSortChange: (dir: SortDirection | null) => void;
 }) {
+  const isMobile = useIsMobile();
   const columnEligible = isColumnFilterableOrSortable(column);
   const canFilter = filterable && columnEligible;
   const canSort = sortable && columnEligible;
   const fields = getColumnFilterFields(column);
   const hasActiveFilter = canFilter && fields.some((field) => getField(field));
+  const clearFilter = () => {
+    for (const field of fields) setField(field, "");
+  };
   const numeric =
     column.type === ColumnType.String &&
     column.filterType === StringFilterType.Number;
@@ -526,6 +540,101 @@ export function CustomTableColumnHeader<T>({
   if (!canFilter && !canSort)
     return <span className="inline-flex">{label}</span>;
 
+  const filterContent = (
+    <>
+      {column.type === ColumnType.Enum && (
+        <ExcludedOptionsFilterContent
+          options={getEnumFilterOptions(column)}
+          {...{ getField, setField }}
+        />
+      )}
+      {column.type === ColumnType.Date && (
+        <DateRangeFilterContent {...{ getField, setField }} />
+      )}
+      {column.type === ColumnType.String &&
+        column.filterType === StringFilterType.Number && (
+          <NumberRangeFilterContent {...{ getField, setField }} />
+        )}
+      {column.type === ColumnType.String &&
+        column.filterType !== StringFilterType.Number && (
+          <TextFilterContent {...{ getField, setField }} />
+        )}
+      {column.type === ColumnType.Tags && (
+        <TagsFilterContent {...{ column, items, getField, setField }} />
+      )}
+      {column.type === ColumnType.Boolean && (
+        <ExcludedOptionsFilterContent
+          options={BOOLEAN_FILTER_OPTIONS}
+          {...{ getField, setField }}
+        />
+      )}
+    </>
+  );
+
+  // phones get a bottom sheet instead of nested dropdown submenus (which
+  // have nowhere to fly out to on a narrow screen): sort and filter stacked
+  if (isMobile)
+    return (
+      <Sheet>
+        <SheetTrigger asChild>
+          <button type="button">{label}</button>
+        </SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="max-h-[85dvh] gap-4 overflow-y-auto rounded-t-2xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
+        >
+          <SheetHeader className="p-0">
+            <SheetTitle className="flex items-center gap-1.5">
+              <Icon icon={column.icon} />
+              {column.label}
+            </SheetTitle>
+            <SheetDescription className="sr-only">
+              Filter and sort this column
+            </SheetDescription>
+          </SheetHeader>
+          {canSort && (
+            <section className="flex flex-col gap-2">
+              <h3 className="text-xs font-medium text-muted-foreground">
+                Sort
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {SORT_OPTIONS.map(({ dir, label: sortLabel }) => (
+                  <Button
+                    key={dir}
+                    size="sm"
+                    variant={sort === dir ? "default" : "outline"}
+                    onClick={() => {
+                      triggerHaptic("selection");
+                      onSortChange(sort === dir ? null : dir);
+                    }}
+                  >
+                    <Icon icon={getSortIcon(dir, numeric)} />
+                    {sortLabel}
+                  </Button>
+                ))}
+              </div>
+            </section>
+          )}
+          {canFilter && (
+            <section className="flex flex-col gap-1">
+              <div className="flex min-h-7 items-center justify-between">
+                <h3 className="text-xs font-medium text-muted-foreground">
+                  Filter
+                </h3>
+                {hasActiveFilter && (
+                  <Button variant="ghost" size="sm" onClick={clearFilter}>
+                    <Icon icon={Cancel01Icon} />
+                    Clear
+                  </Button>
+                )}
+              </div>
+              {filterContent}
+            </section>
+          )}
+        </SheetContent>
+      </Sheet>
+    );
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -546,34 +655,7 @@ export function CustomTableColumnHeader<T>({
                     "w-56",
                 )}
               >
-                {column.type === ColumnType.Enum && (
-                  <ExcludedOptionsFilterContent
-                    options={getEnumFilterOptions(column)}
-                    {...{ getField, setField }}
-                  />
-                )}
-                {column.type === ColumnType.Date && (
-                  <DateRangeFilterContent {...{ getField, setField }} />
-                )}
-                {column.type === ColumnType.String &&
-                  column.filterType === StringFilterType.Number && (
-                    <NumberRangeFilterContent {...{ getField, setField }} />
-                  )}
-                {column.type === ColumnType.String &&
-                  column.filterType !== StringFilterType.Number && (
-                    <TextFilterContent {...{ getField, setField }} />
-                  )}
-                {column.type === ColumnType.Tags && (
-                  <TagsFilterContent
-                    {...{ column, items, getField, setField }}
-                  />
-                )}
-                {column.type === ColumnType.Boolean && (
-                  <ExcludedOptionsFilterContent
-                    options={BOOLEAN_FILTER_OPTIONS}
-                    {...{ getField, setField }}
-                  />
-                )}
+                {filterContent}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
