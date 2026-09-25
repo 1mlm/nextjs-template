@@ -8,6 +8,12 @@ import {
   UnavailableIcon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
+import type { DateRange } from "react-day-picker";
+import {
+  DatePicker,
+  DateRangePicker,
+  DateTimePicker,
+} from "@/components/DatePicker";
 import { FieldLabel } from "@/components/FieldLabel";
 import { FileDropZone } from "@/components/FileDropZone";
 import { NumberTextInput } from "@/components/NumberTextInput";
@@ -76,6 +82,21 @@ function SegmentedPickerDemo() {
   );
 }
 
+function DatePickerDemo() {
+  const [date, setDate] = useState<Date>();
+  return <DatePicker value={date} onChange={setDate} />;
+}
+
+function DateRangePickerDemo() {
+  const [range, setRange] = useState<DateRange>();
+  return <DateRangePicker value={range} onChange={setRange} />;
+}
+
+function DateTimePickerDemo({ hour12 }: { hour12: boolean }) {
+  const [date, setDate] = useState<Date>();
+  return <DateTimePicker value={date} onChange={setDate} {...{ hour12 }} />;
+}
+
 export const INPUT_ITEMS: ShowcaseItem[] = [
   {
     name: "SearchBar",
@@ -109,5 +130,29 @@ export const INPUT_ITEMS: ShowcaseItem[] = [
     description:
       "colored radio group using the same shape as table enum badges",
     Demo: SegmentedPickerDemo,
+  },
+  {
+    name: "DatePicker",
+    path: "src/components/DatePicker.tsx",
+    description: "calendar in a popover, closes itself once a day is picked",
+    Demo: DatePickerDemo,
+  },
+  {
+    name: "DateRangePicker",
+    path: "src/components/DatePicker.tsx",
+    description: "two months side by side, one in the phone sheet",
+    Demo: DateRangePickerDemo,
+  },
+  {
+    name: "DateTimePicker",
+    path: "src/components/DatePicker.tsx",
+    description: "calendar plus scrollable hour / minute / AM-PM columns",
+    Demo: () => <DateTimePickerDemo hour12 />,
+  },
+  {
+    name: "DateTimePicker (24h)",
+    path: "src/components/DatePicker.tsx",
+    description: "same thing with hour12={false}, no AM/PM column",
+    Demo: () => <DateTimePickerDemo hour12={false} />,
   },
 ];

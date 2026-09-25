@@ -174,7 +174,8 @@
   [data-slot="input"],
   [data-slot="input-group"],
   [data-slot="badge"],
-  [data-slot="card"] {
+  [data-slot="card"],
+  [data-slot="popover-content"] {
     @apply corner-squircle;
     }
 
@@ -247,5 +248,27 @@
     margin-bottom: calc(-1rem - env(safe-area-inset-bottom));
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
     border-radius: 0;
+  }
+}
+
+/* time wheel options tilt and fade the further they scroll from the center,
+   like an ios picker. browsers without scroll driven animations get a flat list */
+.wheel-item {
+  animation: wheel-tilt linear both;
+  animation-timeline: view();
+}
+
+@keyframes wheel-tilt {
+  from {
+    opacity: 0.35;
+    transform: perspective(240px) rotateX(-50deg);
+  }
+  50% {
+    opacity: 1;
+    transform: perspective(240px) rotateX(0deg);
+  }
+  to {
+    opacity: 0.35;
+    transform: perspective(240px) rotateX(50deg);
   }
 }
