@@ -3,7 +3,6 @@
 import {
   ArrowRight01Icon,
   Bug02Icon,
-  ChartLineData01Icon,
   SidebarLeftIcon,
   Table01Icon,
   UnavailableIcon,
@@ -27,7 +26,6 @@ import { useIsClient } from "./util";
 
 const DEMO_PAGES: { href: string; label: string; icon: IconSvgElement }[] = [
   { href: "/table", label: "CustomTable", icon: Table01Icon },
-  { href: "/stats", label: "Charts", icon: ChartLineData01Icon },
   {
     href: "/this-page-does-not-exist",
     label: "404 page",

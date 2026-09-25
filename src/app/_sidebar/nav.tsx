@@ -1,5 +1,4 @@
 import {
-  ChartLineData01Icon,
   CubeIcon,
   GridViewIcon,
   Table01Icon,
@@ -15,7 +14,6 @@ export const APP_INFO = {
 export const NAV_ITEMS = [
   { href: "/", label: "Showcase", icon: GridViewIcon },
   { href: "/table", label: "Table", icon: Table01Icon },
-  { href: "/stats", label: "Charts", icon: ChartLineData01Icon },
 ];
 
 export function AppIcon() {
