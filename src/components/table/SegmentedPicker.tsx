@@ -3,10 +3,10 @@ import { Label } from "@/shadcn/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/shadcn/ui/radio-group";
 import { cn } from "@/shadcn/utils";
 import { getColorStyle } from "@/utils/color";
-import type { CustomTableEnumValue } from "./CustomTable";
+import type { CustomTableEnumValue } from "./columns";
 
 // a labeled-and-colored alternative to a plain RadioGroup, built on the same
-// CustomTableEnumValue shape a table's enum/tags columns already use — so a
+// CustomTableEnumValue shape a table's enum/tags columns already use, so a
 // status/label picked here renders exactly like the badge it becomes
 export function SegmentedPicker<T extends string>({
   name,
@@ -20,7 +20,7 @@ export function SegmentedPicker<T extends string>({
   value: T | undefined;
   onChange: (value: T) => void;
   options: Partial<Record<T, CustomTableEnumValue>>;
-  // one option per row instead of a grid — for narrow containers (e.g. a
+  // one option per row instead of a grid, for narrow containers (e.g. a
   // popover) where 3+ options side by side get cramped
   stacked?: boolean;
   disabled?: boolean;
@@ -35,7 +35,7 @@ export function SegmentedPicker<T extends string>({
     <RadioGroup
       value={value ?? ""}
       onValueChange={onChange}
-      disabled={disabled}
+      {...{ disabled }}
       className={stacked ? "flex flex-col gap-2" : "grid grid-cols-3 gap-2"}
     >
       {presentOptions.map(([optionValue, opt]) => {

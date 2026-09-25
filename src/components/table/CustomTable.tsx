@@ -1,8 +1,10 @@
 "use client";
 
 import { BrushCleaningIcon, InboxIcon } from "@hugeicons/core-free-icons";
-import { type ReactNode, useEffect } from "react";
-import { type HugeIcon, Icon } from "@/components/Icon";
+import { useEffect, useRef } from "react";
+import { EmptyState } from "@/components/EmptyState";
+import { Icon } from "@/components/Icon";
+import { DEFAULT_SEARCH_QUERY_KEY } from "@/components/SearchBar";
 import { Button } from "@/shadcn/ui/button";
 import { Checkbox } from "@/shadcn/ui/checkbox";
 import {
@@ -23,85 +25,24 @@ import { cn } from "@/shadcn/utils";
 import { CustomTableCell } from "./CustomTableCell";
 import { CustomTableColumnHeader } from "./CustomTableColumnHeader";
 import { CustomTableSkeletonRows } from "./CustomTableSkeletonRows";
+import { ColumnAlign, ColumnType, type CustomTableColumn } from "./columns";
 import { ExtractButton } from "./ExtractButton";
-import { type ColumnFilterField, getTriState } from "./filtering";
+import {
+  type ColumnFilterField,
+  getTriState,
+  type SortDirection,
+} from "./filtering";
 import { useRowSelection } from "./useRowSelection";
 import { useScrollFade } from "./useScrollFade";
 import { useTableFilterSort } from "./useTableFilterSort";
 import { useTablePagination } from "./useTablePagination";
 
-export type CustomTableEnumValue = {
-  label: string;
-  icon: HugeIcon;
-  // free string, not the narrow Color union — a fixed status badge passes a literal
-  // (e.g. 'green'), but a user-editable tag passes whatever colorId it was saved with
-  color: string;
-  // extra terms matched by tag text-search filters but never displayed
-  keywords?: string[];
-  // makes the badge itself clickable, e.g. a tag opening a detail view
-  onClick?: () => void;
-};
-
-export type CustomTableColumn<T> = {
-  id: string;
-  label: string;
-  icon: HugeIcon;
-} & (
-  | {
-      type: "string";
-      monospace?: boolean;
-      align?: "left" | "right";
-      // 'number' switches the filter UI from a text search to a min/max range
-      filterType?: "text" | "number";
-      // used for the numeric range filter/sort when getString isn't a raw parsable number (e.g. formatted currency)
-      getNumber?: (item: T) => number;
-      // truncates the middle instead of the end, keeping both the start and the tail visible
-      truncate?: "middle";
-      getString: (item: T) => string;
-      // renders the value as a clickable button instead of plain text
-      onClick?: (item: T) => void;
-    }
-  | {
-      type: "copy";
-      // opt out of the global search box, e.g. a raw url whose random path segments false-match everything
-      searchable?: boolean;
-      getString: (item: T) => string;
-    }
-  | { type: "date"; getDate: (item: T) => Date | undefined }
-  | { type: "boolean"; getBoolean: (item: T) => boolean; trueIcon?: HugeIcon }
-  | {
-      type: "enum";
-      enumOptions: Record<string, CustomTableEnumValue>;
-      getValue: (item: T) => string | undefined;
-      // optional extra detail shown in a popover when the badge is clicked, e.g. a
-      // status's timestamp — most enum columns don't need this
-      getPopoverContent?: (item: T) => ReactNode;
-    }
-  | {
-      type: "tags";
-      getTags: (item: T) => CustomTableEnumValue[];
-    }
-  | { type: "buttons"; getButtons: (item: T) => ReactNode }
-);
-
-// raw, spreadsheet-friendly value for a column (dates as ISO, enums as their underlying key, tags joined by comma)
-export function getColumnExportValue<T>(
-  column: CustomTableColumn<T>,
-  item: T,
-): string {
-  if (column.type === "string" || column.type === "copy")
-    return column.getString(item);
-  if (column.type === "date") return column.getDate(item)?.toISOString() ?? "";
-  if (column.type === "boolean")
-    return column.getBoolean(item) ? "true" : "false";
-  if (column.type === "tags")
-    return column
-      .getTags(item)
-      .map((tag) => tag.label)
-      .join(", ");
-  if (column.type === "buttons") return "";
-  return column.getValue(item) ?? "";
-}
+const CENTERED_COLUMN_TYPES = new Set([
+  ColumnType.Copy,
+  ColumnType.Enum,
+  ColumnType.Tags,
+  ColumnType.Buttons,
+]);
 
 export function CustomTable<T>({
   items,
@@ -112,7 +53,7 @@ export function CustomTable<T>({
   filterable = true,
   sortable = true,
   paginate = true,
-  searchQueryKey = "q",
+  searchQueryKey = DEFAULT_SEARCH_QUERY_KEY,
   exportFilePrefix = "export",
   onVisibleCountChange,
   emptyLabel = "items",
@@ -165,12 +106,23 @@ export function CustomTable<T>({
     paginatedItems,
   } = useTablePagination({ items: visibleItems, paginate });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: only used to trigger the reset, not read
+  // compared against the last seen key instead of just running on change,
+  // otherwise the mount run wipes a deep-linked ?page=3
+  const filterSortKey = JSON.stringify([search, filterValues, sortRaw]);
+  const lastFilterSortKeyRef = useRef(filterSortKey);
   useEffect(() => {
+    if (lastFilterSortKeyRef.current === filterSortKey) return;
+    lastFilterSortKeyRef.current = filterSortKey;
     setPage(1);
-  }, [search, filterValues, sortRaw, setPage]);
+  }, [filterSortKey, setPage]);
 
-  const { selectedIds, toggleRow, toggleAll, selectedItems } = useRowSelection({
+  const {
+    selectedIds,
+    visibleSelectedCount,
+    toggleRow,
+    toggleAll,
+    selectedItems,
+  } = useRowSelection({
     allItems: items,
     visibleItems,
     getItemId,
@@ -200,7 +152,7 @@ export function CustomTable<T>({
                   <div className="flex justify-center pr-2!">
                     <Checkbox
                       checked={getTriState(
-                        selectedIds.size,
+                        visibleSelectedCount,
                         visibleItems.length,
                       )}
                       onCheckedChange={toggleAll}
@@ -218,7 +170,7 @@ export function CustomTable<T>({
                       setColumnField(column.id, field, value)
                     }
                     sort={sort?.columnId === column.id ? sort.dir : null}
-                    onSortChange={(dir: "asc" | "desc" | null) =>
+                    onSortChange={(dir: SortDirection | null) =>
                       setColumnSort(column.id, dir)
                     }
                   />
@@ -258,13 +210,10 @@ export function CustomTable<T>({
                         key={column.id}
                         className={cn(
                           "border-r border-border/50 last:border-r-0",
-                          column.type === "string" &&
-                            column.align === "right" &&
+                          column.type === ColumnType.String &&
+                            column.align === ColumnAlign.Right &&
                             "text-right",
-                          (column.type === "copy" ||
-                            column.type === "enum" ||
-                            column.type === "tags" ||
-                            column.type === "buttons") &&
+                          CENTERED_COLUMN_TYPES.has(column.type) &&
                             "text-center",
                         )}
                       >
@@ -278,10 +227,11 @@ export function CustomTable<T>({
         </table>
       </div>
       {!loading && visibleItems.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-2 p-10 text-muted-foreground border-t border-border">
-          <Icon icon={InboxIcon} className="size-8" />
-          <span className="text-sm">No {emptyLabel} to show</span>
-        </div>
+        <EmptyState
+          icon={InboxIcon}
+          message={`No ${emptyLabel} to show`}
+          className="border-t border-border"
+        />
       )}
       {showActionBar && (
         <div className="fixed inset-x-4 bottom-4 flex flex-col items-end gap-2 sm:inset-x-auto sm:bottom-8 sm:right-8 sm:flex-row border border-border bg-sidebar px-4 py-2 rounded-full corner-squircle shadow-[0_0_16px_rgba(0,0,0,0.35)]">

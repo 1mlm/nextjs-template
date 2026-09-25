@@ -1,21 +1,27 @@
-import { type HugeIcon, Icon } from "@/components/Icon";
+import type { IconSvgElement } from "@hugeicons/react";
+import { Icon } from "@/components/Icon";
 import { cn } from "@/shadcn/utils";
 
-// one place for "nothing here yet" — `page` fills the remaining space and
+// one place for "nothing here yet", `page` fills the remaining space and
 // centers on both axes with an icon, `compact` is just a small centered
 // line of text for tight spaces like a dashboard card or a popover list
+export enum EmptyStateVariant {
+  Page = "page",
+  Compact = "compact",
+}
+
 export function EmptyState({
-  variant = "page",
+  variant = EmptyStateVariant.Page,
   icon,
   message,
   className,
 }: {
-  variant?: "page" | "compact";
-  icon?: HugeIcon;
+  variant?: EmptyStateVariant;
+  icon?: IconSvgElement;
   message: string;
   className?: string;
 }) {
-  if (variant === "compact") {
+  if (variant === EmptyStateVariant.Compact) {
     return (
       <p
         className={cn(
@@ -35,7 +41,7 @@ export function EmptyState({
         className,
       )}
     >
-      {icon && <Icon icon={icon} className="size-8" />}
+      {icon && <Icon {...{ icon }} className="size-8" />}
       <span className="text-sm">{message}</span>
     </div>
   );

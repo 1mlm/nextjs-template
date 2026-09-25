@@ -2,9 +2,8 @@ import { parseAsInteger, useQueryState } from "nuqs";
 
 const PAGE_SIZE = 25;
 
-// slices an already filtered/sorted item list into pages, clamping the
-// URL-driven page number into range (e.g. after a filter shrinks the result
-// count below the previously-viewed page)
+// slices the filtered/sorted list into pages and clamps the url page number
+// into range (a filter can shrink the list below the page you were on)
 export function useTablePagination<T>({
   items,
   paginate,

@@ -2,9 +2,9 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-// hides a row the moment its delete is confirmed, instead of waiting on a
-// server round-trip — rolled back on error. Filter your own items array
-// through `visibleItems` before passing it to CustomTable
+// hides a row the moment its delete is confirmed instead of waiting on the
+// server, rolls back on error. run your items through `visibleItems` before
+// handing them to CustomTable
 export function useOptimisticRowRemoval<T, K>(
   items: T[],
   getKey: (item: T) => K,
@@ -35,7 +35,7 @@ export function useOptimisticRowRemoval<T, K>(
   );
 
   // runs deleteAction per row in parallel, keeps only the failures visible
-  // again — matches CustomTable's bulk-delete contract
+  // again, matches CustomTable's bulk-delete contract
   const deleteSelected = useCallback(
     async (
       rows: T[],

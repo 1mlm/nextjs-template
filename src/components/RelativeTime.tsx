@@ -1,13 +1,10 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/shadcn/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import { cn } from "@/shadcn/utils";
 import { formatExactDate, formatRelativeDate } from "@/utils/date";
 
-// shows the relative date/time, hovering reveals the exact one — one place
-// for that pairing instead of every caller re-wiring its own Tooltip +
-// formatRelativeDate/formatExactDate. CustomTable's DateCell is the richer
-// table-cell version of this same pairing (also shows elapsed duration and
-// the raw timestamp) - reach for this one outside a table, e.g. a comment
-// or activity feed
+// relative date, hover shows the exact one. CustomTable's DateCell is the
+// beefier table version (elapsed duration + raw timestamp too), this one is for
+// outside tables, like a comment or an activity feed
 export function RelativeTime({
   date,
   className,

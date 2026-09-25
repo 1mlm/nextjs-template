@@ -1,42 +1,40 @@
 "use client";
 
 import { Cancel01Icon, Loading03Icon } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 import { useEffect, useState } from "react";
-import { type HugeIcon, Icon } from "@/components/Icon";
+import { Icon } from "@/components/Icon";
+import { MiniButton, MiniButtonTone } from "@/components/MiniButton";
 import { Button } from "@/shadcn/ui/button";
 import { Input } from "@/shadcn/ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/shadcn/ui/tooltip";
 import { cn } from "@/shadcn/utils";
 
-// small inline arm-then-confirm flow for a destructive-ish action: click
-// swaps the trigger for a cancel/confirm pair, the confirm side stays
-// disabled and counts down for `holdSeconds` first. Passing `confirmText`
-// additionally requires typing that exact text before it unlocks, for
-// actions serious enough that a hold-timer alone isn't enough friction
-// (e.g. deleting an account) — inline, not a toast/window.confirm, so the
-// friction sits right where the click happened
+// inline arm-then-confirm for destructive-ish stuff: click swaps in a
+// cancel/confirm pair and confirm stays locked for `holdSeconds`. `confirmText`
+// also makes you type that exact text first, for the really scary ones (deleting
+// an account). inline on purpose, no toast or window.confirm, the friction sits
+// right where you clicked
 export function ConfirmButton({
   icon,
   label,
   confirmLabel,
   holdSeconds = 5,
-  variant = "ghost",
+  tone = MiniButtonTone.Neutral,
   className,
   confirmText,
   confirmTextPlaceholder,
   disabled,
   onConfirm,
 }: {
-  icon: HugeIcon;
+  icon: IconSvgElement;
   label: string;
   confirmLabel: string;
   holdSeconds?: number;
-  variant?: "ghost" | "destructive" | "outline";
+  tone?: MiniButtonTone;
   className?: string;
   confirmText?: string;
   confirmTextPlaceholder?: string;
-  // external condition (e.g. a required field left blank) that keeps confirm locked regardless of
-  // the hold timer/typed text
+  // outside reason to keep confirm locked (a required field left blank etc)
   disabled?: boolean;
   onConfirm: () => Promise<void>;
 }) {
@@ -77,25 +75,13 @@ export function ConfirmButton({
     }
   }
 
-  if (!armed) {
+  if (!armed)
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            type="button"
-            variant={variant}
-            size="icon-sm"
-            className={cn("border border-border/60", className)}
-            onClick={() => setArmed(true)}
-          >
-            <Icon icon={icon} />
-            <span className="sr-only">{label}</span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>{label}</TooltipContent>
-      </Tooltip>
+      <MiniButton
+        {...{ icon, label, tone, className }}
+        onClick={() => setArmed(true)}
+      />
     );
-  }
 
   return (
     <div className="flex flex-col gap-1.5">

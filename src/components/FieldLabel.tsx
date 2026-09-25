@@ -1,5 +1,6 @@
+import type { IconSvgElement } from "@hugeicons/react";
 import type { ReactNode } from "react";
-import { type HugeIcon, Icon } from "@/components/Icon";
+import { Icon } from "@/components/Icon";
 import { Label } from "@/shadcn/ui/label";
 
 export function FieldLabel({
@@ -10,12 +11,12 @@ export function FieldLabel({
 }: {
   htmlFor?: string;
   required?: boolean;
-  icon?: HugeIcon;
+  icon?: IconSvgElement;
   children: ReactNode;
 }) {
   return (
-    <Label htmlFor={htmlFor}>
-      {icon && <Icon icon={icon} className="size-4 text-muted-foreground" />}
+    <Label {...{ htmlFor }}>
+      {icon && <Icon {...{ icon }} className="size-4 text-muted-foreground" />}
       {children}
       {required && <span className="text-destructive">*</span>}
     </Label>

@@ -1,11 +1,10 @@
 import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/Icon";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/shadcn/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 
-// compact error indicator meant to sit right next to whatever action
-// failed, instead of a toast or a paragraph of red text taking up layout
-// space - the inline-feedback half of the toast convention (see the
-// comment above <Toaster /> in layout.tsx): use this when nothing
+// tiny error marker that sits right next to whatever failed, instead of a
+// toast or a paragraph of red text shoving the layout around. it's the inline
+// half of the toast rule (see the Toaster note in layout.tsx): nothing
 // disappeared, there's just an error to point at
 export function ErrorTooltip({ message }: { message: string }) {
   return (

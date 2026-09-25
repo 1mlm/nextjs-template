@@ -1,14 +1,28 @@
-import type { CustomTableColumn, CustomTableEnumValue } from "./CustomTable";
+import { addDays, parseISO } from "date-fns";
+import { toggleListItem } from "@/utils/array";
+import {
+  ColumnType,
+  type CustomTableColumn,
+  type CustomTableEnumValue,
+  StringFilterType,
+} from "./columns";
 
 // sentinel used inside enum filters to represent "no value set" as its own selectable option
 export const ENUM_FILTER_NONE_KEY = "__none__";
 
-export type CustomTableSort = { columnId: string; dir: "asc" | "desc" } | null;
+export enum SortDirection {
+  Asc = "asc",
+  Desc = "desc",
+}
+export type CustomTableSort = { columnId: string; dir: SortDirection } | null;
+
+const isSortDirection = (value: string | undefined): value is SortDirection =>
+  Object.values<string>(SortDirection).includes(value ?? "");
 
 export function parseSort(raw: string | null): CustomTableSort {
   if (!raw) return null;
   const [columnId, dir] = raw.split(":");
-  if (!columnId || (dir !== "asc" && dir !== "desc")) return null;
+  if (!columnId || !isSortDirection(dir)) return null;
   return { columnId, dir };
 }
 
@@ -17,75 +31,75 @@ export function serializeSort(sort: CustomTableSort): string {
 }
 
 // the named sub-values a column's filter can be made of, only some apply depending on column type
-export type ColumnFilterField =
-  | "excluded"
-  | "search"
-  | "min"
-  | "max"
-  | "from"
-  | "to"
-  | "only"
-  | "countMin"
-  | "countMax";
+export enum ColumnFilterField {
+  Excluded = "excluded",
+  Search = "search",
+  Min = "min",
+  Max = "max",
+  From = "from",
+  To = "to",
+  Only = "only",
+  CountMin = "countMin",
+  CountMax = "countMax",
+}
 
 // human readable query param per field, e.g. excluded_role, createdAt_from, tags_count_min
 export function getFilterKey(
   columnId: string,
   field: ColumnFilterField,
 ): string {
-  if (field === "excluded") return `excluded_${columnId}`;
-  if (field === "countMin") return `${columnId}_count_min`;
-  if (field === "countMax") return `${columnId}_count_max`;
+  if (field === ColumnFilterField.Excluded) return `excluded_${columnId}`;
+  if (field === ColumnFilterField.CountMin) return `${columnId}_count_min`;
+  if (field === ColumnFilterField.CountMax) return `${columnId}_count_max`;
   return `${columnId}_${field}`;
 }
 
 export function getColumnFilterFields<T>(
   column: CustomTableColumn<T>,
 ): ColumnFilterField[] {
-  if (column.type === "enum" || column.type === "boolean") return ["excluded"];
-  if (column.type === "date") return ["from", "to"];
-  if (column.type === "tags") return ["search", "only", "countMin", "countMax"];
-  if (column.type === "string")
-    return column.filterType === "number" ? ["min", "max"] : ["search"];
+  if (column.type === ColumnType.Enum || column.type === ColumnType.Boolean)
+    return [ColumnFilterField.Excluded];
+  if (column.type === ColumnType.Date)
+    return [ColumnFilterField.From, ColumnFilterField.To];
+  if (column.type === ColumnType.Tags)
+    return [
+      ColumnFilterField.Search,
+      ColumnFilterField.Only,
+      ColumnFilterField.CountMin,
+      ColumnFilterField.CountMax,
+    ];
+  if (column.type === ColumnType.String)
+    return column.filterType === StringFilterType.Number
+      ? [ColumnFilterField.Min, ColumnFilterField.Max]
+      : [ColumnFilterField.Search];
   return [];
 }
 
 export type GetFilterField = (field: ColumnFilterField) => string;
+export type SetFilterField = (field: ColumnFilterField, value: string) => void;
 
-const splitList = (value: string) =>
-  value ? value.split(",").filter(Boolean) : [];
+export const splitList = (value: string) => value.split(",").filter(Boolean);
 
 export function isEnumOptionExcluded(
   getField: GetFilterField,
   key: string,
 ): boolean {
-  return splitList(getField("excluded")).includes(key);
+  return splitList(getField(ColumnFilterField.Excluded)).includes(key);
 }
 
 export function toggleEnumOption(
   getField: GetFilterField,
   key: string,
 ): string {
-  const excluded = new Set(splitList(getField("excluded")));
-  if (excluded.has(key)) excluded.delete(key);
-  else excluded.add(key);
-  return [...excluded].join(",");
+  return toggleListItem(
+    splitList(getField(ColumnFilterField.Excluded)),
+    key,
+  ).join(",");
 }
 
-function enumMatches(
-  getField: GetFilterField,
-  value: string | undefined,
-): boolean {
-  const excluded = splitList(getField("excluded"));
-  if (excluded.length === 0) return true;
-  return !excluded.includes(value ?? ENUM_FILTER_NONE_KEY);
-}
-
-// same "excluded" mechanism as enums, just fixed to the two keys "true"/"false"
-function booleanMatches(getField: GetFilterField, value: boolean): boolean {
-  const excluded = splitList(getField("excluded"));
-  if (excluded.length === 0) return true;
-  return !excluded.includes(String(value));
+// enums and booleans share this, booleans just use the keys "true"/"false"
+function excludedMatches(getField: GetFilterField, key: string): boolean {
+  return !splitList(getField(ColumnFilterField.Excluded)).includes(key);
 }
 
 function numberMatches(min: string, max: string, value: number): boolean {
@@ -94,7 +108,6 @@ function numberMatches(min: string, max: string, value: number): boolean {
   return true;
 }
 
-export const DAY_MS = 86_400_000;
 const isDateOnly = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
 
 function dateMatches(
@@ -105,9 +118,10 @@ function dateMatches(
   if (!from && !to) return true;
   if (!value) return false;
   const time = value.getTime();
-  if (from && time < new Date(from).getTime()) return false;
+  if (from && time < parseISO(from).getTime()) return false;
   // a date-only "to" (calendar day pick) is inclusive of the whole day, a precise preset timestamp is exact
-  const toBound = to && new Date(to).getTime() + (isDateOnly(to) ? DAY_MS : 0);
+  const toBound =
+    to && (isDateOnly(to) ? addDays(parseISO(to), 1) : parseISO(to)).getTime();
   if (toBound && time >= toBound) return false;
   return true;
 }
@@ -121,15 +135,15 @@ function tagsMatches(
   getField: GetFilterField,
   tags: CustomTableEnumValue[],
 ): boolean {
-  const countMin = getField("countMin");
-  const countMax = getField("countMax");
+  const countMin = getField(ColumnFilterField.CountMin);
+  const countMax = getField(ColumnFilterField.CountMax);
   if (countMin && tags.length < Number(countMin)) return false;
   if (countMax && tags.length > Number(countMax)) return false;
 
-  const only = splitList(getField("only"));
+  const only = splitList(getField(ColumnFilterField.Only));
   if (only.length > 0) return tags.some((tag) => only.includes(tag.label));
 
-  const search = getField("search");
+  const search = getField(ColumnFilterField.Search);
   if (!search) return true;
   const query = search.toLowerCase();
   return tags.some((tag) =>
@@ -143,7 +157,7 @@ function tagsMatches(
 export function isColumnFilterableOrSortable<T>(
   column: CustomTableColumn<T>,
 ): boolean {
-  return column.type !== "copy" && column.type !== "buttons";
+  return column.type !== ColumnType.Copy && column.type !== ColumnType.Buttons;
 }
 
 // checked/unchecked/indeterminate for a "select all" checkbox given how many of a set are selected
@@ -156,7 +170,7 @@ export function getTriState(
 }
 
 function getColumnNumber<T>(
-  column: Extract<CustomTableColumn<T>, { type: "string" }>,
+  column: Extract<CustomTableColumn<T>, { type: ColumnType.String }>,
   item: T,
 ): number {
   return column.getNumber
@@ -169,23 +183,30 @@ export function columnMatchesFilter<T>(
   item: T,
   getField: GetFilterField,
 ): boolean {
-  if (column.type === "string") {
-    return column.filterType === "number"
+  if (column.type === ColumnType.String) {
+    return column.filterType === StringFilterType.Number
       ? numberMatches(
-          getField("min"),
-          getField("max"),
+          getField(ColumnFilterField.Min),
+          getField(ColumnFilterField.Max),
           getColumnNumber(column, item),
         )
-      : textMatches(getField("search"), column.getString(item));
+      : textMatches(getField(ColumnFilterField.Search), column.getString(item));
   }
-  if (column.type === "date")
-    return dateMatches(getField("from"), getField("to"), column.getDate(item));
-  if (column.type === "enum")
-    return enumMatches(getField, column.getValue(item));
-  if (column.type === "tags")
+  if (column.type === ColumnType.Date)
+    return dateMatches(
+      getField(ColumnFilterField.From),
+      getField(ColumnFilterField.To),
+      column.getDate(item),
+    );
+  if (column.type === ColumnType.Enum)
+    return excludedMatches(
+      getField,
+      column.getValue(item) ?? ENUM_FILTER_NONE_KEY,
+    );
+  if (column.type === ColumnType.Tags)
     return tagsMatches(getField, column.getTags(item));
-  if (column.type === "boolean")
-    return booleanMatches(getField, column.getBoolean(item));
+  if (column.type === ColumnType.Boolean)
+    return excludedMatches(getField, String(column.getBoolean(item)));
   return true;
 }
 
@@ -194,24 +215,24 @@ export function compareColumnValues<T>(
   a: T,
   b: T,
 ): number {
-  if (column.type === "string") {
-    if (column.filterType === "number")
+  if (column.type === ColumnType.String) {
+    if (column.filterType === StringFilterType.Number)
       return getColumnNumber(column, a) - getColumnNumber(column, b);
     return column.getString(a).localeCompare(column.getString(b));
   }
-  if (column.type === "date") {
+  if (column.type === ColumnType.Date) {
     const aTime = column.getDate(a)?.getTime() ?? -Infinity;
     const bTime = column.getDate(b)?.getTime() ?? -Infinity;
     return aTime - bTime;
   }
-  if (column.type === "enum") {
+  if (column.type === ColumnType.Enum) {
     const aValue = column.getValue(a) ?? "";
     const bValue = column.getValue(b) ?? "";
     return aValue.localeCompare(bValue);
   }
-  if (column.type === "tags")
+  if (column.type === ColumnType.Tags)
     return column.getTags(a).length - column.getTags(b).length;
-  if (column.type === "boolean")
+  if (column.type === ColumnType.Boolean)
     return Number(column.getBoolean(a)) - Number(column.getBoolean(b));
   return 0;
 }

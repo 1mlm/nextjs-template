@@ -9,7 +9,7 @@ export function CustomTableEmptyValue({ onClick }: { onClick?: () => void }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      {...{ onClick }}
       className="flex w-full justify-center"
     >
       {iconEl}

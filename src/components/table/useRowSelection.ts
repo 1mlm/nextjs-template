@@ -1,10 +1,9 @@
 import { useState } from "react";
 
-// checkbox-column selection. `visibleItems` (not `allItems`) drives "select
-// all" and the tri-state checkbox, so a row scrolled out of the current
-// filter doesn't count against "all selected" - but `selectedItems` reads
-// from `allItems`, so a selection survives the filter changing underneath
-// it (e.g. exporting rows picked before narrowing the search)
+// checkbox column selection. select all + the tri-state only look at
+// `visibleItems`, so rows hidden by the filter don't count, but `selectedItems`
+// reads from `allItems` so picks survive the filter changing (pick some rows,
+// narrow the search, export, still all there)
 export function useRowSelection<T>({
   allItems,
   visibleItems,
@@ -23,16 +22,29 @@ export function useRowSelection<T>({
     setSelectedIds(next);
   };
 
-  const allSelected =
-    visibleItems.length > 0 && selectedIds.size === visibleItems.length;
+  const visibleIds = visibleItems.map(getItemId);
+  const visibleSelectedCount = visibleIds.filter((id) =>
+    selectedIds.has(id),
+  ).length;
+  const allVisibleSelected =
+    visibleIds.length > 0 && visibleSelectedCount === visibleIds.length;
+
   const toggleAll = () =>
     setSelectedIds(
-      allSelected ? new Set() : new Set(visibleItems.map(getItemId)),
+      allVisibleSelected
+        ? new Set([...selectedIds].filter((id) => !visibleIds.includes(id)))
+        : new Set([...selectedIds, ...visibleIds]),
     );
 
   const selectedItems = allItems.filter((item) =>
     selectedIds.has(getItemId(item)),
   );
 
-  return { selectedIds, toggleRow, toggleAll, selectedItems };
+  return {
+    selectedIds,
+    visibleSelectedCount,
+    toggleRow,
+    toggleAll,
+    selectedItems,
+  };
 }

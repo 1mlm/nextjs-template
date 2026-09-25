@@ -4,7 +4,7 @@ import colors from "tailwindcss/colors";
 type Palette = typeof colors;
 
 // tailwind's palette mixes keywords (inherit/current/transparent) and flat
-// black/white in with the real ramps — only a ramp has numeric steps
+// black/white in with the real ramps, only a ramp has numeric steps
 export type Color = {
   [K in keyof Palette]: Palette[K] extends { 500: string } ? K : never;
 }[keyof Palette];
@@ -34,10 +34,23 @@ export function getColorStyle(colorId?: string | null): CSSProperties {
   };
 }
 
-// COLORS minus the gray family - hashing a tag into "slate" vs "zinc" isn't a
-// visually distinct color, it's just noise next to the real hues
-const TAG_COLORS = COLORS.filter(
-  (color) => !["slate", "gray", "zinc", "neutral", "stone"].includes(color),
+// every gray-ish family tailwind ships (4.2 snuck in mauve/olive/mist/taupe
+// too, sneakyyy). hashing a tag into "slate" vs "zinc" isn't a visually
+// distinct color, it's just noise next to the real hues
+const NEUTRAL_COLORS: Color[] = [
+  "slate",
+  "gray",
+  "zinc",
+  "neutral",
+  "stone",
+  "mauve",
+  "olive",
+  "mist",
+  "taupe",
+];
+
+export const TAG_COLORS = COLORS.filter(
+  (color) => !NEUTRAL_COLORS.includes(color),
 );
 
 // deterministic string -> color, so a tag/status/user pulled straight from
@@ -45,13 +58,13 @@ const TAG_COLORS = COLORS.filter(
 // {value: color} map that someone forgets to update for the next enum value.
 // not cryptographic, just needs to spread evenly across TAG_COLORS
 function hashString(value: string): number {
-  let hash = 0;
-  for (let i = 0; i < value.length; i++) {
-    hash = (hash * 31 + value.charCodeAt(i)) | 0;
-  }
+  const hash = [...value].reduce(
+    (acc, char) => (acc * 31 + char.charCodeAt(0)) | 0,
+    0,
+  );
   return Math.abs(hash);
 }
 
 export function getColorForKey(key: string): Color {
-  return TAG_COLORS[hashString(key) % TAG_COLORS.length] as Color;
+  return TAG_COLORS[hashString(key) % TAG_COLORS.length];
 }

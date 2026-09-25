@@ -10,6 +10,17 @@ import {
   SortingAZ02Icon,
   SortingZA01Icon,
 } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
+import {
+  endOfYesterday,
+  formatISO,
+  parseISO,
+  startOfMonth,
+  startOfToday,
+  startOfWeek,
+  startOfYesterday,
+  subHours,
+} from "date-fns";
 import { type ReactNode, useId } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
@@ -28,17 +39,24 @@ import {
 } from "@/shadcn/ui/dropdown-menu";
 import { Input } from "@/shadcn/ui/input";
 import { cn } from "@/shadcn/utils";
-import type { CustomTableColumn } from "./CustomTable";
+import { toggleListItem } from "@/utils/array";
 import { EnumBadge } from "./CustomTableCell";
 import {
-  type ColumnFilterField,
-  DAY_MS,
+  ColumnType,
+  type CustomTableColumn,
+  StringFilterType,
+} from "./columns";
+import {
+  ColumnFilterField,
   ENUM_FILTER_NONE_KEY,
   type GetFilterField,
   getColumnFilterFields,
   getTriState,
   isColumnFilterableOrSortable,
   isEnumOptionExcluded,
+  type SetFilterField,
+  SortDirection,
+  splitList,
   toggleEnumOption,
 } from "./filtering";
 
@@ -88,13 +106,13 @@ function SelectAllRow({
 function MinMaxInputs({
   getField,
   setField,
-  minField = "min",
-  maxField = "max",
+  minField = ColumnFilterField.Min,
+  maxField = ColumnFilterField.Max,
   className = "h-7 w-20",
   showToLabel = false,
 }: {
   getField: GetFilterField;
-  setField: (field: ColumnFilterField, value: string) => void;
+  setField: SetFilterField;
   minField?: ColumnFilterField;
   maxField?: ColumnFilterField;
   className?: string;
@@ -121,73 +139,80 @@ function MinMaxInputs({
   );
 }
 
-function EnumFilterContent<T>({
-  column,
-  getField,
-  setField,
+function IconLabel({
+  icon,
+  className,
+  children,
 }: {
-  column: Extract<CustomTableColumn<T>, { type: "enum" }>;
-  getField: GetFilterField;
-  setField: (field: ColumnFilterField, value: string) => void;
+  icon: IconSvgElement;
+  className: string;
+  children: ReactNode;
 }) {
-  const options = Object.entries(column.enumOptions);
-  const allKeys = [...options.map(([key]) => key), ENUM_FILTER_NONE_KEY];
-  const toggle = (key: string) =>
-    setField("excluded", toggleEnumOption(getField, key));
-
-  const includedCount = allKeys.filter(
-    (key) => !isEnumOptionExcluded(getField, key),
-  ).length;
-  const toggleAll = () =>
-    setField(
-      "excluded",
-      includedCount === allKeys.length ? allKeys.join(",") : "",
-    );
-
   return (
-    <div className="flex flex-col gap-1 p-1">
-      <SelectAllRow
-        selectedCount={includedCount}
-        totalCount={allKeys.length}
-        onToggle={toggleAll}
-      />
-      <DropdownMenuSeparator />
-      {options.map(([key, value]) => (
-        <CheckboxRow
-          key={key}
-          checked={!isEnumOptionExcluded(getField, key)}
-          onCheckedChange={() => toggle(key)}
-        >
-          <EnumBadge {...{ value }} />
-        </CheckboxRow>
-      ))}
-      <CheckboxRow
-        checked={!isEnumOptionExcluded(getField, ENUM_FILTER_NONE_KEY)}
-        onCheckedChange={() => toggle(ENUM_FILTER_NONE_KEY)}
-      >
-        <Icon icon={Cancel01Icon} className="size-3.5 opacity-50" />
-        <span className="text-sm">No value</span>
-      </CheckboxRow>
-    </div>
+    <>
+      <Icon {...{ icon }} className={cn("size-3.5", className)} />
+      <span className="text-sm">{children}</span>
+    </>
   );
 }
 
-// same "excluded" toggle mechanism as the enum filter, fixed to the two keys "true"/"false"
-function BooleanFilterContent({
+type ExcludedFilterOption = { key: string; label: ReactNode };
+
+const getEnumFilterOptions = <T,>(
+  column: Extract<CustomTableColumn<T>, { type: ColumnType.Enum }>,
+): ExcludedFilterOption[] => [
+  ...Object.entries(column.enumOptions).map(([key, value]) => ({
+    key,
+    label: <EnumBadge {...{ value }} />,
+  })),
+  {
+    key: ENUM_FILTER_NONE_KEY,
+    label: (
+      <IconLabel icon={Cancel01Icon} className="opacity-50">
+        No value
+      </IconLabel>
+    ),
+  },
+];
+
+const BOOLEAN_FILTER_OPTIONS: ExcludedFilterOption[] = [
+  {
+    key: "true",
+    label: (
+      <IconLabel icon={CheckIcon} className="text-green-500">
+        Yes
+      </IconLabel>
+    ),
+  },
+  {
+    key: "false",
+    label: (
+      <IconLabel icon={Cancel01Icon} className="opacity-50">
+        No
+      </IconLabel>
+    ),
+  },
+];
+
+// enums and booleans both filter by excluding keys, they just feed different options in
+function ExcludedOptionsFilterContent({
+  options,
   getField,
   setField,
 }: {
+  options: ExcludedFilterOption[];
   getField: GetFilterField;
-  setField: (field: ColumnFilterField, value: string) => void;
+  setField: SetFilterField;
 }) {
-  const keys = ["true", "false"];
-  const toggle = (key: string) =>
-    setField("excluded", toggleEnumOption(getField, key));
+  const keys = options.map((option) => option.key);
   const includedCount = keys.filter(
     (key) => !isEnumOptionExcluded(getField, key),
   ).length;
   const toggleAll = () =>
-    setField("excluded", includedCount === keys.length ? keys.join(",") : "");
+    setField(
+      ColumnFilterField.Excluded,
+      includedCount === keys.length ? keys.join(",") : "",
+    );
 
   return (
     <div className="flex flex-col gap-1 p-1">
@@ -197,64 +222,38 @@ function BooleanFilterContent({
         onToggle={toggleAll}
       />
       <DropdownMenuSeparator />
-      <CheckboxRow
-        checked={!isEnumOptionExcluded(getField, "true")}
-        onCheckedChange={() => toggle("true")}
-      >
-        <Icon icon={CheckIcon} className="size-3.5 text-green-500" />
-        <span className="text-sm">Yes</span>
-      </CheckboxRow>
-      <CheckboxRow
-        checked={!isEnumOptionExcluded(getField, "false")}
-        onCheckedChange={() => toggle("false")}
-      >
-        <Icon icon={Cancel01Icon} className="size-3.5 opacity-50" />
-        <span className="text-sm">No</span>
-      </CheckboxRow>
+      {options.map(({ key, label }) => (
+        <CheckboxRow
+          key={key}
+          checked={!isEnumOptionExcluded(getField, key)}
+          onCheckedChange={() =>
+            setField(
+              ColumnFilterField.Excluded,
+              toggleEnumOption(getField, key),
+            )
+          }
+        >
+          {label}
+        </CheckboxRow>
+      ))}
     </div>
   );
 }
 
-const toDateInputValue = (date: Date) => date.toISOString().slice(0, 10);
-
 const DATE_PRESETS: { label: string; getRange: () => [Date, Date] }[] = [
-  {
-    label: "Last hour",
-    getRange: () => [new Date(Date.now() - 3_600_000), new Date()],
-  },
-  {
-    label: "Today",
-    getRange: () => {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      return [start, new Date()];
-    },
-  },
+  { label: "Last hour", getRange: () => [subHours(new Date(), 1), new Date()] },
+  { label: "Today", getRange: () => [startOfToday(), new Date()] },
   {
     label: "Yesterday",
-    getRange: () => {
-      const start = new Date();
-      start.setDate(start.getDate() - 1);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(start.getTime() + DAY_MS - 1);
-      return [start, end];
-    },
+    getRange: () => [startOfYesterday(), endOfYesterday()],
   },
   {
     label: "This week",
-    getRange: () => {
-      const start = new Date();
-      start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
-      start.setHours(0, 0, 0, 0);
-      return [start, new Date()];
-    },
+    getRange: () => [startOfWeek(new Date(), { weekStartsOn: 1 }), new Date()],
   },
   {
     label: "This month",
-    getRange: () => [
-      new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-      new Date(),
-    ],
+    getRange: () => [startOfMonth(new Date()), new Date()],
   },
 ];
 
@@ -263,10 +262,10 @@ function DateRangeFilterContent({
   setField,
 }: {
   getField: GetFilterField;
-  setField: (field: ColumnFilterField, value: string) => void;
+  setField: SetFilterField;
 }) {
-  const from = getField("from");
-  const to = getField("to");
+  const from = getField(ColumnFilterField.From);
+  const to = getField(ColumnFilterField.To);
 
   return (
     <div className="flex flex-col gap-1 p-1">
@@ -279,8 +278,8 @@ function DateRangeFilterContent({
             className="h-6 px-2 text-xs"
             onClick={() => {
               const [start, end] = preset.getRange();
-              setField("from", start.toISOString());
-              setField("to", end.toISOString());
+              setField(ColumnFilterField.From, start.toISOString());
+              setField(ColumnFilterField.To, end.toISOString());
             }}
           >
             {preset.label}
@@ -290,12 +289,20 @@ function DateRangeFilterContent({
       <Calendar
         mode="range"
         selected={{
-          from: from ? new Date(from) : undefined,
-          to: to ? new Date(to) : undefined,
+          from: from ? parseISO(from) : undefined,
+          to: to ? parseISO(to) : undefined,
         }}
         onSelect={(range) => {
-          setField("from", range?.from ? toDateInputValue(range.from) : "");
-          setField("to", range?.to ? toDateInputValue(range.to) : "");
+          setField(
+            ColumnFilterField.From,
+            range?.from
+              ? formatISO(range.from, { representation: "date" })
+              : "",
+          );
+          setField(
+            ColumnFilterField.To,
+            range?.to ? formatISO(range.to, { representation: "date" }) : "",
+          );
         }}
       />
       {(from || to) && (
@@ -304,8 +311,8 @@ function DateRangeFilterContent({
           size="sm"
           className="justify-start"
           onClick={() => {
-            setField("from", "");
-            setField("to", "");
+            setField(ColumnFilterField.From, "");
+            setField(ColumnFilterField.To, "");
           }}
         >
           <Icon icon={Cancel01Icon} />
@@ -321,7 +328,7 @@ function NumberRangeFilterContent({
   setField,
 }: {
   getField: GetFilterField;
-  setField: (field: ColumnFilterField, value: string) => void;
+  setField: SetFilterField;
 }) {
   return (
     <div className="flex items-center gap-1.5 p-2">
@@ -335,14 +342,14 @@ function TextFilterContent({
   setField,
 }: {
   getField: GetFilterField;
-  setField: (field: ColumnFilterField, value: string) => void;
+  setField: SetFilterField;
 }) {
   return (
     <div className="p-2">
       <Input
         placeholder="Search..."
-        value={getField("search")}
-        onChange={(e) => setField("search", e.target.value)}
+        value={getField(ColumnFilterField.Search)}
+        onChange={(e) => setField(ColumnFilterField.Search, e.target.value)}
         className="h-7"
       />
     </div>
@@ -355,14 +362,12 @@ function TagsFilterContent<T>({
   getField,
   setField,
 }: {
-  column: Extract<CustomTableColumn<T>, { type: "tags" }>;
+  column: Extract<CustomTableColumn<T>, { type: ColumnType.Tags }>;
   items: T[];
   getField: GetFilterField;
-  setField: (field: ColumnFilterField, value: string) => void;
+  setField: SetFilterField;
 }) {
-  const only = getField("only")
-    ? getField("only").split(",").filter(Boolean)
-    : [];
+  const only = splitList(getField(ColumnFilterField.Only));
   const allLabels = [
     ...new Set(
       items.flatMap((item) => column.getTags(item).map((tag) => tag.label)),
@@ -370,15 +375,11 @@ function TagsFilterContent<T>({
   ];
   const toggleAll = () =>
     setField(
-      "only",
+      ColumnFilterField.Only,
       only.length === allLabels.length ? "" : allLabels.join(","),
     );
-  const toggleLabel = (label: string) => {
-    const next = only.includes(label)
-      ? only.filter((value) => value !== label)
-      : [...only, label];
-    setField("only", next.join(","));
-  };
+  const toggleLabel = (label: string) =>
+    setField(ColumnFilterField.Only, toggleListItem(only, label).join(","));
 
   return (
     <div className="flex flex-col gap-1 p-1">
@@ -386,8 +387,8 @@ function TagsFilterContent<T>({
         <span className="text-muted-foreground text-xs">Count</span>
         <MinMaxInputs
           {...{ getField, setField }}
-          minField="countMin"
-          maxField="countMax"
+          minField={ColumnFilterField.CountMin}
+          maxField={ColumnFilterField.CountMax}
           className="h-7 w-16"
         />
       </div>
@@ -395,8 +396,8 @@ function TagsFilterContent<T>({
       <div className="p-1">
         <Input
           placeholder="Search tags..."
-          value={getField("search")}
-          onChange={(e) => setField("search", e.target.value)}
+          value={getField(ColumnFilterField.Search)}
+          onChange={(e) => setField(ColumnFilterField.Search, e.target.value)}
           className="h-7"
         />
       </div>
@@ -423,14 +424,21 @@ function TagsFilterContent<T>({
 }
 
 // numeric columns sort with an up/down-digit icon, everything else with an A-Z/Z-A icon
-const getSortIcon = (dir: "asc" | "desc", numeric: boolean) =>
-  dir === "asc"
-    ? numeric
-      ? ArrowDown01Icon
-      : SortingAZ02Icon
-    : numeric
-      ? ArrowUp10Icon
-      : SortingZA01Icon;
+const SORT_ICONS: Record<
+  SortDirection,
+  { numeric: IconSvgElement; text: IconSvgElement }
+> = {
+  [SortDirection.Asc]: { numeric: ArrowDown01Icon, text: SortingAZ02Icon },
+  [SortDirection.Desc]: { numeric: ArrowUp10Icon, text: SortingZA01Icon },
+};
+
+const getSortIcon = (dir: SortDirection, numeric: boolean) =>
+  SORT_ICONS[dir][numeric ? "numeric" : "text"];
+
+const SORT_OPTIONS: { dir: SortDirection; label: string }[] = [
+  { dir: SortDirection.Asc, label: "Ascending" },
+  { dir: SortDirection.Desc, label: "Descending" },
+];
 
 function SortSubmenuContent({
   numeric,
@@ -438,25 +446,20 @@ function SortSubmenuContent({
   onSortChange,
 }: {
   numeric: boolean;
-  sort: "asc" | "desc" | null;
-  onSortChange: (dir: "asc" | "desc" | null) => void;
+  sort: SortDirection | null;
+  onSortChange: (dir: SortDirection | null) => void;
 }) {
   return (
     <>
-      <DropdownMenuItem onClick={() => onSortChange("asc")}>
-        <Icon icon={getSortIcon("asc", numeric)} />
-        Ascending
-        {sort === "asc" && (
-          <span className="ml-auto text-muted-foreground text-xs">✓</span>
-        )}
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => onSortChange("desc")}>
-        <Icon icon={getSortIcon("desc", numeric)} />
-        Descending
-        {sort === "desc" && (
-          <span className="ml-auto text-muted-foreground text-xs">✓</span>
-        )}
-      </DropdownMenuItem>
+      {SORT_OPTIONS.map(({ dir, label }) => (
+        <DropdownMenuItem key={dir} onClick={() => onSortChange(dir)}>
+          <Icon icon={getSortIcon(dir, numeric)} />
+          {label}
+          {sort === dir && (
+            <span className="ml-auto text-muted-foreground text-xs">✓</span>
+          )}
+        </DropdownMenuItem>
+      ))}
       {sort && (
         <DropdownMenuItem onClick={() => onSortChange(null)}>
           <Icon icon={Cancel01Icon} />
@@ -482,16 +485,18 @@ export function CustomTableColumnHeader<T>({
   filterable?: boolean;
   sortable?: boolean;
   getField: GetFilterField;
-  setField: (field: ColumnFilterField, value: string) => void;
-  sort: "asc" | "desc" | null;
-  onSortChange: (dir: "asc" | "desc" | null) => void;
+  setField: SetFilterField;
+  sort: SortDirection | null;
+  onSortChange: (dir: SortDirection | null) => void;
 }) {
   const columnEligible = isColumnFilterableOrSortable(column);
   const canFilter = filterable && columnEligible;
   const canSort = sortable && columnEligible;
   const fields = getColumnFilterFields(column);
   const hasActiveFilter = canFilter && fields.some((field) => getField(field));
-  const numeric = column.type === "string" && column.filterType === "number";
+  const numeric =
+    column.type === ColumnType.String &&
+    column.filterType === StringFilterType.Number;
 
   const label = (
     <span
@@ -536,28 +541,38 @@ export function CustomTableColumnHeader<T>({
             <DropdownMenuPortal>
               <DropdownMenuSubContent
                 className={cn(
-                  column.type !== "string" && column.type !== "tags" && "w-56",
+                  column.type !== ColumnType.String &&
+                    column.type !== ColumnType.Tags &&
+                    "w-56",
                 )}
               >
-                {column.type === "enum" && (
-                  <EnumFilterContent {...{ column, getField, setField }} />
+                {column.type === ColumnType.Enum && (
+                  <ExcludedOptionsFilterContent
+                    options={getEnumFilterOptions(column)}
+                    {...{ getField, setField }}
+                  />
                 )}
-                {column.type === "date" && (
+                {column.type === ColumnType.Date && (
                   <DateRangeFilterContent {...{ getField, setField }} />
                 )}
-                {column.type === "string" && column.filterType === "number" && (
-                  <NumberRangeFilterContent {...{ getField, setField }} />
-                )}
-                {column.type === "string" && column.filterType !== "number" && (
-                  <TextFilterContent {...{ getField, setField }} />
-                )}
-                {column.type === "tags" && (
+                {column.type === ColumnType.String &&
+                  column.filterType === StringFilterType.Number && (
+                    <NumberRangeFilterContent {...{ getField, setField }} />
+                  )}
+                {column.type === ColumnType.String &&
+                  column.filterType !== StringFilterType.Number && (
+                    <TextFilterContent {...{ getField, setField }} />
+                  )}
+                {column.type === ColumnType.Tags && (
                   <TagsFilterContent
                     {...{ column, items, getField, setField }}
                   />
                 )}
-                {column.type === "boolean" && (
-                  <BooleanFilterContent {...{ getField, setField }} />
+                {column.type === ColumnType.Boolean && (
+                  <ExcludedOptionsFilterContent
+                    options={BOOLEAN_FILTER_OPTIONS}
+                    {...{ getField, setField }}
+                  />
                 )}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>

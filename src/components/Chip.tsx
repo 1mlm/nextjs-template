@@ -1,10 +1,10 @@
+import type { IconSvgElement } from "@hugeicons/react";
 import type { CSSProperties } from "react";
-import { type HugeIcon, Icon } from "@/components/Icon";
+import { Icon } from "@/components/Icon";
 import { cn } from "@/shadcn/utils";
 
-// small rounded toggle pill: tag filters, permission toggles. Color-agnostic
-// on purpose — pass `style={getColorStyle(color)}` from the caller instead
-// of baking a color prop in here, same as EnumBadge does
+// small rounded toggle pill (tag filters, permission toggles). no color prop on
+// purpose, pass `style={getColorStyle(color)}` from the caller, same as EnumBadge
 export function Chip({
   icon,
   label,
@@ -13,7 +13,7 @@ export function Chip({
   iconClassName,
   style,
 }: {
-  icon: HugeIcon;
+  icon: IconSvgElement;
   label: string;
   onClick: () => void;
   className?: string;
@@ -23,14 +23,13 @@ export function Chip({
   return (
     <button
       type="button"
-      onClick={onClick}
-      style={style}
+      {...{ onClick, style }}
       className={cn(
         "inline-flex items-center gap-1 rounded-lg corner-squircle px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors",
         className,
       )}
     >
-      <Icon icon={icon} className={iconClassName} />
+      <Icon {...{ icon }} className={iconClassName} />
       {label}
     </button>
   );

@@ -4,7 +4,7 @@ import { Download01Icon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
-import type { CustomTableColumn } from "./CustomTable";
+import type { CustomTableColumn } from "./columns";
 import { ExtractDialog } from "./ExtractDialog";
 
 export function ExtractButton<T>({

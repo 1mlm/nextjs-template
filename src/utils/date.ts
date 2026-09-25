@@ -96,7 +96,7 @@ export function formatRelativeDate(
   return formatRelativeLabel(Math.abs(years), "year", years > 0);
 }
 
-// "1h 30m", "45m", "2h" — compact, no "and"/commas needed for a two-unit max
+// "1h 30m", "45m", "2h", compact, no "and"/commas needed for a two-unit max
 export function formatDurationMinutes(totalMinutes: number): string {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
@@ -123,7 +123,10 @@ export function formatDetailedDuration(
     Math.round((target.getTime() - now.getTime()) / 1000),
   );
 
-  const { parts } = DURATION_UNITS.reduce(
+  const { parts } = DURATION_UNITS.reduce<{
+    remaining: number;
+    parts: string[];
+  }>(
     ({ remaining, parts }, [unit, secondsPerUnit]) => {
       const amount = Math.floor(remaining / secondsPerUnit);
       const label =
@@ -133,7 +136,7 @@ export function formatDetailedDuration(
         parts: [...parts, ...label],
       };
     },
-    { remaining: totalSeconds, parts: [] as string[] },
+    { remaining: totalSeconds, parts: [] },
   );
 
   const joined =

@@ -1,6 +1,10 @@
 import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 import { useMemo } from "react";
-import type { CustomTableColumn, CustomTableEnumValue } from "./CustomTable";
+import {
+  ColumnType,
+  type CustomTableColumn,
+  type CustomTableEnumValue,
+} from "./columns";
 import {
   type ColumnFilterField,
   columnMatchesFilter,
@@ -8,6 +12,7 @@ import {
   getColumnFilterFields,
   getFilterKey,
   parseSort,
+  SortDirection,
   serializeSort,
 } from "./filtering";
 
@@ -17,26 +22,31 @@ function getSearchableStrings<T>(
   item: T,
 ): string[] {
   return columns.flatMap((column) => {
-    if (column.type === "string") return [column.getString(item)];
-    if (column.type === "copy")
+    if (column.type === ColumnType.String) return [column.getString(item)];
+    if (column.type === ColumnType.Copy)
       return column.searchable === false ? [] : [column.getString(item)];
-    if (column.type === "enum") {
+    if (column.type === ColumnType.Enum) {
       const value = column.getValue(item);
       return value !== undefined
         ? [column.enumOptions[value]?.label ?? ""]
         : [];
     }
-    if (column.type === "tags")
+    if (column.type === ColumnType.Tags)
       return column.getTags(item).map((tag: CustomTableEnumValue) => tag.label);
     return [];
   });
 }
 
-// owns every URL-driven piece of "what's currently visible": the global
-// search box, each column's filter fields, and sort - and turns them into
-// the filtered/sorted item list. `search`, `filterValues`, `sortRaw` are
-// exposed alongside the derived state so a caller can reset pagination
-// whenever any of them changes
+// plain function (not a closure inside the hook) so the visibleItems memo can call it without a new dep
+const readColumnField =
+  (filterValues: Partial<Record<string, string>>, columnId: string) =>
+  (field: ColumnFilterField) =>
+    filterValues[getFilterKey(columnId, field)] ?? "";
+
+// owns everything url driven about what's visible: the search box, every
+// column's filter fields and the sort, and turns it into the filtered/sorted
+// list. `search`, `filterValues` and `sortRaw` are handed back too so the
+// caller can reset pagination when any of them changes
 export function useTableFilterSort<T>({
   columns,
   items,
@@ -70,16 +80,14 @@ export function useTableFilterSort<T>({
   );
   const [filterValues, setFilterValues] = useQueryStates(filterParsers);
 
-  const getColumnField =
-    (columnId: string) =>
-    (field: ColumnFilterField): string =>
-      filterValues[getFilterKey(columnId, field)] ?? "";
+  const getColumnField = (columnId: string) =>
+    readColumnField(filterValues, columnId);
   const setColumnField = (
     columnId: string,
     field: ColumnFilterField,
     value: string,
   ) => setFilterValues({ [getFilterKey(columnId, field)]: value });
-  const setColumnSort = (columnId: string, dir: "asc" | "desc" | null) =>
+  const setColumnSort = (columnId: string, dir: SortDirection | null) =>
     setSortRaw(dir ? serializeSort({ columnId, dir }) : "");
 
   const hasActiveFilterOrSort =
@@ -94,19 +102,18 @@ export function useTableFilterSort<T>({
   const visibleItems = useMemo(() => {
     const query = search.trim().toLowerCase();
     const filtered = items.filter((item) => {
-      if (
-        query &&
-        !getSearchableStrings(columns, item).some((s) =>
+      const matchesSearch =
+        !query ||
+        getSearchableStrings(columns, item).some((s) =>
           s.toLowerCase().includes(query),
-        )
-      )
-        return false;
+        );
+      if (!matchesSearch) return false;
       if (!filterable) return true;
       return columns.every((column) =>
         columnMatchesFilter(
           column,
           item,
-          (field) => filterValues[getFilterKey(column.id, field)] ?? "",
+          readColumnField(filterValues, column.id),
         ),
       );
     });
@@ -116,7 +123,7 @@ export function useTableFilterSort<T>({
     const sorted = [...filtered].sort((a, b) =>
       compareColumnValues(sortColumn, a, b),
     );
-    return sort.dir === "desc" ? sorted.reverse() : sorted;
+    return sort.dir === SortDirection.Desc ? sorted.reverse() : sorted;
   }, [items, columns, search, sort, filterValues, filterable]);
 
   return {

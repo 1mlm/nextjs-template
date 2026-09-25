@@ -1,8 +1,24 @@
 "use client";
 
+import type { IconSvgElement } from "@hugeicons/react";
 import { useRef, useState } from "react";
-import { type HugeIcon, Icon } from "@/components/Icon";
+import { Icon } from "@/components/Icon";
 import { cn } from "@/shadcn/utils";
+
+// the input's accept attr only filters the browse dialog, drops skip it entirely
+function isFileAccepted(file: File, accept: string) {
+  const patterns = accept
+    .split(",")
+    .map((pattern) => pattern.trim().toLowerCase());
+  const fileName = file.name.toLowerCase();
+  const mimeType = file.type.toLowerCase();
+  return patterns.some((pattern) => {
+    if (pattern.startsWith(".")) return fileName.endsWith(pattern);
+    if (pattern.endsWith("/*"))
+      return mimeType.startsWith(pattern.slice(0, -1));
+    return mimeType === pattern;
+  });
+}
 
 // click-to-browse + drag & drop file picker, single file only
 export function FileDropZone({
@@ -13,7 +29,7 @@ export function FileDropZone({
   disabled,
 }: {
   accept: string;
-  icon: HugeIcon;
+  icon: IconSvgElement;
   label: string;
   onFile: (file: File) => void;
   disabled?: boolean;
@@ -23,7 +39,7 @@ export function FileDropZone({
 
   const handleFiles = (files: FileList | null) => {
     const file = files?.[0];
-    if (file) onFile(file);
+    if (file && isFileAccepted(file, accept)) onFile(file);
   };
 
   return (
@@ -40,7 +56,7 @@ export function FileDropZone({
         if (!disabled) handleFiles(e.dataTransfer.files);
       }}
       onClick={() => inputRef.current?.click()}
-      disabled={disabled}
+      {...{ disabled }}
       className={cn(
         "flex w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-6 text-center text-sm text-muted-foreground transition-colors",
         dragOver
@@ -49,12 +65,12 @@ export function FileDropZone({
         disabled && "pointer-events-none opacity-50",
       )}
     >
-      <Icon icon={icon} className="size-6" />
+      <Icon {...{ icon }} className="size-6" />
       {label}
       <input
         ref={inputRef}
         type="file"
-        accept={accept}
+        {...{ accept }}
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />

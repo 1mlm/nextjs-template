@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckmarkCircle02Icon, Copy01Icon } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 import {
   type ComponentProps,
   createContext,
@@ -8,7 +9,7 @@ import {
   useContext,
   useState,
 } from "react";
-import { type HugeIcon, Icon } from "@/components/Icon";
+import { Icon } from "@/components/Icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,39 +17,32 @@ import {
   DropdownMenuTrigger,
 } from "@/shadcn/ui/dropdown-menu";
 import { cn } from "@/shadcn/utils";
-import { copyToClipboard } from "@/utils/clipboard";
+import { useCopyToClipboard } from "@/utils/clipboard";
 
 const COPY_FEEDBACK_MS = 650;
 
-// lets a menu item (Copy/Share) delay the menu's close instead of the
-// instant close-on-select every real DropdownMenuItem gets by default —
-// used to show a brief "copied" state in place before the menu goes away,
-// instead of a toast popping up somewhere else on screen
+// lets a menu item (copy, share) hold the menu open for a sec instead of the
+// instant close every DropdownMenuItem does, so it can flash "copied" in place
+// instead of a toast popping up somewhere random
 const RowMenuCloseContext = createContext<(() => void) | null>(null);
 
 function useRowMenuClose() {
   const close = useContext(RowMenuCloseContext);
-  if (!close) {
-    throw new Error("useRowMenuClose must be used inside a RowMenu");
-  }
+  if (!close) throw new Error("useRowMenuClose must be used inside a RowMenu");
   return close;
 }
 
-// a row menu item that must stay mounted after being clicked (it opens a
-// nested Dialog/Popover of its own) can't be a real DropdownMenuItem —
-// selecting one closes and unmounts the whole menu content, which would tear
-// down the nested dialog's state along with it. This is styled to match
-// DropdownMenuItem but is a plain button so clicking it doesn't trigger that
-// close-and-unmount behavior. It's always used as a Dialog/PopoverTrigger's
-// asChild target, which clones it and overwrites its own data-slot/className
-// merge in ways that make it unreliable to target from outside CSS — styled
-// entirely with its own classes instead, no data-slot dependency
+// for items that open their own dialog/popover. a real DropdownMenuItem closes
+// AND unmounts the whole menu on select, which kills the nested dialog with it
+// (fun one to debug). so this is a plain button styled like a menu item.
+// it's always an asChild trigger, and asChild clobbers data-slot/className in
+// weird ways, so it's styled with its own classes, no data-slot selectors
 export function RowMenuItemButton({
   icon,
   children,
   className,
   ...props
-}: ComponentProps<"button"> & { icon: HugeIcon }) {
+}: ComponentProps<"button"> & { icon: IconSvgElement }) {
   return (
     <button
       type="button"
@@ -65,7 +59,7 @@ export function RowMenuItemButton({
 }
 
 // swaps its own icon/label to a checkmark/feedback label in place instead of
-// popping a toast — a toast draws the eye away from the row that was just
+// popping a toast, a toast draws the eye away from the row that was just
 // acted on, this keeps the feedback right where the click happened
 export function CopyMenuItem({
   value,
@@ -75,21 +69,20 @@ export function CopyMenuItem({
   copiedIcon = CheckmarkCircle02Icon,
 }: {
   value: string;
-  icon?: HugeIcon;
+  icon?: IconSvgElement;
   label: string;
   copiedLabel: string;
-  copiedIcon?: HugeIcon;
+  copiedIcon?: IconSvgElement;
 }) {
   const closeMenu = useRowMenuClose();
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard(COPY_FEEDBACK_MS);
 
   return (
     <DropdownMenuItem
-      onSelect={(event) => {
+      onSelect={async (event) => {
         event.preventDefault();
-        copyToClipboard(value);
-        setCopied(true);
-        setTimeout(closeMenu, COPY_FEEDBACK_MS);
+        const didCopy = await copy(value);
+        if (didCopy) setTimeout(closeMenu, COPY_FEEDBACK_MS);
       }}
     >
       <Icon icon={copied ? copiedIcon : icon} />
@@ -98,9 +91,8 @@ export function CopyMenuItem({
   );
 }
 
-// an explicit trailing "..." button column for row actions — no hidden
-// right-click/long-press gesture to discover, works the same on desktop and
-// mobile. Drop this inside a "buttons"-type CustomTableColumn
+// visible trailing "..." button for row actions, no hidden right click or long
+// press to discover, same on desktop and mobile. drop it in a buttons-type column
 export function RowMenu({
   children,
   ariaLabel,
@@ -108,7 +100,7 @@ export function RowMenu({
 }: {
   children: ReactNode;
   ariaLabel: string;
-  icon: HugeIcon;
+  icon: IconSvgElement;
 }) {
   const [open, setOpen] = useState(false);
 

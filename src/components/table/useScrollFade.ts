@@ -4,13 +4,10 @@ const SCROLL_FADE_SIZE = 32;
 
 const clampToUnit = (value: number) => Math.min(1, Math.max(0, value));
 
-// alpha-masks the scroll container itself (not an overlay) so the fade
-// blends correctly over striped/merged row backgrounds and the sticky
-// header alike. leftProgress/rightProgress (0-1) ramp up over the first
-// SCROLL_FADE_SIZE px of scroll instead of snapping on at 1px, so a tiny
-// scroll shows a faint fade and a bigger one shows the full fade.
-// the sticky checkbox column stays fully opaque — it never scrolls out of
-// view, so fading it would be misleading — the fade starts right after it
+// masks the scroll container itself instead of an overlay div, so the fade
+// looks right over striped rows and the sticky header. the fade ramps in over
+// the first SCROLL_FADE_SIZE px instead of snapping on at 1px. the sticky
+// checkbox column never fades (it never scrolls away), the fade starts after it
 function getScrollFadeMask(
   leftProgress: number,
   rightProgress: number,
@@ -23,16 +20,11 @@ function getScrollFadeMask(
   return `linear-gradient(to right, ${left}, ${right})`;
 }
 
-// horizontal scroll-shadow effect for the table's scroll container: tracks
-// scroll position (and the sticky checkbox column's width, which the fade
-// must start after) and produces a CSS mask-image. Re-measures on scroll,
-// on container resize, and whenever `remeasureKey` changes (pass something
-// that changes when the table's own content does, e.g. the visible rows
-// array) — that remeasure is a plain imperative call, not an effect keyed on
-// `remeasureKey`, since a caller re-deriving that value on every render
-// (an inline arrow function landing in a dependency array upstream, say)
-// would otherwise tear down and reattach the scroll/resize listeners every
-// single render instead of once
+// horizontal scroll fade for the table: tracks scroll position + the sticky
+// checkbox column width and spits out a css mask-image. remeasures on scroll,
+// on resize, and when `remeasureKey` changes. that last one is a plain call and
+// not an effect keyed on it, cuz a caller passing a fresh value every render
+// would otherwise reattach the listeners every single render (ew)
 export function useScrollFade(remeasureKey: unknown) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const checkboxColumnRef = useRef<HTMLTableCellElement>(null);
@@ -59,7 +51,7 @@ export function useScrollFade(remeasureKey: unknown) {
   }, []);
 
   // attaches the scroll/resize listeners once and keeps them for the scroll
-  // container's whole lifetime — this must not re-run on every render
+  // container's whole lifetime, this must not re-run on every render
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;
@@ -67,9 +59,8 @@ export function useScrollFade(remeasureKey: unknown) {
     updateScrollFade();
     scrollContainer.addEventListener("scroll", updateScrollFade);
 
-    // ResizeObserver isn't available on older browsers (e.g. Firefox < 69) —
-    // falling back to a window resize listener still catches viewport
-    // changes, just not container-only resizes, rather than crashing the effect
+    // old browsers (firefox < 69) have no ResizeObserver, a window resize listener
+    // still catches viewport changes, just not container-only ones
     if (typeof ResizeObserver === "undefined") {
       window.addEventListener("resize", updateScrollFade);
       return () => {
@@ -86,9 +77,8 @@ export function useScrollFade(remeasureKey: unknown) {
     };
   }, [updateScrollFade]);
 
-  // separate from listener setup above: just re-measures when the table's
-  // own content changes width (e.g. a row gets deleted), without tearing
-  // down and reattaching the scroll/resize listeners to do it
+  // just remeasures when the table content changes width (a row got deleted),
+  // without touching the listeners
   // biome-ignore lint/correctness/useExhaustiveDependencies: remeasureKey is a signal, not a value read here
   useEffect(() => {
     updateScrollFade();

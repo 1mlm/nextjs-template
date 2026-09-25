@@ -2,14 +2,12 @@ import { toast } from "sonner";
 
 const UNDO_WINDOW_MS = 5000;
 
-// defers the real mutation behind a toast's undo window instead of running
-// it immediately — if the tab closes before the window elapses, the
-// mutation simply never fires. that's the safe failure direction: a row
-// silently stays undeleted rather than being silently lost.
-//
-// this is the one place toasts belong in this app (see CLAUDE.md) — the row
-// itself just vanished from the table, so there's no inline element left to
-// show feedback next to, and undo needs a few seconds to be worth having
+// the real mutation waits behind the toast's undo window instead of running
+// right away. if the tab closes before that, it just never fires, which is the
+// safe way to fail (a row silently stays undeleted, never silently lost).
+// this is the one place toasts belong in the app (see the Toaster note in
+// layout.tsx): the row itself just vanished so there's nothing inline left to
+// show feedback next to, and undo needs a few seconds to be useful
 export function runUndoableAction({
   commit,
   onRevert,
@@ -21,23 +19,24 @@ export function runUndoableAction({
   message: string;
   undoLabel?: string;
 }) {
-  let undone = false;
-
+  // sonner pauses its own timer on hover but this one keeps going, so kill
+  // the toast first or undo stays clickable after the commit already ran
   const timer = setTimeout(async () => {
-    if (undone) return;
-    const result = await commit();
+    toast.dismiss(toastId);
+    const result = await commit().catch((error: unknown) => ({
+      error: error instanceof Error ? error.message : "Something went wrong",
+    }));
     if (result?.error) {
       onRevert();
       toast.error(result.error);
     }
   }, UNDO_WINDOW_MS);
 
-  toast.success(message, {
+  const toastId = toast.success(message, {
     duration: UNDO_WINDOW_MS,
     action: {
       label: undoLabel,
       onClick: () => {
-        undone = true;
         clearTimeout(timer);
         onRevert();
       },

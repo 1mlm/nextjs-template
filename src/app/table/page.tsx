@@ -16,11 +16,14 @@ import {
 } from "@hugeicons/core-free-icons";
 import { Suspense, useState } from "react";
 import { SearchBar } from "@/components/SearchBar";
+import { CustomTable } from "@/components/table/CustomTable";
 import {
-  CustomTable,
+  ColumnAlign,
+  ColumnType,
   type CustomTableColumn,
   type CustomTableEnumValue,
-} from "@/components/table/CustomTable";
+  StringFilterType,
+} from "@/components/table/columns";
 import { DeleteRowMenuItem } from "@/components/table/DeleteRowMenuItem";
 import { CopyMenuItem, RowMenu } from "@/components/table/RowMenu";
 import { useOptimisticRowRemoval } from "@/components/table/useOptimisticRowRemoval";
@@ -71,7 +74,7 @@ const LAST_NAMES = [
 ];
 const STATUSES = ["ACTIVE", "PENDING", "BANNED", undefined] as const;
 
-// fixed epoch, not Date.now() — a module-scope clock read differs between the
+// fixed epoch, not Date.now(), a module-scope clock read differs between the
 // server render and the client hydration and blows up as a mismatch
 const EPOCH = new Date("2026-07-27T12:00:00Z").getTime();
 
@@ -106,7 +109,7 @@ const columns: CustomTableColumn<Row>[] = [
     id: "id",
     label: "ID",
     icon: Key01Icon,
-    type: "string",
+    type: ColumnType.String,
     monospace: true,
     truncate: "middle",
     getString: (row) => row.id,
@@ -115,7 +118,7 @@ const columns: CustomTableColumn<Row>[] = [
     id: "name",
     label: "Name",
     icon: UserIcon,
-    type: "string",
+    type: ColumnType.String,
     getString: (row) => row.name,
     onClick: (row) => alert(`Clicked ${row.name}`),
   },
@@ -123,16 +126,16 @@ const columns: CustomTableColumn<Row>[] = [
     id: "email",
     label: "Email",
     icon: Mail01Icon,
-    type: "string",
+    type: ColumnType.String,
     getString: (row) => row.email,
   },
   {
     id: "credits",
     label: "Credits",
     icon: Coins01Icon,
-    type: "string",
-    align: "right",
-    filterType: "number",
+    type: ColumnType.String,
+    align: ColumnAlign.Right,
+    filterType: StringFilterType.Number,
     getString: (row) => row.credits.toLocaleString(),
     getNumber: (row) => row.credits,
   },
@@ -140,7 +143,7 @@ const columns: CustomTableColumn<Row>[] = [
     id: "status",
     label: "Status",
     icon: StarIcon,
-    type: "enum",
+    type: ColumnType.Enum,
     enumOptions: statusOptions,
     getValue: (row) => row.status,
     getPopoverContent: (row) => (
@@ -153,35 +156,35 @@ const columns: CustomTableColumn<Row>[] = [
     id: "labels",
     label: "Labels",
     icon: Tag01Icon,
-    type: "tags",
+    type: ColumnType.Tags,
     getTags: (row) => row.labels.map(toLabelTag),
   },
   {
     id: "verified",
     label: "Verified",
     icon: CheckmarkBadge02Icon,
-    type: "boolean",
+    type: ColumnType.Boolean,
     getBoolean: (row) => row.verified,
   },
   {
     id: "joinedAt",
     label: "Joined",
     icon: Calendar04Icon,
-    type: "date",
+    type: ColumnType.Date,
     getDate: (row) => row.joinedAt,
   },
   {
     id: "url",
     label: "Link",
     icon: Link01Icon,
-    type: "copy",
+    type: ColumnType.Copy,
     searchable: false,
     getString: (row) => row.url,
   },
 ];
 
-// CustomTable/SearchBar read the URL via nuqs (useSearchParams), which Next.js
-// requires a Suspense boundary around wherever it's statically prerendered
+// CustomTable/SearchBar read the url through nuqs (useSearchParams), and next
+// wants a suspense boundary around that on a static page or the build yells
 function TableDemo() {
   const [resultCount, setResultCount] = useState(ROWS.length);
   const { visibleItems, markRemoved, unmarkRemoved } = useOptimisticRowRemoval(
@@ -195,7 +198,7 @@ function TableDemo() {
       id: "actions",
       label: "Actions",
       icon: Delete02Icon,
-      type: "buttons",
+      type: ColumnType.Buttons,
       getButtons: (row) => (
         <RowMenu ariaLabel={`Actions for ${row.name}`} icon={MoreVerticalIcon}>
           <CopyMenuItem value={row.id} label="Copy ID" copiedLabel="Copied!" />
@@ -204,7 +207,7 @@ function TableDemo() {
             message={`${row.name} deleted`}
             onOptimisticRemove={() => markRemoved(row.id)}
             onRevert={() => unmarkRemoved(row.id)}
-            // demo only — nothing to actually persist to
+            // demo only, nothing to actually persist to
             commit={async () => ({ error: null })}
           />
         </RowMenu>

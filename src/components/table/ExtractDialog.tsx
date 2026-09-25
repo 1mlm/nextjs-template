@@ -1,7 +1,7 @@
 "use client";
 
 import ExcelJS from "exceljs";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Button } from "@/shadcn/ui/button";
 import {
   Dialog,
@@ -13,9 +13,11 @@ import {
 } from "@/shadcn/ui/dialog";
 import { Label } from "@/shadcn/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/shadcn/ui/radio-group";
-import { type CustomTableColumn, getColumnExportValue } from "./CustomTable";
-
-type ExportFormat = "excel" | "csv";
+import {
+  ColumnType,
+  type CustomTableColumn,
+  getColumnExportValue,
+} from "./columns";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -44,7 +46,7 @@ function downloadBlob(blob: Blob, filename: string) {
 
 function buildExportRows<T>(items: T[], columns: CustomTableColumn<T>[]) {
   const exportableColumns = columns.filter(
-    (column) => column.type !== "buttons",
+    (column) => column.type !== ColumnType.Buttons,
   );
   return items.map((item) =>
     Object.fromEntries(
@@ -56,10 +58,9 @@ function buildExportRows<T>(items: T[], columns: CustomTableColumn<T>[]) {
   );
 }
 
-async function downloadAsExcel(
-  rows: Record<string, string>[],
-  filename: string,
-) {
+type ExportRows = Record<string, string>[];
+
+async function downloadAsExcel(rows: ExportRows, filename: string) {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Sheet1");
   sheet.columns = Object.keys(rows[0] ?? {}).map((key) => ({
@@ -77,9 +78,9 @@ async function downloadAsExcel(
 }
 
 const escapeCsvValue = (value: string) =>
-  /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 
-function downloadAsCsv(rows: Record<string, string>[], filename: string) {
+function downloadAsCsv(rows: ExportRows, filename: string) {
   const headers = Object.keys(rows[0] ?? {});
   const lines = [
     headers,
@@ -96,6 +97,21 @@ function downloadAsCsv(rows: Record<string, string>[], filename: string) {
   );
 }
 
+const EXPORT_FORMATS: {
+  id: string;
+  label: string;
+  extension: string;
+  download: (rows: ExportRows, filename: string) => void | Promise<void>;
+}[] = [
+  {
+    id: "excel",
+    label: "Excel (.xlsx)",
+    extension: "xlsx",
+    download: downloadAsExcel,
+  },
+  { id: "csv", label: "CSV (.csv)", extension: "csv", download: downloadAsCsv },
+];
+
 export function ExtractDialog<T>({
   open,
   onOpenChange,
@@ -109,13 +125,17 @@ export function ExtractDialog<T>({
   columns: CustomTableColumn<T>[];
   filePrefix: string;
 }) {
-  const [format, setFormat] = useState<ExportFormat>("excel");
+  const [formatId, setFormatId] = useState(EXPORT_FORMATS[0].id);
+  const radioIdPrefix = useId();
 
   const handleConfirm = async () => {
-    const rows = buildExportRows(items, columns);
-    if (format === "excel")
-      await downloadAsExcel(rows, buildExportFilename(filePrefix, "xlsx"));
-    else downloadAsCsv(rows, buildExportFilename(filePrefix, "csv"));
+    const format =
+      EXPORT_FORMATS.find((option) => option.id === formatId) ??
+      EXPORT_FORMATS[0];
+    await format.download(
+      buildExportRows(items, columns),
+      buildExportFilename(filePrefix, format.extension),
+    );
     onOpenChange(false);
   };
 
@@ -130,18 +150,13 @@ export function ExtractDialog<T>({
             Choose a file format to download the selected rows.
           </DialogDescription>
         </DialogHeader>
-        <RadioGroup
-          value={format}
-          onValueChange={(value) => setFormat(value as ExportFormat)}
-        >
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="excel" id="extract-format-excel" />
-            <Label htmlFor="extract-format-excel">Excel (.xlsx)</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="csv" id="extract-format-csv" />
-            <Label htmlFor="extract-format-csv">CSV (.csv)</Label>
-          </div>
+        <RadioGroup value={formatId} onValueChange={setFormatId}>
+          {EXPORT_FORMATS.map(({ id, label }) => (
+            <div key={id} className="flex items-center gap-2">
+              <RadioGroupItem value={id} id={`${radioIdPrefix}-${id}`} />
+              <Label htmlFor={`${radioIdPrefix}-${id}`}>{label}</Label>
+            </div>
+          ))}
         </RadioGroup>
         <DialogFooter>
           <Button onClick={handleConfirm}>Confirm download</Button>

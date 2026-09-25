@@ -9,8 +9,8 @@ import {
   Forward02Icon,
   FullScreenIcon,
 } from "@hugeicons/core-free-icons";
-import { useState } from "react";
 import { Icon } from "@/components/Icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import { Badge } from "@/shadcn/ui/badge";
 import { Button } from "@/shadcn/ui/button";
 import {
@@ -21,9 +21,8 @@ import {
   DialogTrigger,
 } from "@/shadcn/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/shadcn/ui/tooltip";
 import { cn } from "@/shadcn/utils";
-import { copyToClipboard } from "@/utils/clipboard";
+import { useCopyToClipboard } from "@/utils/clipboard";
 import { getColorStyle } from "@/utils/color";
 import {
   formatDetailedDuration,
@@ -31,8 +30,12 @@ import {
   formatRelativeDate,
 } from "@/utils/date";
 import { CornerCountBadge } from "./CornerCountBadge";
-import type { CustomTableColumn, CustomTableEnumValue } from "./CustomTable";
 import { CustomTableEmptyValue } from "./CustomTableEmptyValue";
+import {
+  ColumnType,
+  type CustomTableColumn,
+  type CustomTableEnumValue,
+} from "./columns";
 
 export function EnumBadge({ value }: { value: CustomTableEnumValue }) {
   const badge = (
@@ -56,17 +59,17 @@ export function EnumBadge({ value }: { value: CustomTableEnumValue }) {
 }
 
 function CopyButton({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    copyToClipboard(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1000);
-  };
+  const { copied, copy } = useCopyToClipboard();
 
   return (
-    <Button variant="ghost" size="icon" className="size-6" onClick={handleCopy}>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="size-6"
+      onClick={() => copy(value)}
+    >
       <Icon icon={copied ? CheckIcon : Copy01Icon} />
+      <span className="sr-only">Copy</span>
     </Button>
   );
 }
@@ -187,12 +190,12 @@ export function CustomTableCell<T>({
   column: CustomTableColumn<T>;
   item: T;
 }) {
-  if (column.type === "string") {
+  if (column.type === ColumnType.String) {
     const value = column.getString(item);
     if (!value) return <CustomTableEmptyValue />;
     const content =
       column.truncate === "middle" ? (
-        <MiddleTruncatedText value={value} monospace={column.monospace} />
+        <MiddleTruncatedText {...{ value }} monospace={column.monospace} />
       ) : (
         <span className={cn(column.monospace && "font-mono text-xs")}>
           {value}
@@ -209,12 +212,12 @@ export function CustomTableCell<T>({
       </button>
     );
   }
-  if (column.type === "copy") {
+  if (column.type === ColumnType.Copy)
     return <CopyButton value={column.getString(item)} />;
-  }
-  if (column.type === "date") return <DateCell date={column.getDate(item)} />;
-  if (column.type === "buttons") return <>{column.getButtons(item)}</>;
-  if (column.type === "boolean") {
+  if (column.type === ColumnType.Date)
+    return <DateCell date={column.getDate(item)} />;
+  if (column.type === ColumnType.Buttons) return <>{column.getButtons(item)}</>;
+  if (column.type === ColumnType.Boolean)
     return column.getBoolean(item) ? (
       <div className="flex justify-center">
         <Icon icon={column.trueIcon ?? CheckIcon} className="text-green-500" />
@@ -222,9 +225,8 @@ export function CustomTableCell<T>({
     ) : (
       <CustomTableEmptyValue />
     );
-  }
 
-  if (column.type === "enum") {
+  if (column.type === ColumnType.Enum) {
     const value = column.getValue(item);
     const enumValue =
       value !== undefined ? column.enumOptions[value] : undefined;

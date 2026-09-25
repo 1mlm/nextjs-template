@@ -1,9 +1,9 @@
 "use client";
 
 import { Search02Icon } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 import { useQueryState } from "nuqs";
 import type { ReactNode } from "react";
-import type { HugeIcon } from "@/components/Icon";
 import { Icon } from "@/components/Icon";
 import {
   InputGroup,
@@ -12,16 +12,18 @@ import {
   InputGroupText,
 } from "@/shadcn/ui/input-group";
 
+export const DEFAULT_SEARCH_QUERY_KEY = "q";
+
 export function SearchBar({
   placeholder = "Search...",
   icon = Search02Icon,
   // pass a matching searchQueryKey to CustomTable when overriding this
-  queryKey = "q",
+  queryKey = DEFAULT_SEARCH_QUERY_KEY,
   trailing,
   className,
 }: {
   placeholder?: string;
-  icon?: HugeIcon;
+  icon?: IconSvgElement;
   queryKey?: string;
   // right-aligned slot, e.g. a "12 users" result count
   trailing?: ReactNode;

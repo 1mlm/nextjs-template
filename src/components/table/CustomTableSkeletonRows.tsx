@@ -1,7 +1,7 @@
 import { Skeleton } from "@/shadcn/ui/skeleton";
 import { TableCell, TableRow } from "@/shadcn/ui/table";
 import { cn } from "@/shadcn/utils";
-import type { CustomTableColumn } from "./CustomTable";
+import type { CustomTableColumn } from "./columns";
 
 const SKELETON_ROW_KEYS = Array.from({ length: 8 }, (_, i) => `skeleton-${i}`);
 

@@ -6,10 +6,9 @@ export function isValidNumberText(value: string): boolean {
   return trimmed !== "" && Number.isFinite(Number(trimmed));
 }
 
-// lets you type/cut/paste freely (raw string, no digit-by-digit validation)
-// - only turns the invalid outline on once the field is non-empty and NOT a
-// parsable number, so intermediate states like "-", "3.", or a mid-edit
-// selection never flash an error
+// type/cut/paste freely, it's just a string. the red outline only shows once
+// the text is non-empty and NOT a number, so halfway states like "-" or "3."
+// never flash an error mid typing
 export function NumberTextInput({
   value,
   onChange,
@@ -18,14 +17,13 @@ export function NumberTextInput({
   value: string;
   onChange: (raw: string) => void;
 } & Omit<ComponentProps<typeof Input>, "value" | "onChange" | "type">) {
-  const trimmed = value.trim();
-  const isInvalid = trimmed !== "" && !Number.isFinite(Number(trimmed));
+  const isInvalid = value.trim() !== "" && !isValidNumberText(value);
 
   return (
     <Input
       type="text"
       inputMode="decimal"
-      value={value}
+      {...{ value }}
       onChange={(e) => onChange(e.target.value)}
       aria-invalid={isInvalid}
       {...props}

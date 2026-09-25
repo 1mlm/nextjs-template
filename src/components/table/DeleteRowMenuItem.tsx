@@ -20,7 +20,7 @@ export function DeleteRowMenuItem({
   undoLabel?: string;
   onOptimisticRemove: () => void;
   onRevert: () => void;
-  commit: () => Promise<{ error: string | null } | undefined>;
+  commit: Parameters<typeof runUndoableAction>[0]["commit"];
 }) {
   return (
     <DropdownMenuItem

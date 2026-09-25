@@ -1,10 +1,7 @@
-// fixed-precision monospace rendering with the decimal point kept in a
-// constant position: trailing zeros beyond the significant digits are kept
-// in the DOM (so every row has identical character width and the decimal
-// points land in the same column) but rendered invisible, so "1.2" doesn't
-// visually show as "1.20000" next to "3.4567".
-// use inside a "buttons"-type CustomTableColumn to get this instead of the
-// plain string rendering a "string" column gives you
+// monospace number with the decimal point locked in place: trailing zeros stay
+// in the dom (so every row is the same width and the dots line up) but they're
+// invisible, so 1.2 doesn't read as 1.20000 next to 3.4567.
+// use it in a buttons-type column, a string column would just print the text
 export function AlignedNumber({
   value,
   decimals,

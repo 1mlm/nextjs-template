@@ -1,6 +1,6 @@
 import { Skeleton } from "@/shadcn/ui/skeleton";
 
-// mimics a stack of icon+text rows — an activity feed, an attendance list, a document row list
+// mimics a stack of icon+text rows, an activity feed, an attendance list, a document row list
 export function ListRowSkeleton({ count = 5 }: { count?: number }) {
   const rowKeys = Array.from({ length: count }, (_, i) => `row-${i}`);
   return (
@@ -31,10 +31,9 @@ export function CardGridSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
-// mimics a data table about to appear — a header bar plus a few row bars.
-// CustomTable has its own richer loading state (column-shaped skeleton
-// cells via its `loading` prop) - reach for this one only where a full
-// CustomTable isn't in play yet, e.g. a page-level Suspense fallback
+// a table about to show up, header bar + some row bars. CustomTable already has
+// its own column-shaped skeleton (`loading` prop), use this one where no
+// CustomTable is mounted yet, like a page-level suspense fallback
 export function TableBlockSkeleton({ rows = 6 }: { rows?: number }) {
   const rowKeys = Array.from({ length: rows }, (_, i) => `row-${i}`);
   return (
