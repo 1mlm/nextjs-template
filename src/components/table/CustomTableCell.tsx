@@ -1,16 +1,12 @@
 "use client";
 
 import {
-  Calendar04Icon,
   CheckIcon,
-  Clock01Icon,
-  CodeIcon,
   Copy01Icon,
-  Forward02Icon,
   FullScreenIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/Icon";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
+import { RelativeTime } from "@/components/RelativeTime";
 import { Badge } from "@/shadcn/ui/badge";
 import { Button } from "@/shadcn/ui/button";
 import {
@@ -24,11 +20,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover";
 import { cn } from "@/shadcn/utils";
 import { useCopyToClipboard } from "@/utils/clipboard";
 import { getColorStyle } from "@/utils/color";
-import {
-  formatDetailedDuration,
-  formatExactDate,
-  formatRelativeDate,
-} from "@/utils/date";
 import { CornerCountBadge } from "./CornerCountBadge";
 import { CustomTableEmptyValue } from "./CustomTableEmptyValue";
 import {
@@ -77,37 +68,7 @@ function CopyButton({ value }: { value: string }) {
 export function DateCell({ date }: { date: Date | undefined }) {
   if (!date) return <CustomTableEmptyValue />;
 
-  return (
-    <span className="font-normal italic inline-flex items-center gap-2 group/date">
-      {formatRelativeDate(date)}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            aria-label="Show exact date"
-            className="opacity-0 group-hover/date:opacity-100 focus-visible:opacity-100 transition-opacity"
-          >
-            <Icon icon={Clock01Icon} className="size-3" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent sideOffset={6} className="flex-col items-start gap-1">
-          <span className="inline-flex items-center gap-1.5">
-            <Icon icon={Calendar04Icon} />
-            {formatExactDate(date)}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Icon icon={Forward02Icon} />
-            {formatDetailedDuration(date)}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Icon icon={CodeIcon} />
-            <span className="font-semibold">Timestamp: </span>
-            {date.getTime()}
-          </span>
-        </TooltipContent>
-      </Tooltip>
-    </span>
-  );
+  return <RelativeTime {...{ date }} className="font-normal italic" />;
 }
 
 // keeps the start and a fixed-length tail visible, ellipsizing only the middle

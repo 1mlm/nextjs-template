@@ -179,7 +179,8 @@ export const OVERLAY_ITEMS: ShowcaseItem[] = [
   {
     name: "RelativeTime",
     path: "src/components/RelativeTime.tsx",
-    description: "relative date, hover for the exact one",
+    description:
+      "relative date, hover for the clock: exact date, elapsed time, timestamp. same one table date cells use",
     Demo: RelativeTimeDemo,
   },
 ];
