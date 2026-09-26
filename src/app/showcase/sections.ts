@@ -3,6 +3,7 @@ import { CHART_ITEMS } from "./charts";
 import { DATA_ITEMS } from "./data";
 import { FEEL_ITEMS } from "./feel";
 import { INPUT_ITEMS } from "./inputs";
+import { LOOK_ITEMS } from "./look";
 import { OVERLAY_ITEMS } from "./overlays";
 import { STATE_ITEMS } from "./states";
 
@@ -12,6 +13,7 @@ export const SHOWCASE_SECTIONS = [
   { title: "Inputs", items: INPUT_ITEMS },
   { title: "States & display", items: STATE_ITEMS },
   { title: "Feel (haptics, sound, confetti)", items: FEEL_ITEMS },
+  { title: "Look (shapes, emoji, fonts)", items: LOOK_ITEMS },
   { title: "Charts", items: CHART_ITEMS },
   { title: "Data & pages", items: DATA_ITEMS },
 ];

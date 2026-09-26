@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Calendar03Icon,
   CheckmarkCircle02Icon,
   Clock01Icon,
   FileAttachmentIcon,
@@ -27,11 +28,19 @@ import {
 import { EditableText } from "@/components/EditableText";
 import { FieldLabel } from "@/components/FieldLabel";
 import { FileDropZone } from "@/components/FileDropZone";
+import { Icon } from "@/components/Icon";
 import { NumberTextInput } from "@/components/NumberTextInput";
 import { SearchBar } from "@/components/SearchBar";
 import { SuggestionInput } from "@/components/SuggestionInput";
 import type { CustomTableEnumValue } from "@/components/table/columns";
 import { SegmentedPicker } from "@/components/table/SegmentedPicker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shadcn/ui/select";
 import type { ShowcaseItem } from "./ShowcaseCard";
 import { wait } from "./util";
 
@@ -247,7 +256,44 @@ function DateTimePickerDemo({ hour12 }: { hour12: boolean }) {
   return <DateTimePicker value={date} onChange={setDate} {...{ hour12 }} />;
 }
 
+const SEMESTERS = [
+  "Spring 2026",
+  "Summer Intersession 2026",
+  "Summer 2026",
+  "Fall 2026",
+  "Spring 2027",
+  "Summer 2027",
+];
+
+function CenteredSelectDemo() {
+  const [semester, setSemester] = useState("Summer 2026");
+  return (
+    <Select value={semester} onValueChange={setSemester}>
+      <SelectTrigger className="w-60">
+        <Icon icon={Calendar03Icon} />
+        <SelectValue />
+      </SelectTrigger>
+      {/* item-aligned opens the list with the picked option sitting right
+      where the trigger is, like a native mac menu, so your mouse is already on it */}
+      <SelectContent position="item-aligned">
+        {SEMESTERS.map((name) => (
+          <SelectItem key={name} value={name}>
+            {name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
 export const INPUT_ITEMS: ShowcaseItem[] = [
+  {
+    name: "Select (item-aligned)",
+    path: "shadcn/ui/select.tsx",
+    description:
+      "opens with the selected option right over the trigger and the others above and below it",
+    Demo: CenteredSelectDemo,
+  },
   {
     name: "SearchBar",
     path: "src/components/SearchBar.tsx",

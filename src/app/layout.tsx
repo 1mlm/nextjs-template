@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import { cookies } from "next/headers";
+import { env } from "@/env";
 import "@/shadcn/styles/globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { CSSProperties, PropsWithChildren } from "react";
@@ -49,8 +50,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   // page becomes the maintenance screen. on vercel env changes only apply to a
   // new deploy, so it's set + redeploy, then unset + redeploy. normal deploys
   // don't need any of this, they swap over with zero downtime
-  const isUnderMaintenance = process.env.MAINTENANCE_MODE === "true";
-  if (isUnderMaintenance)
+  if (env.MAINTENANCE_MODE)
     return (
       <html lang="en" className={outfit.className}>
         <body className="antialiased">

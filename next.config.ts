@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+// validates the env vars at build time too, not just on the first request
+import "./src/env";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
