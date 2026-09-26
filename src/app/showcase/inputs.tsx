@@ -168,6 +168,7 @@ function FileDropZoneDemo() {
   return (
     <FileDropZone
       accept="image/*,.pdf"
+      dropAnywhere
       icon={FileAttachmentIcon}
       label={fileName ?? "drop an image or pdf, or click"}
       onFile={(file) => setFileName(file.name)}
@@ -248,7 +249,8 @@ export const INPUT_ITEMS: ShowcaseItem[] = [
   {
     name: "FileDropZone",
     path: "src/components/FileDropZone.tsx",
-    description: "click or drag a file, accept is enforced for drops too",
+    description:
+      "click or drag a file, accept is enforced for drops too. dropAnywhere turns the whole page into the target (drag a file over this window)",
     Demo: FileDropZoneDemo,
   },
   {
