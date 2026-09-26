@@ -409,3 +409,79 @@
 [data-slot="slider-track"] {
   background-color: color-mix(in oklab, var(--foreground) 15%, transparent);
 }
+
+/* springy overlays. things arrive on a spring (fast start, a hair of
+   overshoot, settles) and leave quick with no bounce, a spring on the way
+   out just reads as lag. linear() is the spring baked into css, no js */
+:root {
+  --ease-spring: linear(
+    0,
+    0.0048,
+    0.0192 2.2%,
+    0.0764 4.6%,
+    0.3203 10.2%,
+    0.5541 15.2%,
+    0.7266 20.3%,
+    0.8438 25.4%,
+    0.9213 30.9%,
+    0.9689 37%,
+    0.9961 44.4%,
+    1.0073 52.8%,
+    1.0082 62.3%,
+    1.0025 81.3%,
+    1
+  );
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+:is(
+    [data-slot="dialog-content"],
+    [data-slot="popover-content"],
+    [data-slot="dropdown-menu-content"],
+    [data-slot="context-menu-content"],
+    [data-slot="sheet-content"],
+    [data-slot="tooltip-content"],
+    [data-slot="select-content"]
+  )[data-state="open"],
+[data-slot="tooltip-content"][data-state="delayed-open"] {
+  --tw-ease: var(--ease-spring);
+  --tw-duration: 320ms;
+}
+
+:is(
+    [data-slot="dialog-content"],
+    [data-slot="popover-content"],
+    [data-slot="dropdown-menu-content"],
+    [data-slot="context-menu-content"],
+    [data-slot="sheet-content"],
+    [data-slot="tooltip-content"],
+    [data-slot="select-content"]
+  )[data-state="closed"] {
+  --tw-ease: var(--ease-exit);
+  --tw-duration: 140ms;
+}
+
+/* small interface guideline stuff (rauno's list): no grey flash on tap in
+   mobile safari, no double tap zoom delay on controls, headings break into
+   even lines instead of leaving one lonely word, paragraphs avoid orphans */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  a,
+  label,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
