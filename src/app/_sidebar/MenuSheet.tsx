@@ -4,6 +4,7 @@ import {
   Cancel01Icon,
   Logout01Icon,
   MoreHorizontalIcon,
+  Search01Icon,
   SmartPhone01Icon,
 } from "@hugeicons/core-free-icons";
 import Link from "next/link";
@@ -22,6 +23,7 @@ import {
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { version } from "../../../package.json";
+import { useOpenCommandPalette } from "../_command/CommandPalette";
 import {
   APP_INFO,
   AppIcon,
@@ -30,6 +32,9 @@ import {
   LEGAL_LINKS,
   NAV_ITEMS,
 } from "./nav";
+
+const HEADER_BUTTON_CLASS =
+  "grid size-7 place-items-center rounded-full text-sidebar-foreground/60 ring-1 ring-sidebar-border transition-colors hover:text-sidebar-foreground active:scale-95";
 
 // chrome's "add to home screen" prompt, which it only offers once the
 // manifest checks out. safari never fires it, the button just never shows
@@ -74,6 +79,12 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const install = useInstallPrompt();
+  const openCommandPalette = useOpenCommandPalette();
+
+  const openSearch = () => {
+    setOpen(false);
+    openCommandPalette();
+  };
 
   const closeMenu = () => {
     triggerHaptic("selection");
@@ -112,12 +123,22 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
                 </span>
               </span>
             </span>
-            <DrawerClose
-              aria-label="Close menu"
-              className="grid size-7 place-items-center rounded-full text-sidebar-foreground/60 ring-1 ring-sidebar-border transition-colors hover:text-sidebar-foreground active:scale-95"
-            >
-              <Icon icon={Cancel01Icon} className="size-3.5" />
-            </DrawerClose>
+            <span className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Search"
+                onClick={openSearch}
+                className={HEADER_BUTTON_CLASS}
+              >
+                <Icon icon={Search01Icon} className="size-3.5" />
+              </button>
+              <DrawerClose
+                aria-label="Close menu"
+                className={HEADER_BUTTON_CLASS}
+              >
+                <Icon icon={Cancel01Icon} className="size-3.5" />
+              </DrawerClose>
+            </span>
           </div>
 
           <nav className="grid grid-cols-2 gap-1.5 [&>*:last-child:nth-child(odd)]:col-span-2">

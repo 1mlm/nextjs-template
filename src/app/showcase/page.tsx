@@ -1,26 +1,16 @@
 "use client";
 
-import { Suspense } from "react";
-import { BUTTON_ITEMS } from "./buttons";
-import { CHART_ITEMS } from "./charts";
-import { DATA_ITEMS } from "./data";
-import { FEEL_ITEMS } from "./feel";
-import { INPUT_ITEMS } from "./inputs";
-import { OVERLAY_ITEMS } from "./overlays";
+import { Suspense, useEffect } from "react";
 import { ShowcaseCard } from "./ShowcaseCard";
-import { STATE_ITEMS } from "./states";
-
-const SECTIONS = [
-  { title: "Buttons", items: BUTTON_ITEMS },
-  { title: "Overlays & forms", items: OVERLAY_ITEMS },
-  { title: "Inputs", items: INPUT_ITEMS },
-  { title: "States & display", items: STATE_ITEMS },
-  { title: "Feel (haptics, sound, confetti)", items: FEEL_ITEMS },
-  { title: "Charts", items: CHART_ITEMS },
-  { title: "Data & pages", items: DATA_ITEMS },
-];
+import { flashShowcaseCard, SHOWCASE_SECTIONS } from "./sections";
 
 export default function Page() {
+  // arriving from the command palette with /showcase#some-card
+  useEffect(() => {
+    const slug = window.location.hash.slice(1);
+    if (slug) flashShowcaseCard(slug);
+  }, []);
+
   return (
     // nuqs (SearchBar) reads search params, which needs a suspense boundary on a static page
     <Suspense>
@@ -31,7 +21,7 @@ export default function Page() {
             every component and util in this template, poke at them
           </p>
         </header>
-        {SECTIONS.map(({ title, items }) => (
+        {SHOWCASE_SECTIONS.map(({ title, items }) => (
           <section key={title} className="flex flex-col gap-4">
             <h2 className="text-lg font-medium">{title}</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

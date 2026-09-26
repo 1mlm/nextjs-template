@@ -7,6 +7,7 @@ import type { CSSProperties, PropsWithChildren } from "react";
 import { TooltipProvider } from "@/components/Tooltip";
 import { SidebarInset, SidebarProvider } from "@/shadcn/ui/sidebar";
 import { Toaster } from "@/shadcn/ui/sonner";
+import { CommandPaletteProvider } from "./_command/CommandPalette";
 import { Maintenance } from "./_maintenance/Maintenance";
 import { AppSidebar } from "./_sidebar/AppSidebar";
 import { MobileTopBar } from "./_sidebar/MobileTopBar";
@@ -62,11 +63,13 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         <NuqsAdapter>
           <TooltipProvider>
             <SidebarProvider defaultOpen={isSidebarOpen} style={SIDEBAR_SIZES}>
-              <AppSidebar />
-              <SidebarInset className="min-w-0 bg-muted md:m-2 md:ml-0 md:rounded-xl md:ring-1 md:ring-border">
-                <MobileTopBar />
-                {children}
-              </SidebarInset>
+              <CommandPaletteProvider>
+                <AppSidebar />
+                <SidebarInset className="min-w-0 bg-muted md:m-2 md:ml-0 md:rounded-xl md:ring-1 md:ring-border">
+                  <MobileTopBar />
+                  {children}
+                </SidebarInset>
+              </CommandPaletteProvider>
             </SidebarProvider>
           </TooltipProvider>
         </NuqsAdapter>

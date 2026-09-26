@@ -1,9 +1,10 @@
 "use client";
 
-import { SidebarLeftIcon } from "@hugeicons/core-free-icons";
+import { Search01Icon, SidebarLeftIcon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/Icon";
+import { Kbd } from "@/components/Kbd";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import { Badge } from "@/shadcn/ui/badge";
 import { Button } from "@/shadcn/ui/button";
@@ -15,6 +16,7 @@ import {
 } from "@/shadcn/ui/sidebar";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { useOpenCommandPalette } from "../_command/CommandPalette";
 import { NavLinkIcon } from "./NavLinkIcon";
 import { APP_INFO, AppIcon, getNavTransitionTypes, NAV_ITEMS } from "./nav";
 
@@ -64,6 +66,45 @@ function SidebarToggle() {
   );
 }
 
+const NAV_ROW_CLASS =
+  "flex h-8 items-center gap-2 overflow-hidden rounded-lg px-2 text-sm whitespace-nowrap outline-none transition-colors corner-squircle hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring";
+
+// looks like a nav row, opens the command palette (same as mod+k)
+function SearchRow() {
+  const openCommandPalette = useOpenCommandPalette();
+  const { state } = useSidebar();
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={openCommandPalette}
+          className={cn(
+            NAV_ROW_CLASS,
+            "w-full font-medium text-sidebar-foreground/70",
+          )}
+        >
+          <Icon icon={Search01Icon} className="size-4 shrink-0" />
+          <span className={FADE_ON_COLLAPSE}>Search</span>
+          <Kbd
+            keys={["mod", "k"]}
+            className={cn("ml-auto", FADE_ON_COLLAPSE)}
+          />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="right"
+        hidden={state !== "collapsed"}
+        className="flex items-center gap-2"
+      >
+        Search
+        <Kbd keys={["mod", "k"]} />
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function NavLinks() {
   const pathname = usePathname();
   const { state } = useSidebar();
@@ -80,7 +121,7 @@ function NavLinks() {
                 transitionTypes={getNavTransitionTypes(pathname, href)}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "flex h-8 items-center gap-2 overflow-hidden rounded-lg px-2 text-sm whitespace-nowrap outline-none transition-colors corner-squircle hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+                  NAV_ROW_CLASS,
                   isActive
                     ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground"
                     : "font-medium text-sidebar-foreground/70",
@@ -141,7 +182,8 @@ export function AppSidebar() {
           <SidebarToggle />
         </div>
       </SidebarHeader>
-      <SidebarContent className="px-3 py-2">
+      <SidebarContent className="gap-1 px-3 py-2">
+        <SearchRow />
         <NavLinks />
       </SidebarContent>
     </Sidebar>

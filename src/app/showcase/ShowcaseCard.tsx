@@ -6,6 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shadcn/ui/card";
+import { cn } from "@/shadcn/utils";
+import { getShowcaseSlug } from "./sections";
 
 export type ShowcaseItem = {
   name: string;
@@ -24,7 +26,10 @@ export function ShowcaseCard({
   Demo,
 }: ShowcaseItem) {
   return (
-    <Card className={wide ? "sm:col-span-2" : undefined}>
+    <Card
+      id={getShowcaseSlug(name)}
+      className={cn("scroll-mt-24", wide && "sm:col-span-2")}
+    >
       <CardHeader>
         <CardTitle className="font-mono text-sm">{name}</CardTitle>
         <CardDescription>{description}</CardDescription>

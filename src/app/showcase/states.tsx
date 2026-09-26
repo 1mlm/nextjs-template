@@ -9,6 +9,7 @@ import {
 import { EmptyState, EmptyStateVariant } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import { Icon } from "@/components/Icon";
+import { Kbd } from "@/components/Kbd";
 import { LabelTag } from "@/components/LabelTag";
 import { MarqueeText } from "@/components/MarqueeText";
 import {
@@ -84,6 +85,22 @@ export const STATE_ITEMS: ShowcaseItem[] = [
     Demo: () => (
       <div className="w-full">
         <TableBlockSkeleton rows={3} />
+      </div>
+    ),
+  },
+  {
+    name: "Kbd",
+    path: "src/components/Kbd.tsx",
+    description:
+      "shortcut chips, mod is ⌘ on macs and Ctrl elsewhere, hidden on touch. press mod+k for the command palette",
+    Demo: () => (
+      <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
+        <span className="flex items-center gap-2">
+          search anything <Kbd keys={["mod", "k"]} />
+        </span>
+        <span className="flex items-center gap-2">
+          toggle the sidebar <Kbd keys={["mod", "b"]} />
+        </span>
       </div>
     ),
   },
