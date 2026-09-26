@@ -112,6 +112,11 @@ function NavLinks() {
 }
 
 export function AppSidebar() {
+  const { isMobile } = useSidebar();
+  // phones have MobileTopBar, without this ctrl+b would open shadcn's own
+  // mobile sheet as a second competing menu
+  if (isMobile) return null;
+
   return (
     <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader className="p-3">

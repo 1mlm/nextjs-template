@@ -28,15 +28,18 @@ import {
 import { Input } from "@/shadcn/ui/input";
 import { getColorStyle, TAG_COLORS } from "@/utils/color";
 import type { ShowcaseItem } from "./ShowcaseCard";
-import { useIsClient, wait } from "./util";
+import { wait } from "./util";
 
 const PICKER_COLORS = TAG_COLORS.slice(0, 12);
 
 function ResponsivePopoverDemo() {
   const [picked, setPicked] = useState(PICKER_COLORS[0]);
+  const [open, setOpen] = useState(false);
 
   return (
     <ResponsivePopover
+      {...{ open }}
+      onOpenChange={setOpen}
       title="Pick a color"
       trigger={
         <Button variant="outline">
@@ -51,7 +54,10 @@ function ResponsivePopoverDemo() {
             key={color}
             type="button"
             aria-label={color}
-            onClick={() => setPicked(color)}
+            onClick={() => {
+              setPicked(color);
+              setOpen(false);
+            }}
             style={getColorStyle(color)}
             className="aspect-square rounded-lg corner-squircle ring-offset-2 ring-offset-popover data-[picked=true]:ring-2 data-[picked=true]:ring-foreground"
             data-picked={color === picked}
@@ -105,8 +111,6 @@ function FormDialogDemo() {
 }
 
 function RelativeTimeDemo() {
-  const isClient = useIsClient();
-  if (!isClient) return null;
   return (
     <span className="text-sm">
       edited <RelativeTime date={new Date(Date.now() - 35 * 60_000)} />
@@ -153,7 +157,7 @@ export const OVERLAY_ITEMS: ShowcaseItem[] = [
         <DialogTrigger asChild>
           <Button variant="outline">Open dialog</Button>
         </DialogTrigger>
-        <DialogContent className="overflow-visible pt-10">
+        <DialogContent className="md:overflow-visible md:pt-10">
           <DialogIconBadge icon={SparklesIcon} />
           <DialogHeader>
             <DialogTitle>Fancy dialog</DialogTitle>

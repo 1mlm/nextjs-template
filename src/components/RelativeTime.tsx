@@ -12,6 +12,7 @@ import {
   formatExactDate,
   formatRelativeDate,
 } from "@/utils/date";
+import { useIsClient } from "@/utils/useIsClient";
 
 // relative date, a clock shows up on hover with the exact date, the elapsed
 // duration and the raw timestamp. same thing inside and outside tables
@@ -22,6 +23,9 @@ export function RelativeTime({
   date: string | Date;
   className?: string;
 }) {
+  const isClient = useIsClient();
+  if (!isClient) return null;
+
   const target = new Date(date);
 
   return (

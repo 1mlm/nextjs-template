@@ -21,8 +21,8 @@ import {
   formatRelativeDate,
 } from "@/utils/date";
 import { safeLocalStorage } from "@/utils/storage";
+import { useIsClient } from "@/utils/useIsClient";
 import type { ShowcaseItem } from "./ShowcaseCard";
-import { useIsClient } from "./util";
 
 const DEMO_PAGES: { href: string; label: string; icon: IconSvgElement }[] = [
   { href: "/table", label: "CustomTable", icon: Table01Icon },
@@ -73,7 +73,7 @@ function LocalStorageDemo() {
 
   return (
     <Button variant="outline" onClick={bumpVisits}>
-      clicked {visits} times (survives a reload)
+      clicked {visits} {visits === 1 ? "time" : "times"} (survives a reload)
     </Button>
   );
 }
@@ -91,7 +91,13 @@ function ErrorPageDemo() {
 }
 
 function SidebarDemo() {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, isMobile } = useSidebar();
+  if (isMobile)
+    return (
+      <p className="text-center text-sm text-muted-foreground">
+        on phones it's the tab bar up top, widen the window for the sidebar
+      </p>
+    );
   return (
     <Button variant="outline" onClick={toggleSidebar}>
       <Icon icon={SidebarLeftIcon} />

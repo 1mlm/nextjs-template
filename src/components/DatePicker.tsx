@@ -14,7 +14,7 @@ import { triggerHaptic } from "@/utils/haptics";
 
 // bigger cells in the phone sheet, thumbs aren't cursors
 const CALENDAR_CLASS =
-  "[--cell-size:--spacing(10)] md:[--cell-size:--spacing(8)]";
+  "bg-transparent [--cell-size:--spacing(10)] md:[--cell-size:--spacing(8)]";
 
 const HOURS_12 = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 const HOURS_24 = Array.from({ length: 24 }, (_, i) => i);

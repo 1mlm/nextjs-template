@@ -295,3 +295,12 @@
 [data-slot="sidebar-inner"] {
   border-radius: var(--radius-xl);
 }
+
+/* shadcn's ghost hover wash beats the picked day's fill, so the day you just
+   clicked looked unpicked until the mouse moved off it */
+[data-slot="calendar"] [data-range-start="true"]:hover,
+[data-slot="calendar"] [data-range-end="true"]:hover,
+[data-slot="calendar"] [data-selected-single="true"]:hover {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}

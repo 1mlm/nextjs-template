@@ -136,7 +136,7 @@ const columns: CustomTableColumn<Row>[] = [
     type: ColumnType.String,
     align: ColumnAlign.Right,
     filterType: StringFilterType.Number,
-    getString: (row) => row.credits.toLocaleString(),
+    getString: (row) => row.credits.toLocaleString("en-US"),
     getNumber: (row) => row.credits,
   },
   {

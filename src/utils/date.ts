@@ -28,7 +28,7 @@ const getMonthDiff = (a: Date, b: Date) =>
   (a.getFullYear() - b.getFullYear()) * 12 + (a.getMonth() - b.getMonth());
 
 const dateToTimeString = (d: Date) =>
-  d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  d.toLocaleTimeString("en", { hour: "numeric", minute: "2-digit" });
 
 // 1st, 2nd, 3rd, 4th... 11th-13th stay "th" even though they end in 1/2/3
 const getOrdinalSuffix = (day: number) => {

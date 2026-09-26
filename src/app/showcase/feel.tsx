@@ -57,7 +57,11 @@ function UndoableDeleteDemo() {
         setDeleted(true);
         runUndoableAction({
           message: "Invoice deleted",
-          commit: async () => undefined,
+          // nothing real to delete, so the demo just rearms once it "committed"
+          commit: async () => {
+            setDeleted(false);
+            return undefined;
+          },
           onRevert: () => setDeleted(false),
         });
       }}
