@@ -89,7 +89,7 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
     const toggleOnShortcut = (event: KeyboardEvent) => {
       const isShortcut =
         event.key === OPEN_SHORTCUT_KEY && (event.metaKey || event.ctrlKey);
-      if (!isShortcut) return;
+      if (!isShortcut || event.repeat) return;
       event.preventDefault();
       setOpen((isOpen) => !isOpen);
     };

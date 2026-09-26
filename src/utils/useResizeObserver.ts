@@ -1,7 +1,8 @@
 import { type RefObject, useEffect, useEffectEvent } from "react";
 
 // calls onResize once on mount and again whenever any of the elements
-// changes size (content reflow, window resize, font load...)
+// changes size (content reflow, window resize, font load...). only elements
+// rendered on mount get watched, one that shows up later never will
 export function useResizeObserver(
   targets: RefObject<Element | null>[],
   onResize: () => void,

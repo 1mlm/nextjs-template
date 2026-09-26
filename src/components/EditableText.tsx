@@ -1,7 +1,7 @@
 "use client";
 
 import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ErrorTooltip } from "@/components/ErrorTooltip";
 import { Icon } from "@/components/Icon";
 import { cn } from "@/shadcn/utils";
@@ -29,7 +29,16 @@ export function EditableText({
   const isSaving = savingValue !== undefined;
   const shownValue = savingValue ?? value;
 
+  // enter and escape both just blur, blur is the one place editing ends.
+  // escape flags it first so that blur throws the draft away instead
+  const isCancelling = useRef(false);
+
   const save = async () => {
+    if (isCancelling.current) {
+      isCancelling.current = false;
+      setDraft(undefined);
+      return;
+    }
     const trimmedDraft = draft?.trim();
     setDraft(undefined);
     if (!trimmedDraft || trimmedDraft === value) return;
@@ -59,7 +68,9 @@ export function EditableText({
         onBlur={save}
         onKeyDown={(event) => {
           if (event.key === "Enter") event.currentTarget.blur();
-          if (event.key === "Escape") setDraft(undefined);
+          if (event.key !== "Escape") return;
+          isCancelling.current = true;
+          event.currentTarget.blur();
         }}
         className={cn(
           "-mx-1.5 rounded-md bg-muted px-1.5 outline-none ring-2 ring-ring/50 corner-squircle",

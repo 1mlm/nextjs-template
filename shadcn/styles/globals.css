@@ -244,7 +244,6 @@
     overflow-y: auto;
     border-radius: 1rem 1rem 0 0;
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-    --tw-duration: 200ms;
     --tw-enter-scale: 1;
     --tw-exit-scale: 1;
     --tw-enter-translate-y: 100%;
@@ -443,7 +442,10 @@
     [data-slot="tooltip-content"],
     [data-slot="select-content"]
   )[data-state="open"],
-[data-slot="tooltip-content"][data-state="delayed-open"] {
+[data-slot="tooltip-content"]:is(
+    [data-state="delayed-open"],
+    [data-state="instant-open"]
+  ) {
   --tw-ease: var(--ease-spring);
   --tw-duration: 320ms;
 }

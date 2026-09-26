@@ -54,6 +54,7 @@ export function HoldButton({
       onPointerDown={startHold}
       onPointerUp={cancelHold}
       onPointerLeave={cancelHold}
+      onPointerCancel={cancelHold}
       onKeyDown={(event) => {
         if (HOLD_KEYS.has(event.key) && !event.repeat) startHold();
       }}
