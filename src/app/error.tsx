@@ -66,7 +66,11 @@ export default function ErrorPage({
           <Icon icon={ArrowLeft01Icon} />
           Go back
         </Button>
-        <Button variant="ghost" onClick={handleCopyDetails}>
+        <Button
+          variant="ghost"
+          className="cursor-copy"
+          onClick={handleCopyDetails}
+        >
           <Icon icon={copied ? CheckIcon : Copy01Icon} />
           {copied ? "Copied" : "Copy details"}
         </Button>

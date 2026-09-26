@@ -16,6 +16,7 @@ import {
   Rocket01Icon,
   Settings02Icon,
   SparklesIcon,
+  Tick02Icon,
   UserAdd01Icon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
@@ -59,7 +60,10 @@ function ResponsivePopoverDemo() {
       icon={PaintBoardIcon}
       trigger={
         <Button variant="outline">
-          <Icon icon={PaintBoardIcon} />
+          <span
+            style={getColorStyle(picked)}
+            className="size-4 rounded-sm ring-2 ring-current corner-squircle"
+          />
           Color: {picked}
         </Button>
       }
@@ -75,9 +79,11 @@ function ResponsivePopoverDemo() {
               setOpen(false);
             }}
             style={getColorStyle(color)}
-            className="aspect-square rounded-lg corner-squircle ring-offset-2 ring-offset-popover data-[picked=true]:ring-2 data-[picked=true]:ring-foreground"
+            className="grid aspect-square place-items-center rounded-lg corner-squircle ring-offset-2 ring-offset-popover transition-[scale,box-shadow] duration-150 hover:scale-105 data-[picked=true]:scale-110 data-[picked=true]:shadow-[0_0_14px_2px_currentColor] data-[picked=true]:ring-2 data-[picked=true]:ring-current"
             data-picked={color === picked}
-          />
+          >
+            {color === picked && <Icon icon={Tick02Icon} className="size-5" />}
+          </button>
         ))}
       </div>
     </ResponsivePopover>

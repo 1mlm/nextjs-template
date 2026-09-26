@@ -222,7 +222,7 @@ function CopyEmailsButton({ rows }: { rows: Row[] }) {
   return (
     <Button
       variant="outline"
-      className="shadow-lg"
+      className="cursor-copy shadow-lg"
       onClick={() => copy(rows.map((row) => row.email).join(", "))}
     >
       <Icon icon={Copy01Icon} />

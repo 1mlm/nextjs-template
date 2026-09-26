@@ -13,7 +13,7 @@ export function Icon({
   return (
     <HugeiconsIcon
       icon={isLoading ? Loading01Icon : icon}
-      className={cn("size-[1em]", isLoading && "animate-spin", className)}
+      className={cn("size-[1em] shrink-0", isLoading && "animate-spin", className)}
       {...{ strokeWidth }}
       {...props}
     />

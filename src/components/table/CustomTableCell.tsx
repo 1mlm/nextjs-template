@@ -57,7 +57,7 @@ function CopyButton({ value }: { value: string }) {
     <Button
       variant="ghost"
       size="icon"
-      className="size-6"
+      className="size-6 cursor-copy"
       onClick={() => copy(value)}
     >
       <Icon icon={copied ? CheckIcon : Copy01Icon} />

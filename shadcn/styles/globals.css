@@ -180,6 +180,7 @@
   [data-slot="badge"],
   [data-slot="card"],
   [data-slot="popover-content"],
+  [data-slot="skeleton"],
   [data-slot="sidebar-inner"],
   [data-slot="sidebar-inset"] {
     @apply corner-squircle;
@@ -486,4 +487,42 @@
   p {
     text-wrap: pretty;
   }
+}
+
+/* cursors are part of the feel. while a page link is loading the whole app
+   shows the progress cursor and the clicked link can't be spammed */
+:root:has([data-nav-pending]) * {
+  cursor: progress !important;
+}
+a:has([data-nav-pending]) {
+  pointer-events: none;
+  opacity: 0.7;
+}
+button:has(> .animate-spin),
+[aria-busy="true"] {
+  cursor: progress;
+}
+input:disabled,
+textarea:disabled,
+[role="radio"][aria-disabled="true"],
+label:has(:disabled) {
+  cursor: not-allowed;
+}
+[data-slot="tooltip-trigger"]:not(button, a, [role="button"]) {
+  cursor: help;
+}
+[data-slot="slider-thumb"] {
+  cursor: grab;
+}
+[data-slot="slider-thumb"]:active {
+  cursor: grabbing;
+}
+
+/* emoji cursor for the fun buttons (confetti and friends), falls back to the
+   hand where data-uri cursors don't load */
+@utility cursor-party {
+  cursor:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='2' y='26' font-size='24'>🎉</text></svg>")
+      6 6,
+    pointer;
 }

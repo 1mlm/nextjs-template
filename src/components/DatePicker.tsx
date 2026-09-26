@@ -202,11 +202,14 @@ function WheelColumn({
       columnRef.current.scrollTop = selectedIndex * WHEEL_ITEM_HEIGHT_PX;
   }, [selectedIndex]);
 
-  const scrollToIndex = (index: number) =>
-    columnRef.current?.scrollTo({
-      top: index * WHEEL_ITEM_HEIGHT_PX,
-      behavior: "smooth",
-    });
+  // a tap picks right away, waiting on a smooth scroll to settle felt like
+  // wading through mud. the selectedIndex effect snaps the wheel after
+  const pickOption = (index: number) => {
+    const option = options[index];
+    if (!option || index === selectedIndex) return;
+    triggerHaptic("selection");
+    onSelect(option.date);
+  };
 
   const selectCenteredOptionOnceSettled = () => {
     window.clearTimeout(scrollSettleTimeout.current);
@@ -221,7 +224,7 @@ function WheelColumn({
       if (!centeredOption || centeredIndex === selectedIndex) return;
       triggerHaptic("selection");
       onSelect(centeredOption.date);
-    }, 120);
+    }, 80);
   };
 
   // lets the first and last option scroll up to the center line
@@ -251,7 +254,7 @@ function WheelColumn({
           aria-selected={index === selectedIndex}
           style={{ height: WHEEL_ITEM_HEIGHT_PX }}
           className="wheel-item flex w-full snap-center items-center justify-center text-sm tabular-nums aria-selected:font-medium"
-          onClick={() => scrollToIndex(index)}
+          onClick={() => pickOption(index)}
         >
           {label}
         </button>

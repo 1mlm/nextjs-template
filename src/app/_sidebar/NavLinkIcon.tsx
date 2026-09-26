@@ -14,5 +14,12 @@ export function NavLinkIcon({
   className: string;
 }) {
   const { pending } = useLinkStatus();
-  return <Icon {...{ icon, className }} isLoading={pending} />;
+  // data-nav-pending drives the page-wide progress cursor in globals.css
+  return (
+    <Icon
+      {...{ icon, className }}
+      isLoading={pending}
+      data-nav-pending={pending || undefined}
+    />
+  );
 }

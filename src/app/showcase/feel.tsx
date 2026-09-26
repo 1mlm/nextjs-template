@@ -76,7 +76,11 @@ function CopyDemo() {
   const { copied, copy } = useCopyToClipboard();
 
   return (
-    <Button variant="outline" onClick={() => copy("hello from the template")}>
+    <Button
+      variant="outline"
+      className="cursor-copy"
+      onClick={() => copy("hello from the template")}
+    >
       <Icon icon={copied ? CheckIcon : Copy01Icon} />
       {copied ? "Copied" : "Copy some text"}
     </Button>
@@ -123,7 +127,7 @@ export const FEEL_ITEMS: ShowcaseItem[] = [
     path: "src/utils/confetti.ts",
     description: "canvas-confetti burst, skipped for reduced motion",
     Demo: () => (
-      <Button onClick={triggerConfetti}>
+      <Button onClick={triggerConfetti} className="cursor-party">
         <Icon icon={PartyIcon} />
         Celebrate
       </Button>
