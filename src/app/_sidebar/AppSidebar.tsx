@@ -13,6 +13,7 @@ import {
   useSidebar,
 } from "@/shadcn/ui/sidebar";
 import { cn } from "@/shadcn/utils";
+import { triggerHaptic } from "@/utils/haptics";
 import { APP_INFO, AppIcon, NAV_ITEMS } from "./nav";
 
 // text stays mounted and never shrinks (fixed width + nowrap), it just fades
@@ -46,7 +47,10 @@ function SidebarToggle() {
         variant="ghost"
         size="icon"
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        onClick={toggleSidebar}
+        onClick={() => {
+          triggerHaptic("selection");
+          toggleSidebar();
+        }}
         className="text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
       >
         <Icon

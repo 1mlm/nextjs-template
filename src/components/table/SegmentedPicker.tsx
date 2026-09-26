@@ -3,6 +3,7 @@ import { Label } from "@/shadcn/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/shadcn/ui/radio-group";
 import { cn } from "@/shadcn/utils";
 import { getColorStyle } from "@/utils/color";
+import { triggerHaptic } from "@/utils/haptics";
 import type { CustomTableEnumValue } from "./columns";
 
 // a labeled-and-colored alternative to a plain RadioGroup, built on the same
@@ -34,7 +35,10 @@ export function SegmentedPicker<T extends string>({
   return (
     <RadioGroup
       value={value ?? ""}
-      onValueChange={onChange}
+      onValueChange={(next: T) => {
+        triggerHaptic("selection");
+        onChange(next);
+      }}
       {...{ name, disabled }}
       className={stacked ? "flex flex-col gap-2" : "grid grid-cols-3 gap-2"}
     >

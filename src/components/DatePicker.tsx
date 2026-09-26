@@ -10,6 +10,7 @@ import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { Button } from "@/shadcn/ui/button";
 import { Calendar } from "@/shadcn/ui/calendar";
 import { cn } from "@/shadcn/utils";
+import { triggerHaptic } from "@/utils/haptics";
 
 // bigger cells in the phone sheet, thumbs aren't cursors
 const CALENDAR_CLASS =
@@ -205,8 +206,9 @@ function WheelColumn({
         columnRef.current.scrollTop / WHEEL_ITEM_HEIGHT_PX,
       );
       const centeredOption = options[centeredIndex];
-      if (centeredOption && centeredIndex !== selectedIndex)
-        onSelect(centeredOption.date);
+      if (!centeredOption || centeredIndex === selectedIndex) return;
+      triggerHaptic("selection");
+      onSelect(centeredOption.date);
     }, 120);
   };
 

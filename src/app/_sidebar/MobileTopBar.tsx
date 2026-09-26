@@ -14,6 +14,7 @@ import {
   SheetTrigger,
 } from "@/shadcn/ui/sheet";
 import { cn } from "@/shadcn/utils";
+import { triggerHaptic } from "@/utils/haptics";
 import { APP_INFO, AppIcon, NAV_ITEMS } from "./nav";
 
 // phones get a top bar instead of the sidebar, the menu opens as a bottom
@@ -47,7 +48,10 @@ export function MobileTopBar() {
               <Link
                 key={href}
                 {...{ href }}
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  triggerHaptic("selection");
+                  setOpen(false);
+                }}
                 aria-current={pathname === href ? "page" : undefined}
                 className={cn(
                   "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium ring-1 transition-colors corner-squircle active:scale-[0.97]",
