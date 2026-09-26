@@ -480,6 +480,10 @@ function SortSubmenuContent({
   );
 }
 
+// a faint ghost-button fill so it reads as clickable before you ever hover it
+const HEADER_TRIGGER_CLASS =
+  "flex w-full justify-center rounded-md bg-foreground/4 px-3 py-1.5 text-foreground/70 transition-colors corner-squircle hover:bg-foreground/8 hover:text-foreground aria-expanded:bg-foreground/10 aria-expanded:text-foreground active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
+
 // radix menus eat arrow keys (left closes the submenu) and letters (typeahead
 // jumps focus to an item) even while you're typing in a filter input
 const keepTypingKeysInsideInputs = (event: KeyboardEvent) => {
@@ -521,12 +525,7 @@ export function CustomTableColumnHeader<T>({
     column.filterType === StringFilterType.Number;
 
   const label = (
-    <span
-      className={cn(
-        "inline-flex items-center justify-center gap-1.5",
-        (canFilter || canSort) && "transition-colors hover:text-foreground/70",
-      )}
-    >
+    <span className="inline-flex items-center justify-center gap-1.5">
       <Icon icon={column.icon} />
       {column.label}
       {hasActiveFilter && (
@@ -546,7 +545,17 @@ export function CustomTableColumnHeader<T>({
   );
 
   if (!canFilter && !canSort)
-    return <span className="inline-flex">{label}</span>;
+    return (
+      <span className="flex justify-center px-3 py-1.5 text-foreground/70">
+        {label}
+      </span>
+    );
+
+  const trigger = (
+    <button type="button" className={HEADER_TRIGGER_CLASS}>
+      {label}
+    </button>
+  );
 
   const filterContent = (
     <>
@@ -584,9 +593,7 @@ export function CustomTableColumnHeader<T>({
   if (isMobile)
     return (
       <Sheet>
-        <SheetTrigger asChild>
-          <button type="button">{label}</button>
-        </SheetTrigger>
+        <SheetTrigger asChild>{trigger}</SheetTrigger>
         <SheetContent
           side="bottom"
           className="max-h-[85dvh] gap-4 overflow-y-auto rounded-t-2xl p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
@@ -645,9 +652,7 @@ export function CustomTableColumnHeader<T>({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button type="button">{label}</button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent align="center" className="w-40">
         {canFilter && (
           <DropdownMenuSub>

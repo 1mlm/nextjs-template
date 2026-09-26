@@ -1,6 +1,7 @@
 import {
   CubeIcon,
   GridViewIcon,
+  Home01Icon,
   Table01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/Icon";
@@ -12,7 +13,8 @@ export const APP_INFO = {
 };
 
 export const NAV_ITEMS = [
-  { href: "/", label: "Showcase", icon: GridViewIcon },
+  { href: "/", label: "Home", icon: Home01Icon },
+  { href: "/showcase", label: "Showcase", icon: GridViewIcon },
   { href: "/table", label: "Table", icon: Table01Icon },
 ];
 

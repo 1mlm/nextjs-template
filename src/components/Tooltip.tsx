@@ -3,7 +3,9 @@
 import {
   type ComponentProps,
   createContext,
+  type RefObject,
   useContext,
+  useEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -12,8 +14,7 @@ import {
   Tooltip as TooltipPrimitive,
   TooltipTrigger as TooltipTriggerPrimitive,
 } from "@/shadcn/ui/tooltip";
-
-const TAP_TOOLTIP_VISIBLE_MS = 1600;
+import { triggerHaptic } from "@/utils/haptics";
 
 const HOVER_QUERY = "(hover: hover)";
 
@@ -31,36 +32,48 @@ const useHasHoverSupport = () =>
     () => true,
   );
 
-const TapTooltipContext = createContext<(() => void) | null>(null);
+const TapTooltipContext = createContext<{
+  toggle: () => void;
+  triggerRef: RefObject<HTMLSpanElement | null>;
+} | null>(null);
 
 // radix tooltips only open on hover/focus, and a tap on a phone gives you
 // neither (the label never shows or flashes for like one frame, so annoyingggg).
-// on touch devices the tap now also pops the tooltip for a bit before it
-// auto-hides, mouse devices get plain radix behavior untouched
+// on touch devices a tap toggles it and a tap anywhere else closes it, mouse
+// devices get plain radix behavior untouched
 export function Tooltip({
   children,
   ...props
 }: ComponentProps<typeof TooltipPrimitive>) {
   const hasHover = useHasHoverSupport();
   const [open, setOpen] = useState(false);
-  const dismissTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const triggerRef = useRef<HTMLSpanElement>(null);
+
+  // any tap outside the trigger closes it, like a popover
+  useEffect(() => {
+    if (!open) return;
+    const closeOnOutsideTap = (event: PointerEvent) => {
+      const isInsideTrigger =
+        event.target instanceof Node &&
+        triggerRef.current?.contains(event.target);
+      if (!isInsideTrigger) setOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideTap);
+    return () => document.removeEventListener("pointerdown", closeOnOutsideTap);
+  }, [open]);
 
   if (hasHover)
     return <TooltipPrimitive {...props}>{children}</TooltipPrimitive>;
 
-  const reveal = () => {
-    clearTimeout(dismissTimer.current);
-    setOpen(true);
-    dismissTimer.current = setTimeout(
-      () => setOpen(false),
-      TAP_TOOLTIP_VISIBLE_MS,
-    );
+  const toggle = () => {
+    triggerHaptic("selection");
+    setOpen((wasOpen) => !wasOpen);
   };
 
   return (
-    <TapTooltipContext.Provider value={reveal}>
+    <TapTooltipContext.Provider value={{ toggle, triggerRef }}>
       {/* no onOpenChange on purpose, radix's own click handler closes it right
-      after the tap opened it (so it just blinked lol), the timer owns open here */}
+      after the tap opened it (so it just blinked lol), this state owns open here */}
       <TooltipPrimitive {...props} {...{ open }}>
         {children}
       </TooltipPrimitive>
@@ -71,13 +84,17 @@ export function Tooltip({
 export function TooltipTrigger(
   props: ComponentProps<typeof TooltipTriggerPrimitive>,
 ) {
-  const reveal = useContext(TapTooltipContext);
-  if (!reveal) return <TooltipTriggerPrimitive {...props} />;
+  const tapTooltip = useContext(TapTooltipContext);
+  if (!tapTooltip) return <TooltipTriggerPrimitive {...props} />;
 
   // capture phase so it runs before the trigger's own onClick (which still
   // fires normally), `contents` keeps this span out of flex/gap layout
   return (
-    <span className="contents" onClickCapture={reveal}>
+    <span
+      ref={tapTooltip.triggerRef}
+      className="contents"
+      onClickCapture={tapTooltip.toggle}
+    >
       <TooltipTriggerPrimitive {...props} />
     </span>
   );

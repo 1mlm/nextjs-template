@@ -143,14 +143,18 @@ export function CustomTable<T>({
     <div className="rounded-md overflow-clip">
       <div
         ref={scrollContainerRef}
-        className="relative w-full max-h-[70vh] overflow-auto"
+        // fills the screen minus room for the page header above and the
+        // floating action bar below, instead of a fixed 70vh that left a gap
+        className="relative w-full max-h-[calc(100dvh-12rem)] overflow-auto"
         style={{ maskImage, WebkitMaskImage: maskImage }}
       >
         <table className="w-full caption-bottom text-sm">
           <TableHeader>
-            <TableRow className="*:sticky *:top-0 *:outline *:outline-border *:text-center *:text-xs *:bg-muted *:px-4">
+            {/* z-20 so positioned stuff inside body cells (tag count badges,
+            the sticky checkbox column) scrolls under the header, not over it */}
+            <TableRow className="*:sticky *:top-0 *:z-20 *:outline *:outline-border *:text-center *:text-xs *:bg-muted *:px-1">
               {selectable && (
-                <TableHead ref={checkboxColumnRef} className="left-0 z-20">
+                <TableHead ref={checkboxColumnRef} className="left-0 z-30 px-4">
                   <div className="flex justify-center pr-2!">
                     <Checkbox
                       checked={getTriState(

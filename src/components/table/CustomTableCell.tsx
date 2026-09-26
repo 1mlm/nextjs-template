@@ -5,6 +5,7 @@ import {
   Copy01Icon,
   FullScreenIcon,
 } from "@hugeicons/core-free-icons";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { RelativeTime } from "@/components/RelativeTime";
 import { Badge } from "@/shadcn/ui/badge";
@@ -105,21 +106,35 @@ function TagsCell({
   tags: CustomTableEnumValue[];
   itemLabel: string;
 }) {
-  const hasOverflow = tags.length > 2;
+  const tagsRef = useRef<HTMLDivElement>(null);
+  const [isClipped, setIsClipped] = useState(false);
   const badges = tags.map((tag) => <EnumBadge key={tag.label} value={tag} />);
+
+  // measured, not guessed from the tag count: a wide column fits 4 tags
+  // without clipping anything, a narrow one clips at 3
+  useEffect(() => {
+    const container = tagsRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(() =>
+      setIsClipped(container.scrollHeight > container.clientHeight + 1),
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <Dialog>
       <div className="relative">
         <div
+          ref={tagsRef}
           className={cn(
             "flex max-h-11 flex-wrap justify-center gap-1 overflow-hidden",
-            hasOverflow && "max-h-14 mask-b-from-60%",
+            isClipped && "mask-b-from-60%",
           )}
         >
           {badges}
         </div>
-        {hasOverflow && (
+        {isClipped && (
           <DialogTrigger asChild>
             <CornerCountBadge>
               {tags.length}

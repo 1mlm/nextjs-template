@@ -25,36 +25,39 @@ export function RelativeTime({
   const target = new Date(date);
 
   return (
-    <span
-      className={cn("group/date inline-flex items-center gap-2", className)}
-    >
-      {formatRelativeDate(target)}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            aria-label="Show exact date"
-            className="opacity-0 transition-opacity group-hover/date:opacity-100 focus-visible:opacity-100"
-          >
-            <Icon icon={Clock01Icon} className="size-3" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent sideOffset={6} className="flex-col items-start gap-1">
-          <span className="inline-flex items-center gap-1.5">
-            <Icon icon={Calendar04Icon} />
-            {formatExactDate(target)}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Icon icon={Forward02Icon} />
-            {formatDetailedDuration(target)}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Icon icon={CodeIcon} />
-            <span className="font-semibold">Timestamp: </span>
-            {target.getTime()}
-          </span>
-        </TooltipContent>
-      </Tooltip>
-    </span>
+    <Tooltip>
+      {/* the whole thing is the trigger so it's a real tap target on phones.
+      no hover there, so the clock just always shows */}
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "group/date inline-flex items-center gap-2 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+            className,
+          )}
+        >
+          {formatRelativeDate(target)}
+          <Icon
+            icon={Clock01Icon}
+            className="size-3 opacity-0 transition-opacity group-hover/date:opacity-100 group-focus-visible/date:opacity-100 pointer-coarse:opacity-100"
+          />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent sideOffset={6} className="flex-col items-start gap-1">
+        <span className="inline-flex items-center gap-1.5">
+          <Icon icon={Calendar04Icon} />
+          {formatExactDate(target)}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <Icon icon={Forward02Icon} />
+          {formatDetailedDuration(target)}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <Icon icon={CodeIcon} />
+          <span className="font-semibold">Timestamp: </span>
+          {target.getTime()}
+        </span>
+      </TooltipContent>
+    </Tooltip>
   );
 }

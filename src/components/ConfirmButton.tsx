@@ -8,6 +8,7 @@ import { MiniButton, MiniButtonTone } from "@/components/MiniButton";
 import { ResponsivePopover } from "@/components/ResponsivePopover";
 import { Button } from "@/shadcn/ui/button";
 import { Input } from "@/shadcn/ui/input";
+import { triggerHaptic } from "@/utils/haptics";
 
 // arm-then-confirm for destructive-ish stuff: the button opens a small popover
 // (bottom sheet on phones) where confirm stays locked for `holdSeconds`.
@@ -61,12 +62,15 @@ export function ConfirmButton({
   const locked = isHolding || textMismatch || disabled;
 
   async function handleConfirm() {
+    if (locked || pending) return;
     setPending(true);
     setError(null);
     try {
       await onConfirm();
+      triggerHaptic("success");
       setOpen(false);
     } catch (err) {
+      triggerHaptic("error");
       setError(
         err instanceof Error ? err.message : "Something went wrong, try again",
       );
@@ -82,43 +86,52 @@ export function ConfirmButton({
       onOpenChange={(next) => !pending && setOpen(next)}
       title={label}
       trigger={<MiniButton {...{ icon, label, tone, className }} />}
-      className="flex flex-col gap-2 max-md:px-4 max-md:pb-6 md:w-64"
+      className="max-md:px-4 max-md:pb-6 md:w-auto"
     >
-      {confirmText !== undefined && (
-        <Input
-          value={typedText}
-          onChange={(e) => setTypedText(e.target.value)}
-          onPaste={(e) => e.preventDefault()}
-          placeholder={confirmTextPlaceholder ?? `type "${confirmText}"`}
-          autoFocus
-        />
-      )}
-      <div className="flex justify-end gap-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={pending}
-          onClick={() => setOpen(false)}
-        >
-          Cancel
-        </Button>
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          disabled={locked || pending}
-          onClick={handleConfirm}
-          className="tabular-nums"
-        >
-          <Icon
-            icon={pending ? Loading03Icon : icon}
-            className={pending ? "animate-spin" : undefined}
+      {/* a form so the phone keyboard's enter/go key confirms too */}
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleConfirm();
+        }}
+        className="flex flex-col gap-2"
+      >
+        {confirmText !== undefined && (
+          <Input
+            value={typedText}
+            onChange={(e) => setTypedText(e.target.value)}
+            onPaste={(e) => e.preventDefault()}
+            placeholder={confirmTextPlaceholder ?? `type "${confirmText}"`}
+            enterKeyHint="done"
+            autoFocus
           />
-          {isHolding ? `Wait... ${secondsLeft}` : confirmLabel}
-        </Button>
-      </div>
-      {error && <span className="text-xs text-destructive">{error}</span>}
+        )}
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={pending}
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="destructive"
+            size="sm"
+            disabled={locked || pending}
+            className="tabular-nums"
+          >
+            <Icon
+              icon={pending ? Loading03Icon : icon}
+              className={pending ? "animate-spin" : undefined}
+            />
+            {isHolding ? `Wait... ${secondsLeft}` : confirmLabel}
+          </Button>
+        </div>
+        {error && <span className="text-xs text-destructive">{error}</span>}
+      </form>
     </ResponsivePopover>
   );
 }
