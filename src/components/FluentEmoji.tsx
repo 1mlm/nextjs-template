@@ -1,13 +1,15 @@
 "use client";
 
-import { type CSSProperties, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/shadcn/utils";
+import { type Color, recolorSvg } from "@/utils/color";
 
-// microsoft's 3D fluent emoji, straight from their github through jsdelivr
-// (static png, ~40kb) and the community animated set (apng, ~800kb so it
-// only loads on hover or when asked). adding one = adding a row: the name
-// exactly as on https://github.com/microsoft/fluentui-emoji/tree/main/assets
-// (any casing) and its folder in
+// microsoft's fluent emoji, straight from their github through jsdelivr: the
+// 3D png (~40kb), the community animated apng (~800kb so it only loads on
+// hover or when asked) and the flat "Color" svg, which is what a theme
+// recolors. adding one = adding a row: the name exactly as on
+// https://github.com/microsoft/fluentui-emoji/tree/main/assets (any casing)
+// and its folder in
 // https://github.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/tree/master/Emojis
 type FluentEmojiEntry = {
   name: string;
@@ -52,14 +54,18 @@ export const FLUENT_EMOJIS = {
 
 export type FluentEmojiId = keyof typeof FLUENT_EMOJIS;
 
-// "Red Heart" -> assets/Red heart/3D/red_heart_3d.png, the hands live one
-// folder deeper under their default (yellow) skin tone
-function getStaticEmojiUrl({ name, hasSkinTones }: FluentEmojiEntry) {
+// "Red Heart" + 3D -> assets/Red heart/3D/red_heart_3d.png, the hands live
+// one folder deeper under their default (yellow) skin tone
+function getMicrosoftEmojiUrl(
+  { name, hasSkinTones }: FluentEmojiEntry,
+  style: "3D" | "Color",
+) {
   const folder = name.charAt(0) + name.slice(1).toLowerCase();
-  const fileName = name.toLowerCase().replaceAll(" ", "_");
+  const fileName = `${name.toLowerCase().replaceAll(" ", "_")}_${style.toLowerCase()}`;
+  const extension = style === "3D" ? "png" : "svg";
   const path = hasSkinTones
-    ? `${folder}/Default/3D/${fileName}_3d_default.png`
-    : `${folder}/3D/${fileName}_3d.png`;
+    ? `${folder}/Default/${style}/${fileName}_default.${extension}`
+    : `${folder}/${style}/${fileName}.${extension}`;
   return encodeURI(
     `https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/${path}`,
   );
@@ -76,72 +82,100 @@ export enum EmojiAnimation {
   Always = "always",
 }
 
-// `tint` recolors it while keeping all the 3D shading: a color or gradient
-// laid on top with mix-blend-color, masked to the emoji's own silhouette.
-// "var(--color-green-500)" or "linear-gradient(135deg, #f0f, #0ff)" both work
+// each svg downloads once however many emoji on the page use it
+const svgRequests = new Map<string, Promise<string>>();
+function fetchSvg(url: string) {
+  const request =
+    svgRequests.get(url) ?? fetch(url).then((response) => response.text());
+  svgRequests.set(url, request);
+  return request;
+}
+
+const IMAGE_CLASS = "size-full object-contain select-none";
+
+// every fill and gradient stop in the flat svg gets moved to the theme's
+// hue, each one keeping its own lightness and colorfulness, so the shading
+// and highlights survive. drawn through an <img> so nothing in a fetched
+// file can ever run
+function ThemedEmoji({
+  entry,
+  theme,
+}: {
+  entry: FluentEmojiEntry;
+  theme: Color[];
+}) {
+  const [svg, setSvg] = useState<string>();
+  const url = getMicrosoftEmojiUrl(entry, "Color");
+  useEffect(() => {
+    fetchSvg(url).then(setSvg);
+  }, [url]);
+  if (!svg) return null;
+  const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(recolorSvg(svg, theme))}`;
+
+  return (
+    // biome-ignore lint/performance/noImgElement: a data uri svg, nothing for next/image to optimize
+    <img
+      {...{ src }}
+      alt={entry.name}
+      draggable={false}
+      className={IMAGE_CLASS}
+    />
+  );
+}
+
+// `theme` swaps the 3D look for the flat one recolored with tailwind colors:
+// ["green"] is all greens, ["orange", "fuchsia"] runs the dark parts orange
+// and the light parts pink. themed ones don't animate, there's no animated svg
 export function FluentEmoji({
   emoji,
   animation = EmojiAnimation.Hover,
-  tint,
+  theme,
   className,
 }: {
   emoji: FluentEmojiId;
   animation?: EmojiAnimation;
-  tint?: string;
+  theme?: Color[];
   className?: string;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const entry = FLUENT_EMOJIS[emoji];
-  const staticSrc = getStaticEmojiUrl(entry);
   const isAnimated =
-    animation === EmojiAnimation.Always ||
-    (animation === EmojiAnimation.Hover && isHovered);
-  const animatedSrc = getAnimatedEmojiUrl(entry);
-  // the tint follows whichever one is showing so it moves with the animation
-  const visibleSrc = isAnimated && isAnimationLoaded ? animatedSrc : staticSrc;
-  const tintStyle: CSSProperties = {
-    background: tint,
-    maskImage: `url("${visibleSrc}")`,
-    maskSize: "contain",
-  };
+    !theme &&
+    (animation === EmojiAnimation.Always ||
+      (animation === EmojiAnimation.Hover && isHovered));
 
   return (
     <span
-      className={cn(
-        "relative isolate inline-block size-12 shrink-0",
-        className,
-      )}
+      className={cn("relative inline-block size-12 shrink-0", className)}
       onPointerEnter={() => setIsHovered(true)}
       onPointerLeave={() => setIsHovered(false)}
     >
-      {/* biome-ignore lint/performance/noImgElement: remote cdn file, next/image would need remotePatterns and re-encoding kills the apng animation */}
-      <img
-        src={staticSrc}
-        alt={entry.name}
-        draggable={false}
-        className="size-full object-contain select-none"
-      />
+      {theme ? (
+        <ThemedEmoji {...{ entry, theme }} />
+      ) : (
+        // biome-ignore lint/performance/noImgElement: remote cdn file, next/image would need remotePatterns and re-encoding kills the apng animation
+        <img
+          src={getMicrosoftEmojiUrl(entry, "3D")}
+          alt={entry.name}
+          draggable={false}
+          className={IMAGE_CLASS}
+        />
+      )}
       {/* the animated one loads on top and only shows once it's all there,
       so the first hover doesn't blink to an empty box for a second */}
       {isAnimated && (
         // biome-ignore lint/performance/noImgElement: same as above
         <img
-          src={animatedSrc}
+          src={getAnimatedEmojiUrl(entry)}
           alt=""
           draggable={false}
           onLoad={() => setIsAnimationLoaded(true)}
           className={cn(
-            "absolute inset-0 size-full object-contain select-none",
+            IMAGE_CLASS,
+            "absolute inset-0",
             !isAnimationLoaded && "opacity-0",
           )}
-        />
-      )}
-      {tint && (
-        <span
-          aria-hidden
-          style={tintStyle}
-          className="absolute inset-0 mix-blend-color"
         />
       )}
     </span>

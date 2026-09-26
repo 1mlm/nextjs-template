@@ -2,6 +2,7 @@ import {
   CubeIcon,
   GridViewIcon,
   Home01Icon,
+  PuzzleIcon,
   Table01Icon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
@@ -34,6 +35,7 @@ export const NAV_ITEMS: {
   { href: "/", label: "Home", icon: Home01Icon },
   { href: "/showcase", label: "Showcase", icon: GridViewIcon },
   { href: "/table", label: "Table", icon: Table01Icon },
+  { href: "/blocks", label: "Blocks", icon: PuzzleIcon },
 ];
 
 const getNavIndex = (path: string) =>

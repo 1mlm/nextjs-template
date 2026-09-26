@@ -28,6 +28,7 @@ import { ScrollRow } from "@/components/ScrollRow";
 import { SquircleFuserContainer } from "@/components/SquircleFuser";
 import { cn } from "@/shadcn/utils";
 import { useCopyToClipboard } from "@/utils/clipboard";
+import { type Color, getColorSwatch } from "@/utils/color";
 import { triggerHaptic } from "@/utils/haptics";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
@@ -114,44 +115,44 @@ function FontsDemo() {
   );
 }
 
-const TINTS = [
-  { label: "Original", tint: undefined },
-  { label: "Green", tint: "var(--color-green-500)" },
-  {
-    label: "Sunset",
-    tint: "linear-gradient(135deg, var(--color-orange-500), var(--color-fuchsia-500))",
-  },
-  {
-    label: "Ocean",
-    tint: "linear-gradient(135deg, var(--color-cyan-400), var(--color-indigo-600))",
-  },
+const THEMES: { label: string; theme?: Color[] }[] = [
+  { label: "3D" },
+  { label: "Green", theme: ["green"] },
+  { label: "Sunset", theme: ["orange", "fuchsia"] },
+  { label: "Ocean", theme: ["indigo", "cyan"] },
+  { label: "Candy", theme: ["violet", "pink", "yellow"] },
 ];
 
 const EMOJI_IDS = Object.keys(FLUENT_EMOJIS) as FluentEmojiId[];
 
 function FluentEmojiDemo() {
-  const [tintLabel, setTintLabel] = useState(TINTS[0]?.label);
-  const { tint } = TINTS.find(({ label }) => label === tintLabel) ?? {};
+  const [themeLabel, setThemeLabel] = useState(THEMES[0]?.label);
+  const { theme } = THEMES.find(({ label }) => label === themeLabel) ?? {};
 
   return (
     <div className="flex w-full flex-col gap-3">
       <div className="flex flex-wrap gap-1.5">
-        {TINTS.map(({ label, tint: optionTint }) => (
+        {THEMES.map(({ label, theme: optionTheme }) => (
           <button
             key={label}
             type="button"
-            onClick={() => setTintLabel(label)}
+            onClick={() => setThemeLabel(label)}
             className={cn(
               "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm corner-squircle",
-              label === tintLabel
+              label === themeLabel
                 ? "bg-foreground text-background"
                 : "bg-muted hover:bg-muted-foreground/20",
             )}
           >
-            <span
-              className="size-3 rounded-full bg-muted-foreground"
-              style={{ background: optionTint }}
-            />
+            <span className="flex -space-x-1">
+              {optionTheme?.map((color) => (
+                <span
+                  key={color}
+                  style={{ background: getColorSwatch(color) }}
+                  className="size-3 rounded-full"
+                />
+              ))}
+            </span>
             {label}
           </button>
         ))}
@@ -160,7 +161,7 @@ function FluentEmojiDemo() {
         {EMOJI_IDS.map((emoji) => (
           <FluentEmoji
             key={emoji}
-            {...{ emoji, tint }}
+            {...{ emoji, theme }}
             className="size-full transition-transform hover:scale-125"
           />
         ))}
@@ -248,7 +249,7 @@ export const LOOK_ITEMS: ShowcaseItem[] = [
     name: "FluentEmoji",
     path: "src/components/FluentEmoji.tsx",
     description:
-      "microsoft's 3D emoji by name, animated on hover, recolored to any color or gradient keeping the shading",
+      "microsoft's 3D emoji by name, animated on hover. a theme recolors every color inside the flat version with your tailwind colors, shading kept",
     Demo: FluentEmojiDemo,
   },
   {
