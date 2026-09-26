@@ -5,7 +5,7 @@ import {
   Table01Icon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
-import { Icon } from "@/components/Icon";
+import { IconChip } from "@/components/IconChip";
 
 // the one place a fork renames the app and edits the sidebar links
 export const APP_INFO = {
@@ -52,8 +52,6 @@ export const getNavTransitionTypes = (
 
 export function AppIcon() {
   return (
-    <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-sidebar-foreground text-sidebar corner-squircle">
-      <Icon icon={CubeIcon} className="size-4" />
-    </span>
+    <IconChip icon={CubeIcon} className="bg-sidebar-foreground text-sidebar" />
   );
 }

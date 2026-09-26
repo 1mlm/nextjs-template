@@ -1,10 +1,11 @@
 "use client";
 
-import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { type CSSProperties, useRef, useState } from "react";
 
 type MarqueeVariables = CSSProperties & Record<`--${string}`, string>;
 
 import { cn } from "@/shadcn/utils";
+import { useResizeObserver } from "@/utils/useResizeObserver";
 
 // how fast the text slides, slow enough to actually read it
 const PIXELS_PER_SECOND = 40;
@@ -24,20 +25,12 @@ export function MarqueeText({
   const textRef = useRef<HTMLSpanElement>(null);
   const [overflowPx, setOverflowPx] = useState(0);
 
-  useEffect(() => {
+  useResizeObserver([containerRef, textRef], () => {
     const container = containerRef.current;
     const textElement = textRef.current;
     if (!container || !textElement) return;
-    const measure = () =>
-      setOverflowPx(
-        Math.max(0, textElement.scrollWidth - container.clientWidth),
-      );
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(container);
-    observer.observe(textElement);
-    return () => observer.disconnect();
-  }, []);
+    setOverflowPx(Math.max(0, textElement.scrollWidth - container.clientWidth));
+  });
 
   const isOverflowing = overflowPx > 1;
   const marqueeStyle: MarqueeVariables = {

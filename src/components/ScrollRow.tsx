@@ -1,9 +1,10 @@
 "use client";
 
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { cn } from "@/shadcn/utils";
+import { useResizeObserver } from "@/utils/useResizeObserver";
 
 const FADE_PX = 40;
 // how much of the visible width one arrow tap scrolls
@@ -33,29 +34,19 @@ export function ScrollRow({
   className?: string;
 }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [canScroll, setCanScroll] = useState({ left: false, right: false });
 
-  useEffect(() => {
+  const measureScrollEdges = () => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
-    const measure = () => {
-      const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
-      setCanScroll({
-        left: scroller.scrollLeft > 1,
-        right: scroller.scrollLeft < maxScrollLeft - 1,
-      });
-    };
-    measure();
-    scroller.addEventListener("scroll", measure, { passive: true });
-    const observer = new ResizeObserver(measure);
-    observer.observe(scroller);
-    if (scroller.firstElementChild)
-      observer.observe(scroller.firstElementChild);
-    return () => {
-      scroller.removeEventListener("scroll", measure);
-      observer.disconnect();
-    };
-  }, []);
+    const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+    setCanScroll({
+      left: scroller.scrollLeft > 1,
+      right: scroller.scrollLeft < maxScrollLeft - 1,
+    });
+  };
+  useResizeObserver([scrollerRef, contentRef], measureScrollEdges);
 
   const scrollToward = (side: ScrollSide) => {
     const scroller = scrollerRef.current;
@@ -81,10 +72,13 @@ export function ScrollRow({
     <div className={cn("relative min-w-0", className)}>
       <div
         ref={scrollerRef}
+        onScroll={measureScrollEdges}
         className="overflow-x-auto overscroll-x-contain [scrollbar-width:none]"
         style={{ maskImage: edgeMask, WebkitMaskImage: edgeMask }}
       >
-        <div className="flex w-max items-center gap-2">{children}</div>
+        <div ref={contentRef} className="flex w-max items-center gap-2">
+          {children}
+        </div>
       </div>
       {arrows.map(({ side, isVisible, icon }) => (
         <button

@@ -4,6 +4,7 @@ import { Tick02Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { Fragment } from "react";
 import { Icon } from "@/components/Icon";
+import { IconChip } from "@/components/IconChip";
 import { cn } from "@/shadcn/utils";
 
 export type StepperStep = {
@@ -99,17 +100,13 @@ export function Stepper({
                   }
                   className="group/step flex items-center gap-2 rounded-lg p-1 pr-2 corner-squircle enabled:cursor-pointer enabled:hover:bg-muted"
                 >
-                  <span
+                  <IconChip
+                    icon={state === StepState.Done ? Tick02Icon : step.icon}
                     className={cn(
-                      "grid size-8 shrink-0 place-items-center rounded-lg transition-all duration-300 corner-squircle",
+                      "transition-all duration-300",
                       STEP_CHIP_CLASS[state],
                     )}
-                  >
-                    <Icon
-                      icon={state === StepState.Done ? Tick02Icon : step.icon}
-                      className="size-4"
-                    />
-                  </span>
+                  />
                   <span
                     className={cn(
                       "text-sm whitespace-nowrap transition-colors",

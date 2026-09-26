@@ -11,6 +11,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
+import { IconChip } from "@/components/IconChip";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import { UserAvatar } from "@/components/UserAvatar";
 import {
@@ -168,9 +169,10 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
               onClick={install}
               className="flex items-center gap-2.5 rounded-lg bg-sidebar-accent p-2.5 text-left transition-colors corner-squircle active:scale-[0.98]"
             >
-              <span className="grid size-8 place-items-center rounded-lg bg-sidebar-foreground text-sidebar corner-squircle">
-                <Icon icon={SmartPhone01Icon} className="size-4" />
-              </span>
+              <IconChip
+                icon={SmartPhone01Icon}
+                className="bg-sidebar-foreground text-sidebar"
+              />
               <span className="leading-tight">
                 <p className="text-sm font-semibold">Install the app</p>
                 <p className="text-xs text-sidebar-foreground/60">
