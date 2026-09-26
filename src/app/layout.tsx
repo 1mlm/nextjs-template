@@ -9,6 +9,7 @@ import { SidebarInset, SidebarProvider } from "@/shadcn/ui/sidebar";
 import { Toaster } from "@/shadcn/ui/sonner";
 import { AppSidebar } from "./_sidebar/AppSidebar";
 import { MobileTopBar } from "./_sidebar/MobileTopBar";
+import { NewVersionToast } from "./NewVersionToast";
 
 const outfit = Outfit();
 
@@ -46,10 +47,12 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             </SidebarProvider>
           </TooltipProvider>
         </NuqsAdapter>
-        {/* barely ever use this. toasts are only for when the row itself
-        vanished and needs an undo window (see runUndoableAction), everything
+        {/* barely ever use this. toasts are only for when there's nothing on
+        screen to show feedback next to: a row that vanished and needs an undo
+        window (runUndoableAction) or a new deploy (NewVersionToast). everything
         else gets inline feedback right next to whatever you clicked */}
         <Toaster />
+        <NewVersionToast />
       </body>
     </html>
   );
