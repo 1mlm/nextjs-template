@@ -304,3 +304,73 @@
   background-color: var(--primary);
   color: var(--primary-foreground);
 }
+
+/* page transitions (the <ViewTransition> around {children} in layout.tsx).
+   old page leaves fast, new one arrives a bit slower so they don't fight.
+   the sidebar list is vertical so desktop slides vertically, the phone tab
+   bar is horizontal so phones slide sideways */
+:root {
+  --page-exit: 120ms;
+  --page-enter: 220ms;
+  --page-slide: 12px;
+  --page-axis-x: 0;
+  --page-axis-y: 1;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --page-axis-x: 1;
+    --page-axis-y: 0;
+  }
+}
+
+::view-transition-old(.nav-forward),
+::view-transition-old(.nav-back),
+::view-transition-old(.page-fade) {
+  animation: var(--page-exit) ease-in both page-leave;
+}
+
+::view-transition-new(.nav-forward),
+::view-transition-new(.nav-back),
+::view-transition-new(.page-fade) {
+  animation: var(--page-enter) ease-out var(--page-exit) both page-arrive;
+}
+
+::view-transition-old(.nav-forward) {
+  --page-offset: calc(var(--page-slide) * -1);
+}
+::view-transition-new(.nav-forward) {
+  --page-offset: var(--page-slide);
+}
+::view-transition-old(.nav-back) {
+  --page-offset: var(--page-slide);
+}
+::view-transition-new(.nav-back) {
+  --page-offset: calc(var(--page-slide) * -1);
+}
+
+@keyframes page-leave {
+  to {
+    opacity: 0;
+    filter: blur(2px);
+    translate: calc(var(--page-offset, 0px) * var(--page-axis-x))
+      calc(var(--page-offset, 0px) * var(--page-axis-y));
+  }
+}
+
+@keyframes page-arrive {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+    translate: calc(var(--page-offset, 0px) * var(--page-axis-x))
+      calc(var(--page-offset, 0px) * var(--page-axis-y));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

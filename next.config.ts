@@ -2,6 +2,18 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // lets <ViewTransition> in layout.tsx animate route changes
+    viewTransition: true,
+  },
+  // opening the dev server through a tunnel on a phone, without these the
+  // page loads but hot reload and server actions get blocked
+  allowedDevOrigins: [
+    "*.ngrok-free.app",
+    "*.ngrok.io",
+    "*.trycloudflare.com",
+    "*.loca.lt",
+  ],
   async headers() {
     return [
       {

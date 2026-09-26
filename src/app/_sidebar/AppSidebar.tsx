@@ -15,7 +15,13 @@ import {
 } from "@/shadcn/ui/sidebar";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
-import { APP_INFO, AppIcon, NAV_ITEMS, NavLinkIcon } from "./nav";
+import {
+  APP_INFO,
+  AppIcon,
+  getNavTransitionTypes,
+  NAV_ITEMS,
+  NavLinkIcon,
+} from "./nav";
 
 // text stays mounted and never shrinks (fixed width + nowrap), it just fades
 // while the sidebar clips it. collapsing fades out fast so the moving toggle
@@ -76,6 +82,7 @@ function NavLinks() {
             <TooltipTrigger asChild>
               <Link
                 {...{ href }}
+                transitionTypes={getNavTransitionTypes(pathname, href)}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "flex h-8 items-center gap-2 overflow-hidden rounded-lg px-2 text-sm whitespace-nowrap outline-none transition-colors corner-squircle hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",

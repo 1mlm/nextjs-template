@@ -37,6 +37,20 @@ export const NAV_ITEMS: {
   { href: "/table", label: "Table", icon: Table01Icon },
 ];
 
+const getNavIndex = (path: string) =>
+  NAV_ITEMS.findIndex(({ href }) => href === path);
+
+// going down the nav list slides the page forward, going back up slides it
+// back, so the motion matches where the link sits (see page transitions in
+// globals.css). pages outside the list just crossfade
+export const getNavTransitionTypes = (
+  currentPath: string,
+  targetHref: string,
+) =>
+  getNavIndex(targetHref) > getNavIndex(currentPath)
+    ? ["nav-forward"]
+    : ["nav-back"];
+
 // has to render inside the <Link>, that's where useLinkStatus reads the
 // pending navigation from. the dev server compiling a page can take seconds
 export function NavLinkIcon({

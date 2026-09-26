@@ -20,7 +20,14 @@ import {
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { version } from "../../../package.json";
-import { APP_INFO, AppIcon, DEMO_USER, LEGAL_LINKS, NAV_ITEMS } from "./nav";
+import {
+  APP_INFO,
+  AppIcon,
+  DEMO_USER,
+  getNavTransitionTypes,
+  LEGAL_LINKS,
+  NAV_ITEMS,
+} from "./nav";
 
 const getInitials = (name: string) =>
   name
@@ -84,6 +91,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
               <Link
                 key={href}
                 {...{ href }}
+                transitionTypes={getNavTransitionTypes(pathname, href)}
                 onClick={closeMenu}
                 aria-current={pathname === href ? "page" : undefined}
                 className={cn(

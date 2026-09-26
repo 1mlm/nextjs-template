@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { MenuSheet } from "./MenuSheet";
-import { NAV_ITEMS, NavLinkIcon } from "./nav";
+import { getNavTransitionTypes, NAV_ITEMS, NavLinkIcon } from "./nav";
 
 const MAX_TABS = 4;
 
@@ -29,6 +29,7 @@ export function MobileTopBar() {
         <Link
           key={href}
           {...{ href }}
+          transitionTypes={getNavTransitionTypes(pathname, href)}
           onClick={() => triggerHaptic("selection")}
           aria-current={pathname === href ? "page" : undefined}
           className={cn(
