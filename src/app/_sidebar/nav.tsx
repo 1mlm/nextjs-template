@@ -5,7 +5,6 @@ import {
   Table01Icon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
-import { useLinkStatus } from "next/link";
 import { Icon } from "@/components/Icon";
 
 // the one place a fork renames the app and edits the sidebar links
@@ -50,19 +49,6 @@ export const getNavTransitionTypes = (
   getNavIndex(targetHref) > getNavIndex(currentPath)
     ? ["nav-forward"]
     : ["nav-back"];
-
-// has to render inside the <Link>, that's where useLinkStatus reads the
-// pending navigation from. the dev server compiling a page can take seconds
-export function NavLinkIcon({
-  icon,
-  className,
-}: {
-  icon: IconSvgElement;
-  className: string;
-}) {
-  const { pending } = useLinkStatus();
-  return <Icon {...{ icon, className }} isLoading={pending} />;
-}
 
 export function AppIcon() {
   return (

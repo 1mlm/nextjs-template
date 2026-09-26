@@ -4,10 +4,11 @@ import {
   Cancel01Icon,
   Logout01Icon,
   MoreHorizontalIcon,
+  SmartPhone01Icon,
 } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import {
@@ -36,11 +37,40 @@ const getInitials = (name: string) =>
     .join("")
     .slice(0, 2);
 
+// chrome's "add to home screen" prompt, which it only offers once the
+// manifest checks out. safari never fires it, the button just never shows
+type InstallPromptEvent = Event & { prompt: () => Promise<void> };
+
+const isInstallPromptEvent = (event: Event): event is InstallPromptEvent =>
+  "prompt" in event;
+
+function useInstallPrompt() {
+  const [installEvent, setInstallEvent] = useState<InstallPromptEvent>();
+
+  useEffect(() => {
+    const keepPrompt = (event: Event) => {
+      if (!isInstallPromptEvent(event)) return;
+      event.preventDefault();
+      setInstallEvent(event);
+    };
+    const forgetPrompt = () => setInstallEvent(undefined);
+    window.addEventListener("beforeinstallprompt", keepPrompt);
+    window.addEventListener("appinstalled", forgetPrompt);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", keepPrompt);
+      window.removeEventListener("appinstalled", forgetPrompt);
+    };
+  }, []);
+
+  return installEvent;
+}
+
 // the sheet itself is transparent, the visible part is a card inset from the
 // screen edges so it floats instead of being glued to the bottom
 export function MenuSheet({ tabClassName }: { tabClassName: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const installEvent = useInstallPrompt();
 
   const closeMenu = () => {
     triggerHaptic("selection");
@@ -107,6 +137,23 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
             ))}
           </nav>
 
+          {installEvent && (
+            <button
+              type="button"
+              onClick={() => installEvent.prompt()}
+              className="flex items-center gap-2.5 rounded-lg bg-sidebar-accent p-2.5 text-left transition-colors corner-squircle active:scale-[0.98]"
+            >
+              <span className="grid size-8 place-items-center rounded-lg bg-sidebar-foreground text-sidebar corner-squircle">
+                <Icon icon={SmartPhone01Icon} className="size-4" />
+              </span>
+              <span className="leading-tight">
+                <p className="text-sm font-semibold">Install the app</p>
+                <p className="text-xs text-sidebar-foreground/60">
+                  opens from your home screen, no browser bars
+                </p>
+              </span>
+            </button>
+          )}
           <div className="flex items-center gap-2.5 rounded-lg p-2.5 ring-1 ring-sidebar-border corner-squircle">
             <span className="grid size-8 shrink-0 place-items-center rounded-full bg-sidebar-accent text-xs font-semibold">
               {getInitials(DEMO_USER.name)}

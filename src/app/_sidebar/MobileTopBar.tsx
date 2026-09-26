@@ -6,7 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { MenuSheet } from "./MenuSheet";
-import { getNavTransitionTypes, NAV_ITEMS, NavLinkIcon } from "./nav";
+import { NavLinkIcon } from "./NavLinkIcon";
+import { getNavTransitionTypes, NAV_ITEMS } from "./nav";
 
 const MAX_TABS = 4;
 
