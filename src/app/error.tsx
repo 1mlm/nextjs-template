@@ -4,7 +4,6 @@ import {
   ArrowLeft01Icon,
   CheckIcon,
   Copy01Icon,
-  Loading03Icon,
   RefreshIcon,
 } from "@hugeicons/core-free-icons";
 import { useEffect, useState } from "react";
@@ -60,10 +59,7 @@ export default function ErrorPage({
             reset();
           }}
         >
-          <Icon
-            icon={retrying ? Loading03Icon : RefreshIcon}
-            className={retrying ? "animate-spin" : undefined}
-          />
+          <Icon icon={RefreshIcon} isLoading={retrying} />
           Try again
         </Button>
         <Button variant="outline" onClick={() => window.history.back()}>

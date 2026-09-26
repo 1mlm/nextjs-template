@@ -1,6 +1,5 @@
 "use client";
 
-import { Loading03Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
@@ -123,10 +122,7 @@ export function ConfirmButton({
             disabled={locked || pending}
             className="tabular-nums"
           >
-            <Icon
-              icon={pending ? Loading03Icon : icon}
-              className={pending ? "animate-spin" : undefined}
-            />
+            <Icon {...{ icon }} isLoading={pending} />
             {isHolding ? `Wait... ${secondsLeft}` : confirmLabel}
           </Button>
         </div>

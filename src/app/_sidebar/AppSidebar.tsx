@@ -15,7 +15,7 @@ import {
 } from "@/shadcn/ui/sidebar";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
-import { APP_INFO, AppIcon, NAV_ITEMS } from "./nav";
+import { APP_INFO, AppIcon, NAV_ITEMS, NavLinkIcon } from "./nav";
 
 // text stays mounted and never shrinks (fixed width + nowrap), it just fades
 // while the sidebar clips it. collapsing fades out fast so the moving toggle
@@ -84,7 +84,7 @@ function NavLinks() {
                     : "font-medium text-sidebar-foreground/70",
                 )}
               >
-                <Icon {...{ icon }} className="size-4 shrink-0" />
+                <NavLinkIcon {...{ icon }} className="size-4 shrink-0" />
                 <span className={FADE_ON_COLLAPSE}>{label}</span>
                 {badge ? (
                   <Badge

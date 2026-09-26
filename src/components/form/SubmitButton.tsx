@@ -1,6 +1,5 @@
 "use client";
 
-import { Loading03Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import type { ComponentProps, ReactNode } from "react";
 import { Icon } from "@/components/Icon";
@@ -21,10 +20,7 @@ export function SubmitButton({
 }) {
   return (
     <Button type="submit" disabled={pending || disabled} {...props}>
-      <Icon
-        icon={pending ? Loading03Icon : icon}
-        className={pending ? "animate-spin" : undefined}
-      />
+      <Icon {...{ icon }} isLoading={pending} />
       {children}
     </Button>
   );

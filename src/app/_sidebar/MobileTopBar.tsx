@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Icon } from "@/components/Icon";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { MenuSheet } from "./MenuSheet";
-import { NAV_ITEMS } from "./nav";
+import { NAV_ITEMS, NavLinkIcon } from "./nav";
 
 const MAX_TABS = 4;
 
@@ -38,7 +37,7 @@ export function MobileTopBar() {
           )}
         >
           <span className="relative">
-            <Icon {...{ icon }} className="size-5" />
+            <NavLinkIcon {...{ icon }} className="size-5" />
             {badge ? (
               <span className="absolute -top-1.5 -right-2.5 grid h-4 min-w-4 place-items-center rounded-full bg-sidebar-accent px-1 text-[0.6rem] text-sidebar-accent-foreground">
                 {badge}
