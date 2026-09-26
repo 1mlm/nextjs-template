@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { MenuSheet } from "./MenuSheet";
@@ -17,14 +18,46 @@ const TAB_CLASS =
 const getTabItems = () =>
   NAV_ITEMS.length > MAX_TABS ? NAV_ITEMS.slice(0, MAX_TABS - 1) : NAV_ITEMS;
 
+// under this nothing hides, the page top always has the bar. the jitter
+// threshold ignores tiny scrolls (and ios rubber banding) flipping it back
+const ALWAYS_SHOWN_ABOVE_PX = 64;
+const SCROLL_JITTER_PX = 8;
+
+// like most phone apps, scrolling down to read tucks the bar away and any
+// scroll back up brings it right back
+function useIsHiddenWhileScrollingDown() {
+  const [isHidden, setIsHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const updateOnScroll = () => {
+      const scrollY = window.scrollY;
+      const delta = scrollY - lastScrollY.current;
+      if (Math.abs(delta) < SCROLL_JITTER_PX) return;
+      setIsHidden(delta > 0 && scrollY > ALWAYS_SHOWN_ABOVE_PX);
+      lastScrollY.current = scrollY;
+    };
+    window.addEventListener("scroll", updateOnScroll, { passive: true });
+    return () => window.removeEventListener("scroll", updateOnScroll);
+  }, []);
+
+  return isHidden;
+}
+
 // phones get a tab bar at the top instead of the sidebar, "More" opens the
 // full menu sheet (every page, profile, log out)
 export function MobileTopBar() {
   const pathname = usePathname();
   const tabItems = getTabItems();
+  const isHidden = useIsHiddenWhileScrollingDown();
 
   return (
-    <nav className="sticky top-2 z-20 m-2 flex rounded-2xl bg-sidebar/90 px-1 text-sidebar-foreground ring-1 ring-sidebar-border backdrop-blur-sm corner-squircle md:hidden">
+    <nav
+      className={cn(
+        "sticky top-2 z-20 m-2 flex rounded-2xl bg-sidebar/90 px-1 text-sidebar-foreground ring-1 ring-sidebar-border backdrop-blur-sm transition-transform duration-300 ease-out corner-squircle focus-within:translate-y-0 motion-reduce:transition-none md:hidden",
+        isHidden && "-translate-y-[calc(100%+1rem)]",
+      )}
+    >
       {tabItems.map(({ href, label, icon, badge }) => (
         <Link
           key={href}
