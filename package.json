@@ -7,9 +7,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "check": "tsc --noEmit",
+    "check": "next typegen && tsc --noEmit",
     "biome": "biome lint .",
-    "biome:fix": "biome check . --write"
+    "biome:fix": "biome check . --write",
+    "verify": "pnpm check && pnpm biome && next build"
   },
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.2.0",

@@ -11,6 +11,7 @@ import { CommandPaletteProvider } from "./_command/CommandPalette";
 import { Maintenance } from "./_maintenance/Maintenance";
 import { AppSidebar } from "./_sidebar/AppSidebar";
 import { MobileTopBar } from "./_sidebar/MobileTopBar";
+import { APP_INFO } from "./_sidebar/nav";
 import { NewVersionToast } from "./NewVersionToast";
 
 const outfit = Outfit();
@@ -34,7 +35,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Template Next.js App",
+  title: { default: APP_INFO.name, template: `%s · ${APP_INFO.name}` },
+  description: APP_INFO.description,
 };
 
 export default async function RootLayout({ children }: PropsWithChildren) {

@@ -1,6 +1,5 @@
 "use client";
 
-import ExcelJS from "exceljs";
 import { useId, useState } from "react";
 import { Button } from "@/shadcn/ui/button";
 import {
@@ -61,6 +60,8 @@ function buildExportRows<T>(items: T[], columns: CustomTableColumn<T>[]) {
 type ExportRows = Record<string, string>[];
 
 async function downloadAsExcel(rows: ExportRows, filename: string) {
+  // hundreds of kb, only fetched once someone actually exports an xlsx
+  const { default: ExcelJS } = await import("exceljs");
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Sheet1");
   sheet.columns = Object.keys(rows[0] ?? {}).map((key) => ({

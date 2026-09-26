@@ -10,17 +10,33 @@
 - [`Biome`](https://biomejs.dev/)
 - [`pnpm`](https://pnpm.io/)
 
-## Included components
+## Forking checklist
 
-Everything is on the home page (`src/app/page.tsx`, demos in `src/app/_showcase/`), one card per component, so run `pnpm dev` and poke at them.
+1. `src/app/_sidebar/nav.tsx`: `APP_INFO` (name + tagline, feeds the sidebar, tab title, manifest and link preview image), `NAV_ITEMS` (pages), `DEMO_USER` (swap for the real session user)
+2. `src/app/layout.tsx`: `viewport.themeColor` if the brand isn't black/white
+3. `src/app/_sidebar/drawAppIcon.tsx`: the app icon (install icons, apple icon, preview image all draw from it), plus `src/app/favicon.ico`
+4. `next.config.ts`: delete the `noindex` header once the site should show up on google
+5. delete the showcase (`src/app/showcase/`) and demo pages (`src/app/table/`) once you don't need the reference
+6. the license line at the bottom of this file
 
-- `CustomTable` (`src/components/table/`): filterable, sortable, paginated data table with xlsx/csv export ([`exceljs`](https://github.com/exceljs/exceljs)), columns typed with the `ColumnType` enum in `columns.ts`, full example in `src/app/table/page.tsx`
-- `src/components/charts/`: line charts and stat cards from [`bklit-ui`](https://ui.bklit.com/) (shadcn registry, don't hand-edit), see `src/app/stats/page.tsx`
-- `src/components/form/`: `FormDialog` + `useFormDialogAction` + `SubmitButton` + `FormError`
-- `ResponsivePopover` (popover on desktop, bottom sheet on phones), `Tooltip` (also opens on tap on touch devices)
-- UI atoms in `src/components/`: `Chip`, `ConfirmButton`, `DialogIconBadge`, `EmptyState`, `ErrorState`, `ErrorTooltip`, `FieldLabel`, `FileDropZone`, `Icon`, `LabelTag`, `MiniButton`, `NumberTextInput`, `PageSkeleton`, `RelativeTime`, `SearchBar`
-- `src/utils/`: clipboard, color hashing, confetti, date formatting, haptics ([`web-haptics`](https://github.com/lochie/web-haptics)), synthesized sounds, safe localStorage, undoable actions (sonner toast with undo)
-- `src/app/error.tsx` and `src/app/not-found.tsx`
+## What's in it
+
+Everything lives on `/showcase`, one card per component, so run `pnpm dev` and poke at them. `Ctrl/⌘ + K` finds any of them.
+
+- **App shell**: collapsible squircle sidebar, phone tab bar with a drag-to-close menu drawer, command palette, page transitions (view transitions), new-version toast, maintenance screen (`MAINTENANCE_MODE=true`), installable (manifest + generated icons)
+- **`CustomTable`** (`src/components/table/`): filters, sort, pagination, selection with bulk actions, editable cells, merged cells, pinned new rows, right-click row menu, xlsx/csv export, full example on `/table`
+- **Inputs**: `Combobox`, `MultiCombobox`, `SuggestionInput`, `EditableText`, date / range / date-time pickers, `NumberTextInput`, `FileDropZone`, `AvatarPicker` (crop + zoom), `SearchBar` (url synced)
+- **Buttons & overlays**: `ConfirmButton`, `HoldButton`, `MiniButton`, `SlidingTabs`, `ResponsivePopover` (popover on desktop, bottom sheet on phones), `LazyDialog`, `FormDialog`, `Stepper`, tooltips that open on tap
+- **Display**: `ReorderList`, `MarqueeText`, `ScrollRow`, `RelativeTime` (live), `Kbd`, `UserAvatar`, skeletons, empty/error states
+- **Charts** (`src/components/charts/`): line chart and sparkline stat card from [`bklit-ui`](https://ui.bklit.com/)
+- **Utils** (`src/utils/`): haptics ([`web-haptics`](https://github.com/lochie/web-haptics)), synthesized sounds, confetti, clipboard, dates, colors, safe localStorage, undoable actions, shared clock (`useNow`)
+
+## Scripts
+
+- `pnpm dev`
+- `pnpm check`: route types + typescript
+- `pnpm biome` / `pnpm biome:fix`
+- `pnpm verify`: all of the above plus a production build, same thing CI runs on every push
 
 ## Philosophy
 
