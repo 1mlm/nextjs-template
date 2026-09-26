@@ -403,3 +403,9 @@
     }
   }
 }
+
+/* shadcn's slider track is bg-muted, which vanishes on a dialog/popover in
+   dark mode (same grey), a faint foreground tint shows up on any surface */
+[data-slot="slider-track"] {
+  background-color: color-mix(in oklab, var(--foreground) 15%, transparent);
+}

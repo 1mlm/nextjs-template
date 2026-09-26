@@ -13,6 +13,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import { AvatarPicker } from "@/components/AvatarPicker";
 import {
   Combobox,
   type ComboboxOption,
@@ -144,6 +145,25 @@ function SuggestionInputDemo() {
   );
 }
 
+function AvatarPickerDemo() {
+  const [photoUrl, setPhotoUrl] = useState<string>();
+  return (
+    <div className="flex items-center gap-4">
+      <AvatarPicker
+        name="Jane Doe"
+        src={photoUrl}
+        onChange={(_blob, previewUrl) => setPhotoUrl(previewUrl)}
+      />
+      <div className="text-sm leading-tight">
+        <p className="font-semibold">Jane Doe</p>
+        <p className="text-muted-foreground">
+          {photoUrl ? "looking good" : "initials until you pick one"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function NumberTextInputDemo() {
   const [value, setValue] = useState("12.5");
 
@@ -239,6 +259,13 @@ export const INPUT_ITEMS: ShowcaseItem[] = [
     description:
       "free text with past values underneath, a datalist that respects the theme",
     Demo: SuggestionInputDemo,
+  },
+  {
+    name: "AvatarPicker + UserAvatar",
+    path: "src/components/AvatarPicker.tsx",
+    description:
+      "click the avatar, pick a photo, drag + zoom it into the circle. hands back a jpeg to upload",
+    Demo: AvatarPickerDemo,
   },
   {
     name: "NumberTextInput + FieldLabel",

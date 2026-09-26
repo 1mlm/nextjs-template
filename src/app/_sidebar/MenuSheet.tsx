@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
+import { UserAvatar } from "@/components/UserAvatar";
 import {
   Sheet,
   SheetClose,
@@ -29,13 +30,6 @@ import {
   LEGAL_LINKS,
   NAV_ITEMS,
 } from "./nav";
-
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2);
 
 // chrome's "add to home screen" prompt, which it only offers once the
 // manifest checks out. safari never fires it, the button just never shows
@@ -155,9 +149,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
             </button>
           )}
           <div className="flex items-center gap-2.5 rounded-lg p-2.5 ring-1 ring-sidebar-border corner-squircle">
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-sidebar-accent text-xs font-semibold">
-              {getInitials(DEMO_USER.name)}
-            </span>
+            <UserAvatar name={DEMO_USER.name} />
             <span className="min-w-0 flex-1 leading-tight">
               <p className="truncate text-sm font-semibold">{DEMO_USER.name}</p>
               <p className="truncate text-xs text-sidebar-foreground/60">
