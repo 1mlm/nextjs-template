@@ -8,11 +8,13 @@ import {
   Coins01Icon,
   Copy01Icon,
   Delete02Icon,
+  Image01Icon,
   Key01Icon,
   Link01Icon,
   Mail01Icon,
   MoreVerticalIcon,
   Note01Icon,
+  QuotesIcon,
   StarIcon,
   Tag01Icon,
   UserGroupIcon,
@@ -35,6 +37,7 @@ import { SortDirection } from "@/components/table/filtering";
 import { CopyMenuItem, RowMenu } from "@/components/table/RowMenu";
 import { useJustCreatedIds } from "@/components/table/useJustCreatedIds";
 import { useOptimisticRowRemoval } from "@/components/table/useOptimisticRowRemoval";
+import { UserAvatar } from "@/components/UserAvatar";
 import { Button } from "@/shadcn/ui/button";
 import { ContextMenuItem } from "@/shadcn/ui/context-menu";
 import { Input } from "@/shadcn/ui/input";
@@ -51,6 +54,7 @@ type Row = {
   verified: boolean;
   joinedAt: Date | undefined;
   labels: string[];
+  bio: string;
 };
 
 const statusOptions = {
@@ -87,6 +91,15 @@ const LAST_NAMES = [
 ];
 const STATUSES = ["ACTIVE", "PENDING", "BANNED", undefined] as const;
 const TEAMS = ["Design", "Engineering", "Growth", "Support"];
+// some short, some long, some with line breaks, so the clamp and the
+// expand-over-the-cell popover both get exercised
+const BIOS = [
+  "Coffee first.",
+  "Builds the design system by day, breaks it by night.\nLoves squircles more than circles.\nWill fight you about kerning.",
+  "",
+  "Ex-support, now growth. Knows every customer by name and most of their cats too, which is honestly a superpower in this line of work.",
+  "Ships on fridays.\nRegrets nothing.",
+];
 const NOTE_MAX_LENGTH = 20;
 
 // fixed epoch, not Date.now(), a module-scope clock read differs between the
@@ -108,6 +121,7 @@ const makeRow = (i: number): Row => {
     verified: i % 3 !== 0,
     joinedAt: i % 7 === 0 ? undefined : new Date(EPOCH - i * 36_000_000),
     labels,
+    bio: BIOS[i % BIOS.length] ?? "",
   };
 };
 
@@ -129,6 +143,15 @@ const toLabelTag = (label: string): CustomTableEnumValue => ({
 });
 
 const columns: CustomTableColumn<Row>[] = [
+  {
+    id: "avatar",
+    label: "Profile picture",
+    icon: Image01Icon,
+    iconOnly: true,
+    type: ColumnType.String,
+    getString: (row) => row.name,
+    render: (row) => <UserAvatar name={row.name} className="mx-auto size-7" />,
+  },
   {
     id: "id",
     label: "ID",
@@ -152,6 +175,14 @@ const columns: CustomTableColumn<Row>[] = [
     icon: Mail01Icon,
     type: ColumnType.String,
     getString: (row) => row.email,
+  },
+  {
+    id: "bio",
+    label: "Bio",
+    icon: QuotesIcon,
+    type: ColumnType.String,
+    longText: true,
+    getString: (row) => row.bio,
   },
   {
     id: "team",
@@ -291,7 +322,8 @@ function TableDemo() {
     {
       id: "actions",
       label: "Actions",
-      icon: Delete02Icon,
+      icon: MoreVerticalIcon,
+      iconOnly: true,
       type: ColumnType.Buttons,
       getButtons: (row) => (
         <RowMenu ariaLabel={`Actions for ${row.name}`} icon={MoreVerticalIcon}>

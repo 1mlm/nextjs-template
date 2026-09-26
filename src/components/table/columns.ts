@@ -37,6 +37,9 @@ export type CustomTableColumn<T> = {
   id: string;
   label: string;
   icon: IconSvgElement;
+  // header shows just the icon and the label moves into a tooltip, for skinny
+  // columns (a picture, a menu button) where the word would be wider than the content
+  iconOnly?: boolean;
   // tints the cell red, e.g. an editable cell holding an invalid value
   getCellError?: (item: T) => boolean;
 } & (
@@ -50,6 +53,9 @@ export type CustomTableColumn<T> = {
       getNumber?: (item: T) => number;
       // truncates the middle instead of the end, keeping both the start and the tail visible
       truncate?: "middle";
+      // keeps line breaks and wraps, clamped to a couple of lines. clicking a
+      // clipped one opens the full text glued over the cell
+      longText?: boolean;
       getString: (item: T) => string;
       // renders the value as a clickable button instead of plain text
       onClick?: (item: T) => void;

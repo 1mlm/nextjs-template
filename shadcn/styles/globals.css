@@ -181,6 +181,10 @@
   [data-slot="card"],
   [data-slot="popover-content"],
   [data-slot="skeleton"],
+  [data-slot="avatar"],
+  [data-slot="avatar"]::after,
+  [data-slot="avatar-image"],
+  [data-slot="avatar-fallback"],
   [data-slot="sidebar-inner"],
   [data-slot="sidebar-inset"] {
     @apply corner-squircle;

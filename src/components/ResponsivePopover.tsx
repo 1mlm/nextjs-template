@@ -1,10 +1,15 @@
 "use client";
 
 import type { IconSvgElement } from "@hugeicons/react";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ReactNode, RefObject } from "react";
 import { IconChip } from "@/components/IconChip";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shadcn/ui/popover";
 import {
   Sheet,
   SheetContent,
@@ -28,6 +33,8 @@ export function ResponsivePopover({
   icon,
   side = "bottom",
   align = "center",
+  sideOffset,
+  anchorRef,
   children,
   className,
 }: {
@@ -38,6 +45,9 @@ export function ResponsivePopover({
   icon: IconSvgElement;
   side?: PopoverContentProps["side"];
   align?: PopoverContentProps["align"];
+  sideOffset?: number;
+  // pin the popover to this element instead of the trigger (desktop only)
+  anchorRef?: RefObject<HTMLElement | null>;
   children: ReactNode;
   className?: string;
 }) {
@@ -64,7 +74,21 @@ export function ResponsivePopover({
   return (
     <Popover {...{ open, onOpenChange }}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent {...{ side, align, className }} aria-label={title}>
+      {anchorRef && (
+        // radix wants a ref that's never null, this one reads the element late
+        <PopoverAnchor
+          virtualRef={{
+            current: {
+              getBoundingClientRect: () =>
+                anchorRef.current?.getBoundingClientRect() ?? new DOMRect(),
+            },
+          }}
+        />
+      )}
+      <PopoverContent
+        {...{ side, align, sideOffset, className }}
+        aria-label={title}
+      >
         {children}
       </PopoverContent>
     </Popover>

@@ -48,27 +48,37 @@ const NO_SORT: NonNullable<CustomTableSort>[] = [];
 const NO_PINNED_IDS: string[] = [];
 
 // opaque mixes over the page surface, not translucent bg-x/15: the sticky
-// checkbox cell repaints the row color on itself and a see-through one showed
-// the other columns sliding underneath it
-// (the hover: twins keep shadcn's row hover wash from hiding the tint)
-const ROW_BACKGROUNDS = {
+// checkbox cell repaints the row color on itself (bg-inherit) and a
+// see-through one showed the other columns sliding underneath it.
+// colors live in css vars so a hovered merged cell can put its first row
+// back to the resting color (it's that row's child, so it'd light it up)
+const ROW_COLORS = {
   selected:
-    "bg-[color-mix(in_oklch,var(--muted),var(--color-green-500)_15%)] hover:bg-[color-mix(in_oklch,var(--muted),var(--color-green-500)_20%)]",
+    "[--row-bg:color-mix(in_oklch,var(--muted),var(--color-green-500)_15%)] [--row-hover-bg:color-mix(in_oklch,var(--muted),var(--color-green-500)_20%)]",
   pinned:
-    "bg-[color-mix(in_oklch,var(--muted),var(--color-amber-400)_12%)] hover:bg-[color-mix(in_oklch,var(--muted),var(--color-amber-400)_17%)]",
-  striped: "bg-[color-mix(in_oklch,var(--muted),var(--foreground)_5%)]",
-  plain: "bg-muted",
+    "[--row-bg:color-mix(in_oklch,var(--muted),var(--color-amber-400)_12%)] [--row-hover-bg:color-mix(in_oklch,var(--muted),var(--color-amber-400)_17%)]",
+  striped:
+    "[--row-bg:color-mix(in_oklch,var(--muted),var(--foreground)_5%)] [--row-hover-bg:color-mix(in_oklch,var(--muted),var(--foreground)_9%)]",
+  plain:
+    "[--row-bg:var(--muted)] [--row-hover-bg:color-mix(in_oklch,var(--muted),var(--foreground)_4%)]",
 };
 
-const getRowBackground = (
+const getRowColors = (
   isSelected: boolean,
   isPinned: boolean,
   index: number,
 ) => {
-  if (isSelected) return ROW_BACKGROUNDS.selected;
-  if (isPinned) return ROW_BACKGROUNDS.pinned;
-  return index % 2 === 1 ? ROW_BACKGROUNDS.striped : ROW_BACKGROUNDS.plain;
+  if (isSelected) return ROW_COLORS.selected;
+  if (isPinned) return ROW_COLORS.pinned;
+  return index % 2 === 1 ? ROW_COLORS.striped : ROW_COLORS.plain;
 };
+
+const ROW_CLASS =
+  "group/row bg-(--row-bg) hover:bg-(--row-hover-bg) has-[>[data-merged]:hover]:bg-(--row-bg)";
+// a merged cell spans rows with different stripes, so it gets its own
+// stronger grey and real borders to read as one grouped block
+const MERGED_CELL_CLASS =
+  "border-x border-b border-border bg-[color-mix(in_oklch,var(--muted),var(--foreground)_10%)] align-top font-medium hover:bg-[color-mix(in_oklch,var(--muted),var(--foreground)_14%)]";
 
 export function CustomTable<T>({
   items,
@@ -252,7 +262,7 @@ export function CustomTable<T>({
                 paginatedItems.map((item, index) => {
                   const id = getItemId(item);
                   const isPinned = pinnedItemIds.includes(id);
-                  const rowBackground = getRowBackground(
+                  const rowColors = getRowColors(
                     selectedIds.has(id),
                     isPinned,
                     index,
@@ -273,13 +283,12 @@ export function CustomTable<T>({
                         animate={{ opacity: 1, y: 0 }}
                         exit={hasMergedCells ? undefined : ROW_EXIT}
                         transition={ROW_SPRING}
-                        className={cn("group/row", rowBackground)}
+                        className={cn(ROW_CLASS, rowColors)}
                       >
                         {selectable && (
                           <TableCell
                             className={cn(
-                              "sticky left-0 z-10 border-r border-border/50 text-center",
-                              rowBackground,
+                              "sticky left-0 z-10 border-r border-border/50 bg-inherit text-center",
                             )}
                           >
                             <div className="flex justify-center pr-2!">
@@ -302,6 +311,7 @@ export function CustomTable<T>({
                               key={column.id}
                               data-column-id={column.id}
                               rowSpan={isMergedCell ? run.length : undefined}
+                              data-merged={isMergedCell || undefined}
                               className={cn(
                                 "border-r border-border/50 last:border-r-0",
                                 column.type === ColumnType.String &&
@@ -309,13 +319,20 @@ export function CustomTable<T>({
                                   "text-right",
                                 CENTERED_COLUMN_TYPES.has(column.type) &&
                                   "text-center",
-                                isMergedCell &&
-                                  "border-b border-b-border bg-muted/60 align-top font-medium",
+                                isMergedCell && MERGED_CELL_CLASS,
                                 column.getCellError?.(item) &&
                                   "bg-destructive/10 shadow-[inset_0_0_0_1px_var(--destructive)]",
                               )}
                             >
-                              <CustomTableCell {...{ column, item }} />
+                              {isMergedCell ? (
+                                // the group name rides along under the sticky
+                                // header while you scroll through a tall group
+                                <div className="sticky top-12">
+                                  <CustomTableCell {...{ column, item }} />
+                                </div>
+                              ) : (
+                                <CustomTableCell {...{ column, item }} />
+                              )}
                             </TableCell>
                           );
                         })}

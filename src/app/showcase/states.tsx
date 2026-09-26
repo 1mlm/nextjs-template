@@ -2,9 +2,12 @@
 
 import {
   CheckmarkCircle02Icon,
+  Clock01Icon,
   File02Icon,
   InboxIcon,
+  RefreshIcon,
   Tag01Icon,
+  UnavailableIcon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { EmptyState, EmptyStateVariant } from "@/components/EmptyState";
@@ -14,7 +17,10 @@ import { Kbd } from "@/components/Kbd";
 import { LabelTag } from "@/components/LabelTag";
 import { MarqueeText } from "@/components/MarqueeText";
 import {
+  CARD_GRID_CLASS,
+  CARD_HEIGHT_CLASS,
   CardGridSkeleton,
+  ListRow,
   ListRowSkeleton,
   TableBlockSkeleton,
 } from "@/components/PageSkeleton";
@@ -22,6 +28,9 @@ import { ReorderList } from "@/components/ReorderList";
 import { AlignedNumber } from "@/components/table/AlignedNumber";
 import { CornerCountBadge } from "@/components/table/CornerCountBadge";
 import { EnumBadge } from "@/components/table/CustomTableCell";
+import type { CustomTableEnumValue } from "@/components/table/columns";
+import { UserAvatar } from "@/components/UserAvatar";
+import { Button } from "@/shadcn/ui/button";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
 const PRIORITIES = [
@@ -49,6 +58,111 @@ function ReorderListDemo() {
         </span>
       )}
     />
+  );
+}
+
+const FAKE_NAMES = [
+  "Amina Benali",
+  "Youssef Haddad",
+  "Sofia Cherkaoui",
+  "Karim Ziani",
+  "Lina Otmani",
+  "Omar Fassi",
+];
+const FAKE_STATUSES: CustomTableEnumValue[] = [
+  { label: "Active", icon: CheckmarkCircle02Icon, color: "green" },
+  { label: "Pending", icon: Clock01Icon, color: "amber" },
+  { label: "Banned", icon: UnavailableIcon, color: "red" },
+];
+const FAKE_CARDS = [
+  { emoji: "🚀", title: "Launch week", text: "5 tasks left" },
+  { emoji: "🐛", title: "Bug bash", text: "12 squashed" },
+  { emoji: "📚", title: "Docs", text: "3 pages to write" },
+  { emoji: "🎨", title: "Rebrand", text: "waiting on colors" },
+];
+
+const pickRandom = <T,>(items: T[], count: number) =>
+  items.toSorted(() => Math.random() - 0.5).slice(0, count);
+
+// the button sits under the content, so if the swap moved anything by even a
+// pixel you'd see the button jump
+function FinishLoadingButton({
+  isLoading,
+  onClick,
+}: {
+  isLoading: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <Button variant="outline" size="sm" {...{ onClick }}>
+      <Icon icon={isLoading ? CheckmarkCircle02Icon : RefreshIcon} />
+      {isLoading ? "Finish loading" : "Load again"}
+    </Button>
+  );
+}
+
+function ListRowSkeletonDemo() {
+  const [names, setNames] = useState<string[]>();
+  const loadedRows = names?.map((name, index) => (
+    <ListRow
+      key={name}
+      leading={<UserAvatar {...{ name }} />}
+      title={name}
+      trailing={
+        <EnumBadge
+          value={
+            FAKE_STATUSES[index % FAKE_STATUSES.length] ?? FAKE_STATUSES[0]
+          }
+        />
+      }
+    />
+  ));
+  return (
+    <div className="flex w-full flex-col items-start gap-3">
+      <div className="w-full">
+        {loadedRows ? (
+          <div className="flex flex-col gap-2">{loadedRows}</div>
+        ) : (
+          <ListRowSkeleton count={3} />
+        )}
+      </div>
+      <FinishLoadingButton
+        isLoading={!names}
+        onClick={() => setNames(names ? undefined : pickRandom(FAKE_NAMES, 3))}
+      />
+    </div>
+  );
+}
+
+function CardGridSkeletonDemo() {
+  const [cards, setCards] = useState<typeof FAKE_CARDS>();
+  return (
+    <div className="flex w-full flex-col items-start gap-3">
+      <div className="w-full">
+        {cards ? (
+          <div className={CARD_GRID_CLASS}>
+            {cards.map(({ emoji, title, text }) => (
+              <div
+                key={title}
+                className={`${CARD_HEIGHT_CLASS} flex flex-col justify-between rounded-xl bg-muted p-4 corner-squircle`}
+              >
+                <span className="text-4xl">{emoji}</span>
+                <span className="flex flex-col">
+                  <span className="font-semibold">{title}</span>
+                  <span className="text-sm text-muted-foreground">{text}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <CardGridSkeleton count={2} />
+        )}
+      </div>
+      <FinishLoadingButton
+        isLoading={!cards}
+        onClick={() => setCards(cards ? undefined : pickRandom(FAKE_CARDS, 2))}
+      />
+    </div>
   );
 }
 
@@ -89,23 +203,16 @@ export const STATE_ITEMS: ShowcaseItem[] = [
   {
     name: "ListRowSkeleton",
     path: "src/components/PageSkeleton.tsx",
-    description: "loading placeholder for a feed / list",
-    Demo: () => (
-      <div className="w-full">
-        <ListRowSkeleton count={3} />
-      </div>
-    ),
+    description:
+      "loading placeholder for a feed / list, shares ListRow with the real rows so finishing moves nothing",
+    Demo: ListRowSkeletonDemo,
   },
   {
     name: "CardGridSkeleton",
     path: "src/components/PageSkeleton.tsx",
     description:
-      "grid of card placeholders, for a page-level suspense fallback",
-    Demo: () => (
-      <div className="w-full">
-        <CardGridSkeleton count={2} />
-      </div>
-    ),
+      "grid of card placeholders, for a page-level suspense fallback. same grid and card height as the real cards",
+    Demo: CardGridSkeletonDemo,
   },
   {
     name: "TableBlockSkeleton",

@@ -31,7 +31,7 @@ export function CustomTableSkeletonRows<T>({
               key={column.id}
               className="border-r border-border/50 last:border-r-0"
             >
-              <Skeleton className="h-4 w-full min-w-12" />
+              <Skeleton className="h-lh w-full min-w-12" />
             </TableCell>
           ))}
         </TableRow>

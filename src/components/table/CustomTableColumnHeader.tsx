@@ -23,6 +23,7 @@ import {
 } from "date-fns";
 import { type KeyboardEvent, type ReactNode, useId } from "react";
 import { Icon } from "@/components/Icon";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { Button } from "@/shadcn/ui/button";
 import { Calendar } from "@/shadcn/ui/calendar";
@@ -492,6 +493,34 @@ const keepTypingKeysInsideInputs = (event: KeyboardEvent) => {
     event.stopPropagation();
 };
 
+// the tooltip leans away at an angle so it doesn't sit flat over the
+// neighbouring column's header while you read it
+function IconOnlyLabel({
+  icon,
+  label,
+}: {
+  icon: IconSvgElement;
+  label: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="grid size-4 place-items-center">
+          <Icon {...{ icon }} className="size-4" />
+          <span className="sr-only">{label}</span>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        align="start"
+        className="origin-bottom-left -rotate-8"
+      >
+        {label}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function CustomTableColumnHeader<T>({
   column,
   items,
@@ -526,8 +555,14 @@ export function CustomTableColumnHeader<T>({
 
   const label = (
     <span className="inline-flex items-center justify-center gap-1.5">
-      <Icon icon={column.icon} />
-      {column.label}
+      {column.iconOnly ? (
+        <IconOnlyLabel icon={column.icon} label={column.label} />
+      ) : (
+        <>
+          <Icon icon={column.icon} />
+          {column.label}
+        </>
+      )}
       {hasActiveFilter && (
         <Icon
           icon={FilterIcon}
