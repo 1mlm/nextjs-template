@@ -41,6 +41,7 @@ function ResponsivePopoverDemo() {
       {...{ open }}
       onOpenChange={setOpen}
       title="Pick a color"
+      icon={PaintBoardIcon}
       trigger={
         <Button variant="outline">
           <Icon icon={PaintBoardIcon} />
@@ -115,7 +116,7 @@ function RelativeTimeDemo() {
   const [editedAt] = useState(() => new Date(Date.now() - 50_000));
   return (
     <span className="text-sm">
-      edited <RelativeTime date={editedAt} />
+      last edit: <RelativeTime date={editedAt} />
     </span>
   );
 }

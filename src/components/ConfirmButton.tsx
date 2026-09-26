@@ -84,6 +84,7 @@ export function ConfirmButton({
       // stays open while the confirm is in flight so the result isn't lost
       onOpenChange={(next) => !pending && setOpen(next)}
       title={label}
+      {...{ icon }}
       trigger={<MiniButton {...{ icon, label, tone, className }} />}
       className="max-md:px-4 max-md:pb-6 md:w-auto"
     >

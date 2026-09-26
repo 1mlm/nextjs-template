@@ -2,6 +2,7 @@
 
 import type { IconSvgElement } from "@hugeicons/react";
 import { type ComponentProps, type ReactNode, startTransition } from "react";
+import { IconChip } from "@/components/IconChip";
 import type { Button } from "@/shadcn/ui/button";
 import {
   Dialog,
@@ -50,7 +51,8 @@ export function FormDialog({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       {/* capped to the viewport with the fields scrolling on their own, or a long form pushes the submit button off screen */}
       <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col sm:max-w-md">
-        <DialogHeader>
+        <DialogHeader className="flex-row items-center gap-2.5">
+          <IconChip icon={submitIcon} />
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription className="sr-only">
             {description}

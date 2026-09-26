@@ -4,11 +4,20 @@ import {
   CheckmarkCircle02Icon,
   Clock01Icon,
   FileAttachmentIcon,
+  Location01Icon,
   Money03Icon,
+  Tag01Icon,
   UnavailableIcon,
+  UserCircleIcon,
+  UserIcon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import {
+  Combobox,
+  type ComboboxOption,
+  MultiCombobox,
+} from "@/components/Combobox";
 import {
   DatePicker,
   DateRangePicker,
@@ -18,6 +27,7 @@ import { FieldLabel } from "@/components/FieldLabel";
 import { FileDropZone } from "@/components/FileDropZone";
 import { NumberTextInput } from "@/components/NumberTextInput";
 import { SearchBar } from "@/components/SearchBar";
+import { SuggestionInput } from "@/components/SuggestionInput";
 import type { CustomTableEnumValue } from "@/components/table/columns";
 import { SegmentedPicker } from "@/components/table/SegmentedPicker";
 import type { ShowcaseItem } from "./ShowcaseCard";
@@ -37,6 +47,102 @@ const STATUS_OPTIONS: Record<Status, CustomTableEnumValue> = {
   [Status.Pending]: { label: "Pending", icon: Clock01Icon, color: "amber" },
   [Status.Banned]: { label: "Banned", icon: UnavailableIcon, color: "red" },
 };
+
+const PEOPLE: ComboboxOption[] = [
+  {
+    value: "amina",
+    label: "Amina Benali",
+    icon: UserIcon,
+    hint: "amina@example.com",
+  },
+  {
+    value: "youssef",
+    label: "Youssef Haddad",
+    icon: UserIcon,
+    hint: "youssef@example.com",
+  },
+  {
+    value: "sofia",
+    label: "Sofia Cherkaoui",
+    icon: UserIcon,
+    hint: "sofia@example.com",
+  },
+  {
+    value: "karim",
+    label: "Karim Ziani",
+    icon: UserIcon,
+    hint: "karim@example.com",
+  },
+  {
+    value: "lina",
+    label: "Lina Otmani",
+    icon: UserIcon,
+    hint: "lina@example.com",
+  },
+];
+
+const LABELS: ComboboxOption[] = [
+  { value: "bug", label: "bug", icon: Tag01Icon, hint: "12" },
+  { value: "design", label: "design", icon: Tag01Icon, hint: "4" },
+  { value: "backend", label: "backend", icon: Tag01Icon, hint: "9" },
+  { value: "urgent", label: "urgent", icon: Tag01Icon, hint: "2" },
+  { value: "idea", label: "idea", icon: Tag01Icon, hint: "7" },
+];
+
+const PAST_CITIES = [
+  "Casablanca",
+  "Rabat",
+  "Marrakech",
+  "Fes",
+  "Tangier",
+  "Agadir",
+  "Ifrane",
+  "Meknes",
+];
+
+function ComboboxDemo() {
+  const [assignee, setAssignee] = useState("");
+  return (
+    <Combobox
+      options={PEOPLE}
+      value={assignee}
+      onValueChange={setAssignee}
+      title="Assign someone"
+      icon={UserCircleIcon}
+      placeholder="Assign someone"
+      searchPlaceholder="Search by name or email..."
+    />
+  );
+}
+
+function MultiComboboxDemo() {
+  const [labels, setLabels] = useState(["bug", "urgent"]);
+  return (
+    <MultiCombobox
+      options={LABELS}
+      values={labels}
+      onValuesChange={setLabels}
+      title="Labels"
+      icon={Tag01Icon}
+      placeholder="Add labels"
+      searchPlaceholder="Search labels..."
+    />
+  );
+}
+
+function SuggestionInputDemo() {
+  const [city, setCity] = useState("");
+  return (
+    <SuggestionInput
+      value={city}
+      onValueChange={setCity}
+      suggestions={PAST_CITIES}
+      icon={Location01Icon}
+      placeholder="City (try typing an a)"
+      className="w-full"
+    />
+  );
+}
 
 function NumberTextInputDemo() {
   const [value, setValue] = useState("12.5");
@@ -111,6 +217,27 @@ export const INPUT_ITEMS: ShowcaseItem[] = [
         className="w-full"
       />
     ),
+  },
+  {
+    name: "Combobox",
+    path: "src/components/Combobox.tsx",
+    description:
+      "searchable select, arrows + enter work, bottom sheet on phones. searches the hint too (try an email)",
+    Demo: ComboboxDemo,
+  },
+  {
+    name: "MultiCombobox",
+    path: "src/components/Combobox.tsx",
+    description:
+      "same panel but stays open while you pick, chips x out without opening it",
+    Demo: MultiComboboxDemo,
+  },
+  {
+    name: "SuggestionInput",
+    path: "src/components/SuggestionInput.tsx",
+    description:
+      "free text with past values underneath, a datalist that respects the theme",
+    Demo: SuggestionInputDemo,
   },
   {
     name: "NumberTextInput + FieldLabel",

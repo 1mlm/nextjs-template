@@ -1,6 +1,11 @@
 "use client";
 
-import { Calendar03Icon } from "@hugeicons/core-free-icons";
+import {
+  Calendar03Icon,
+  CalendarClockIcon,
+  CalendarRangeIcon,
+} from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 import { format, set, setHours, setMinutes, startOfDay } from "date-fns";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
@@ -25,6 +30,7 @@ const padTwoDigits = (n: number) => String(n).padStart(2, "0");
 
 function PickerPopover({
   title,
+  icon,
   label,
   placeholder,
   open,
@@ -32,6 +38,7 @@ function PickerPopover({
   children,
 }: {
   title: string;
+  icon: IconSvgElement;
   label?: string;
   placeholder: string;
   open?: boolean;
@@ -40,7 +47,7 @@ function PickerPopover({
 }) {
   return (
     <ResponsivePopover
-      {...{ title, open, onOpenChange }}
+      {...{ title, icon, open, onOpenChange }}
       align="start"
       className="flex w-auto justify-center px-4 pt-1 pb-6 md:p-1"
       trigger={
@@ -51,7 +58,7 @@ function PickerPopover({
             !label && "text-muted-foreground",
           )}
         >
-          <Icon icon={Calendar03Icon} />
+          <Icon {...{ icon }} />
           {label ?? placeholder}
         </Button>
       }
@@ -76,6 +83,7 @@ export function DatePicker({
   return (
     <PickerPopover
       title="Pick a date"
+      icon={Calendar03Icon}
       onOpenChange={setOpen}
       {...{ label, placeholder, open }}
     >
@@ -112,7 +120,11 @@ export function DateRangePicker({
   const label = value && formatDateRange(value);
 
   return (
-    <PickerPopover title="Pick a date range" {...{ label, placeholder }}>
+    <PickerPopover
+      title="Pick a date range"
+      icon={CalendarRangeIcon}
+      {...{ label, placeholder }}
+    >
       <Calendar
         mode="range"
         className={CALENDAR_CLASS}
@@ -266,7 +278,11 @@ export function DateTimePicker({
   const timeColumns = getTimeColumns(base, hour12);
 
   return (
-    <PickerPopover title="Pick a date and time" {...{ label, placeholder }}>
+    <PickerPopover
+      title="Pick a date and time"
+      icon={CalendarClockIcon}
+      {...{ label, placeholder }}
+    >
       <div className="flex flex-col items-center gap-2 md:flex-row md:items-stretch md:gap-0">
         <Calendar
           mode="single"

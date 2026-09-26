@@ -1,6 +1,8 @@
 "use client";
 
+import type { IconSvgElement } from "@hugeicons/react";
 import type { ComponentProps, ReactNode } from "react";
+import { IconChip } from "@/components/IconChip";
 import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover";
 import {
@@ -16,12 +18,14 @@ type PopoverContentProps = ComponentProps<typeof PopoverContent>;
 // popover on desktop, bottom sheet on phones. a popover near a screen edge
 // just gets clipped on a narrow screen (and tiny floating boxes feel bad on
 // touch anyway), a sheet from the bottom is the obvious thumb-friendly version.
-// `title` only shows in the sheet, it's also what screen readers announce
+// `title` + `icon` only show in the sheet header, the title is also what
+// screen readers announce
 export function ResponsivePopover({
   open,
   onOpenChange,
   trigger,
   title,
+  icon,
   side = "bottom",
   align = "center",
   children,
@@ -31,6 +35,7 @@ export function ResponsivePopover({
   onOpenChange?: (open: boolean) => void;
   trigger: ReactNode;
   title: string;
+  icon: IconSvgElement;
   side?: PopoverContentProps["side"];
   align?: PopoverContentProps["align"];
   children: ReactNode;
@@ -47,7 +52,8 @@ export function ResponsivePopover({
           className="rounded-t-2xl"
           aria-describedby={undefined}
         >
-          <SheetHeader>
+          <SheetHeader className="flex-row items-center gap-2.5">
+            <IconChip {...{ icon }} />
             <SheetTitle>{title}</SheetTitle>
           </SheetHeader>
           <div className={className ?? "px-4 pb-6"}>{children}</div>
