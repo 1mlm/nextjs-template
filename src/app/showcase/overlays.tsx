@@ -2,6 +2,8 @@
 
 import {
   Add01Icon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
   Calendar03Icon,
   DeliveryTruck01Icon,
   InformationCircleIcon,
@@ -9,7 +11,12 @@ import {
   Money03Icon,
   PackageIcon,
   PaintBoardIcon,
+  PencilEdit01Icon,
+  RefreshIcon,
+  Rocket01Icon,
+  Settings02Icon,
   SparklesIcon,
+  UserAdd01Icon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { DialogIconBadge } from "@/components/DialogIconBadge";
@@ -21,6 +28,7 @@ import { Icon } from "@/components/Icon";
 import { LazyDialog } from "@/components/LazyDialog";
 import { RelativeTime } from "@/components/RelativeTime";
 import { ResponsivePopover } from "@/components/ResponsivePopover";
+import { Stepper, type StepperStep } from "@/components/Stepper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import { Button } from "@/shadcn/ui/button";
 import {
@@ -33,6 +41,7 @@ import {
 } from "@/shadcn/ui/dialog";
 import { Input } from "@/shadcn/ui/input";
 import { getColorStyle, TAG_COLORS } from "@/utils/color";
+import { triggerConfetti } from "@/utils/confetti";
 import type { ShowcaseItem } from "./ShowcaseCard";
 import { wait } from "./util";
 
@@ -72,6 +81,85 @@ function ResponsivePopoverDemo() {
         ))}
       </div>
     </ResponsivePopover>
+  );
+}
+
+const PROJECT_STEPS: (StepperStep & { hint: string })[] = [
+  {
+    id: "details",
+    label: "Details",
+    icon: PencilEdit01Icon,
+    hint: "name it, describe it",
+  },
+  {
+    id: "team",
+    label: "Team",
+    icon: UserAdd01Icon,
+    hint: "invite the people you like",
+  },
+  {
+    id: "settings",
+    label: "Settings",
+    icon: Settings02Icon,
+    hint: "privacy, labels, all that",
+  },
+  {
+    id: "launch",
+    label: "Launch",
+    icon: Rocket01Icon,
+    hint: "one click and it's live",
+  },
+];
+
+function StepperDemo() {
+  const [stepIndex, setStepIndex] = useState(0);
+  const isLastStep = stepIndex === PROJECT_STEPS.length - 1;
+  const isFinished = stepIndex === PROJECT_STEPS.length;
+  const currentStep = PROJECT_STEPS[stepIndex];
+
+  const goNext = () => {
+    if (isLastStep) triggerConfetti();
+    setStepIndex(stepIndex + 1);
+  };
+
+  return (
+    <div className="flex w-full flex-col gap-4">
+      <Stepper
+        steps={PROJECT_STEPS}
+        currentIndex={stepIndex}
+        onStepClick={setStepIndex}
+      />
+      <div className="flex items-center gap-3 rounded-xl bg-muted p-3 corner-squircle">
+        <Icon
+          icon={currentStep?.icon ?? Rocket01Icon}
+          className="size-5 text-muted-foreground"
+        />
+        <p className="text-sm">
+          {currentStep?.hint ?? "shipped! click a step to go back to it"}
+        </p>
+      </div>
+      <div className="flex justify-between gap-2">
+        <Button
+          variant="outline"
+          disabled={stepIndex === 0}
+          onClick={() => setStepIndex(stepIndex - 1)}
+        >
+          <Icon icon={ArrowLeft01Icon} />
+          Back
+        </Button>
+        {isFinished ? (
+          <Button variant="outline" onClick={() => setStepIndex(0)}>
+            <Icon icon={RefreshIcon} />
+            Start over
+          </Button>
+        ) : (
+          <Button onClick={goNext}>
+            {isLastStep ? "Launch" : "Next"}
+            <Icon icon={isLastStep ? Rocket01Icon : ArrowRight01Icon} />
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -184,6 +272,14 @@ export const OVERLAY_ITEMS: ShowcaseItem[] = [
     description:
       "popover on desktop, bottom sheet on phones. shrink the window and open it again",
     Demo: ResponsivePopoverDemo,
+  },
+  {
+    name: "Stepper",
+    path: "src/components/Stepper.tsx",
+    description:
+      "icon chain on wide screens, segmented bar on phones. done steps are clickable, future ones aren't",
+    wide: true,
+    Demo: StepperDemo,
   },
   {
     name: "LazyDialog",
