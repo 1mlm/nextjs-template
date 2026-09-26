@@ -385,3 +385,21 @@
     rotate: 6deg;
   }
 }
+
+/* MarqueeText's animate-marquee: holds still at each end for a beat so both
+   the start and the end are readable before it turns around. lives in @theme
+   cuz tailwind prunes a plain @keyframes that only an animate-[] uses */
+@theme {
+  --animate-marquee: marquee-ping-pong 2s ease-in-out infinite alternate;
+
+  @keyframes marquee-ping-pong {
+    0%,
+    15% {
+      translate: 0;
+    }
+    85%,
+    100% {
+      translate: calc(var(--marquee-distance) * -1);
+    }
+  }
+}

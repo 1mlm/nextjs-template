@@ -10,6 +10,7 @@ import { EmptyState, EmptyStateVariant } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import { Icon } from "@/components/Icon";
 import { LabelTag } from "@/components/LabelTag";
+import { MarqueeText } from "@/components/MarqueeText";
 import {
   CardGridSkeleton,
   ListRowSkeleton,
@@ -21,6 +22,12 @@ import { EnumBadge } from "@/components/table/CustomTableCell";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
 const ALIGNED_NUMBERS = [1.2, 3.4567, 120, 0.05];
+
+const LONG_FILE_NAMES = [
+  "Q3 report final FINAL (2) actually final.pdf",
+  "notes.txt",
+  "screenshot 2026-09-26 at 14.32.11 from the meeting.png",
+];
 
 export const STATE_ITEMS: ShowcaseItem[] = [
   {
@@ -78,6 +85,28 @@ export const STATE_ITEMS: ShowcaseItem[] = [
       <div className="w-full">
         <TableBlockSkeleton rows={3} />
       </div>
+    ),
+  },
+  {
+    name: "MarqueeText",
+    path: "src/components/MarqueeText.tsx",
+    description:
+      "too long for its spot? fades at the edge, hover it to read the rest (slides on its own on phones)",
+    Demo: () => (
+      <ul className="flex w-52 flex-col gap-1">
+        {LONG_FILE_NAMES.map((fileName) => (
+          <li
+            key={fileName}
+            className="flex items-center gap-2 rounded-lg bg-muted px-2.5 py-1.5 text-sm corner-squircle"
+          >
+            <Icon
+              icon={File02Icon}
+              className="shrink-0 text-muted-foreground"
+            />
+            <MarqueeText text={fileName} />
+          </li>
+        ))}
+      </ul>
     ),
   },
   {
