@@ -13,21 +13,24 @@
 ## Forking checklist
 
 1. `src/app/_sidebar/nav.tsx`: `APP_INFO` (name + tagline, feeds the sidebar, tab title, manifest and link preview image), `NAV_ITEMS` (pages), `DEMO_USER` (swap for the real session user)
-2. `src/app/layout.tsx`: `viewport.themeColor` if the brand isn't black/white
-3. `src/app/_sidebar/drawAppIcon.tsx`: the app icon (install icons, apple icon, preview image all draw from it), plus `src/app/favicon.ico`
-4. `next.config.ts`: delete the `noindex` header once the site should show up on google
-5. delete the showcase (`src/app/showcase/`) and demo pages (`src/app/table/`) once you don't need the reference
-6. the license line at the bottom of this file
+2. `src/env.ts`: add every env var the app reads to the zod schema (build fails loudly on a missing one)
+3. `src/app/layout.tsx`: `viewport.themeColor` if the brand isn't black/white
+4. `src/app/_sidebar/drawAppIcon.tsx`: the app icon (install icons, apple icon, preview image all draw from it), plus `src/app/favicon.ico`
+5. `next.config.ts`: delete the `noindex` header once the site should show up on google
+6. delete the showcase (`src/app/showcase/`) and demo pages (`src/app/table/`, `src/app/blocks/`) once you don't need the reference
+7. the license line at the bottom of this file
 
 ## What's in it
 
 Everything lives on `/showcase`, one card per component, so run `pnpm dev` and poke at them. `Ctrl/⌘ + K` finds any of them.
 
 - **App shell**: collapsible squircle sidebar, phone tab bar with a drag-to-close menu drawer, command palette, page transitions (view transitions), new-version toast, maintenance screen (`MAINTENANCE_MODE=true`), installable (manifest + generated icons)
-- **`CustomTable`** (`src/components/table/`): filters, sort, pagination, selection with bulk actions, editable cells, merged cells, pinned new rows, right-click row menu, xlsx/csv export, full example on `/table`
-- **Inputs**: `Combobox`, `MultiCombobox`, `SuggestionInput`, `EditableText`, date / range / date-time pickers, `NumberTextInput`, `FileDropZone`, `AvatarPicker` (crop + zoom), `SearchBar` (url synced)
+- **`CustomTable`** (`src/components/table/`): filters, sort, pagination, selection with bulk actions, editable cells, merged cells (sticky group label), cells that expand over themselves when clipped, long text columns, icon-only headers, pinned new rows, right-click row menu, xlsx/csv export, full example on `/table`
+- **Blocks editor** (`src/app/blocks/`): scratch-style drag and drop programming, every block defined once in `blocks.ts` (looks, plug rules, run, js output), runs step by step with the running block lit up
+- **Inputs**: item-aligned `Select`, `Combobox`, `MultiCombobox`, `SuggestionInput`, `EditableText`, date / range / date-time pickers, `NumberTextInput`, `FileDropZone`, `AvatarPicker` (crop + zoom), `SearchBar` (url synced)
 - **Buttons & overlays**: `ConfirmButton`, `HoldButton`, `MiniButton`, `SlidingTabs`, `ResponsivePopover` (popover on desktop, bottom sheet on phones), `LazyDialog`, `FormDialog`, `Stepper`, tooltips that open on tap
-- **Display**: `ReorderList`, `MarqueeText`, `ScrollRow`, `RelativeTime` (live), `Kbd`, `UserAvatar`, skeletons, empty/error states
+- **Look**: `SquircleFuserContainer` (pills fused into a frame's edge), `FluentEmoji` (3D, animated on hover, recolorable to any tailwind colors), a fonts preview
+- **Display**: `ReorderList`, `ListRow` + skeletons that swap without moving a pixel, `MarqueeText`, `ScrollRow`, `RelativeTime` (live), `Kbd`, `UserAvatar`, skeletons, empty/error states
 - **Charts** (`src/components/charts/`): line chart and sparkline stat card from [`bklit-ui`](https://ui.bklit.com/)
 - **Utils** (`src/utils/`): haptics ([`web-haptics`](https://github.com/lochie/web-haptics)), synthesized sounds, confetti, clipboard, dates, colors, safe localStorage, undoable actions, shared clock (`useNow`)
 
