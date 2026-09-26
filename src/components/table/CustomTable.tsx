@@ -1,6 +1,7 @@
 "use client";
 
 import { InboxIcon } from "@hugeicons/core-free-icons";
+import { AnimatePresence, motion, type Transition } from "motion/react";
 import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { DEFAULT_SEARCH_QUERY_KEY } from "@/components/SearchBar";
@@ -37,6 +38,10 @@ const CENTERED_COLUMN_TYPES = new Set([
   ColumnType.Tags,
   ColumnType.Buttons,
 ]);
+
+const MotionTableRow = motion.create(TableRow);
+const ROW_EXIT = { opacity: 0, x: -24 };
+const ROW_SPRING: Transition = { type: "spring", bounce: 0.15, duration: 0.35 };
 
 // stable empties so a table without these doesn't rerun the sort every render
 const NO_SORT: NonNullable<CustomTableSort>[] = [];
@@ -183,6 +188,9 @@ export function CustomTable<T>({
     () => getMergeRuns(columns, paginatedItems, sortedByColumnId),
     [columns, paginatedItems, sortedByColumnId],
   );
+  // a leaving row still holding a tall merged cell shoves the other columns
+  // sideways while it fades, so with merged cells rows just vanish
+  const hasMergedCells = mergeRuns.size > 0;
 
   const { scrollContainerRef, checkboxColumnRef, maskImage } = useScrollFade(
     paginatedItems.length,
@@ -237,80 +245,85 @@ export function CustomTable<T>({
             {loading && (
               <CustomTableSkeletonRows {...{ columns, selectable }} />
             )}
-            {!loading &&
-              paginatedItems.map((item, index) => {
-                const id = getItemId(item);
-                const isPinned = pinnedItemIds.includes(id);
-                const rowBackground = getRowBackground(
-                  selectedIds.has(id),
-                  isPinned,
-                  index,
-                );
-                return (
-                  <RowContextMenu
-                    key={id}
-                    {...{ item, columns }}
-                    isSelected={selectedIds.has(id)}
-                    onToggleSelected={
-                      selectable ? () => toggleRow(id) : undefined
-                    }
-                    extraItems={getRowMenuItems?.(item)}
-                  >
-                    <TableRow
-                      className={cn(
-                        "group/row",
-                        rowBackground,
-                        isPinned && "animate-in fade-in-0 duration-500",
-                      )}
+            {/* keyed by page so flipping pages swaps rows instantly, only rows
+            that leave or join the page you're on animate */}
+            <AnimatePresence key={currentPage} initial={false}>
+              {!loading &&
+                paginatedItems.map((item, index) => {
+                  const id = getItemId(item);
+                  const isPinned = pinnedItemIds.includes(id);
+                  const rowBackground = getRowBackground(
+                    selectedIds.has(id),
+                    isPinned,
+                    index,
+                  );
+                  return (
+                    <RowContextMenu
+                      key={id}
+                      {...{ item, columns }}
+                      isSelected={selectedIds.has(id)}
+                      onToggleSelected={
+                        selectable ? () => toggleRow(id) : undefined
+                      }
+                      extraItems={getRowMenuItems?.(item)}
                     >
-                      {selectable && (
-                        <TableCell
-                          className={cn(
-                            "sticky left-0 z-10 border-r border-border/50 text-center",
-                            rowBackground,
-                          )}
-                        >
-                          <div className="flex justify-center pr-2!">
-                            <Checkbox
-                              checked={selectedIds.has(id)}
-                              onCheckedChange={() => toggleRow(id)}
-                              aria-label="Select row"
-                            />
-                          </div>
-                        </TableCell>
-                      )}
-                      {columns.map((column) => {
-                        const run = mergeRuns.get(column.id)?.[index];
-                        // swallowed by the tall cell of the row that started the run
-                        if (run && !run.isStart) return null;
-                        const isMergedCell =
-                          run !== undefined && run.length > 1;
-                        return (
+                      <MotionTableRow
+                        layout="position"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={hasMergedCells ? undefined : ROW_EXIT}
+                        transition={ROW_SPRING}
+                        className={cn("group/row", rowBackground)}
+                      >
+                        {selectable && (
                           <TableCell
-                            key={column.id}
-                            data-column-id={column.id}
-                            rowSpan={isMergedCell ? run.length : undefined}
                             className={cn(
-                              "border-r border-border/50 last:border-r-0",
-                              column.type === ColumnType.String &&
-                                column.align === ColumnAlign.Right &&
-                                "text-right",
-                              CENTERED_COLUMN_TYPES.has(column.type) &&
-                                "text-center",
-                              isMergedCell &&
-                                "border-b border-b-border bg-muted/60 align-top font-medium",
-                              column.getCellError?.(item) &&
-                                "bg-destructive/10 shadow-[inset_0_0_0_1px_var(--destructive)]",
+                              "sticky left-0 z-10 border-r border-border/50 text-center",
+                              rowBackground,
                             )}
                           >
-                            <CustomTableCell {...{ column, item }} />
+                            <div className="flex justify-center pr-2!">
+                              <Checkbox
+                                checked={selectedIds.has(id)}
+                                onCheckedChange={() => toggleRow(id)}
+                                aria-label="Select row"
+                              />
+                            </div>
                           </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  </RowContextMenu>
-                );
-              })}
+                        )}
+                        {columns.map((column) => {
+                          const run = mergeRuns.get(column.id)?.[index];
+                          // swallowed by the tall cell of the row that started the run
+                          if (run && !run.isStart) return null;
+                          const isMergedCell =
+                            run !== undefined && run.length > 1;
+                          return (
+                            <TableCell
+                              key={column.id}
+                              data-column-id={column.id}
+                              rowSpan={isMergedCell ? run.length : undefined}
+                              className={cn(
+                                "border-r border-border/50 last:border-r-0",
+                                column.type === ColumnType.String &&
+                                  column.align === ColumnAlign.Right &&
+                                  "text-right",
+                                CENTERED_COLUMN_TYPES.has(column.type) &&
+                                  "text-center",
+                                isMergedCell &&
+                                  "border-b border-b-border bg-muted/60 align-top font-medium",
+                                column.getCellError?.(item) &&
+                                  "bg-destructive/10 shadow-[inset_0_0_0_1px_var(--destructive)]",
+                              )}
+                            >
+                              <CustomTableCell {...{ column, item }} />
+                            </TableCell>
+                          );
+                        })}
+                      </MotionTableRow>
+                    </RowContextMenu>
+                  );
+                })}
+            </AnimatePresence>
           </TableBody>
         </table>
       </div>
