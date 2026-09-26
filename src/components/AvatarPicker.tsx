@@ -162,6 +162,8 @@ export function AvatarPicker({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [pickedImageSrc, setPickedImageSrc] = useState<string>();
+  // the url handed out last time, freed once a newer crop replaces it
+  const lastPreviewUrl = useRef<string>(undefined);
 
   const closeCropper = () => {
     if (pickedImageSrc) URL.revokeObjectURL(pickedImageSrc);
@@ -201,7 +203,11 @@ export function AvatarPicker({
           imageSrc={pickedImageSrc}
           onCancel={closeCropper}
           onCropped={(blob) => {
-            onChange(blob, URL.createObjectURL(blob));
+            const previewUrl = URL.createObjectURL(blob);
+            onChange(blob, previewUrl);
+            if (lastPreviewUrl.current)
+              URL.revokeObjectURL(lastPreviewUrl.current);
+            lastPreviewUrl.current = previewUrl;
             closeCropper();
           }}
         />

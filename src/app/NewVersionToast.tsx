@@ -36,19 +36,17 @@ const showNewVersionToast = () =>
 // started with, every few minutes and whenever the tab comes back into view
 export function NewVersionToast() {
   useEffect(() => {
-    const loadedVersion = fetchVersion().catch(() => null);
+    // the first answer that actually arrives is this tab's version, so a
+    // failed first fetch (offline for a sec) doesn't switch checks off for good
+    const tabVersion: { current?: string } = {};
 
     const checkForNewVersion = async () => {
-      const [startVersion, liveVersion] = await Promise.all([
-        loadedVersion,
-        fetchVersion().catch(() => null),
-      ]);
-      const hasNewVersion =
-        startVersion !== null &&
-        liveVersion !== null &&
-        liveVersion !== startVersion;
-      if (hasNewVersion) showNewVersionToast();
+      const liveVersion = await fetchVersion().catch(() => undefined);
+      if (!liveVersion) return;
+      tabVersion.current ??= liveVersion;
+      if (liveVersion !== tabVersion.current) showNewVersionToast();
     };
+    checkForNewVersion();
 
     const checkWhenVisible = () => {
       if (document.visibilityState === "visible") checkForNewVersion();

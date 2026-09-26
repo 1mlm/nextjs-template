@@ -57,9 +57,11 @@ export function SuggestionInput({
   icon: IconSvgElement;
 }) {
   const [isFocused, setIsFocused] = useState(false);
+  // escape hides the list until you type again, focus never actually left
+  const [isDismissed, setIsDismissed] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const matches = getMatches(suggestions, value);
-  const isOpen = isFocused && matches.length > 0;
+  const isOpen = isFocused && !isDismissed && matches.length > 0;
 
   const pickSuggestion = (suggestion: string) => {
     onValueChange(suggestion);
@@ -87,6 +89,7 @@ export function SuggestionInput({
             aria-autocomplete="list"
             onChange={(event) => {
               onValueChange(event.target.value);
+              setIsDismissed(false);
               setHighlightedIndex(0);
             }}
             onFocus={() => setIsFocused(true)}
@@ -97,7 +100,7 @@ export function SuggestionInput({
               else if (event.key === "ArrowUp") moveHighlight(-1);
               else if (event.key === "Enter")
                 pickSuggestion(matches[highlightedIndex]);
-              else if (event.key === "Escape") setIsFocused(false);
+              else if (event.key === "Escape") setIsDismissed(true);
               else return;
               event.preventDefault();
             }}

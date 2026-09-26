@@ -15,12 +15,12 @@ export function useRowSelection<T>({
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const toggleRow = (id: string) => {
-    const next = new Set(selectedIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSelectedIds(next);
-  };
+  const toggleRow = (id: string) =>
+    setSelectedIds(
+      selectedIds.has(id)
+        ? new Set([...selectedIds].filter((selectedId) => selectedId !== id))
+        : new Set([...selectedIds, id]),
+    );
 
   const visibleIds = visibleItems.map(getItemId);
   const visibleSelectedCount = visibleIds.filter((id) =>

@@ -78,6 +78,9 @@ function useWindowFileDrag(isEnabled: boolean, onDrop: (file: File) => void) {
       window.removeEventListener("dragover", onDragOver);
       window.removeEventListener("dragleave", onDragLeave);
       window.removeEventListener("drop", onWindowDrop);
+      // switched off mid drag, no more events will come to hide the overlay
+      dragDepth.current = 0;
+      setIsDragging(false);
     };
   }, [isEnabled]);
 
@@ -151,7 +154,13 @@ export function FileDropZone({
           e.preventDefault();
           if (!disabled) setDragOver(true);
         }}
-        onDragLeave={() => setDragOver(false)}
+        onDragLeave={(e) => {
+          // leaving into our own icon/label isn't leaving the zone
+          const isStillInside =
+            e.relatedTarget instanceof Node &&
+            e.currentTarget.contains(e.relatedTarget);
+          if (!isStillInside) setDragOver(false);
+        }}
         onDrop={(e) => {
           e.preventDefault();
           // or the window listener (dropAnywhere) picks up the same drop again
