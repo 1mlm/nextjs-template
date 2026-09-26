@@ -2,7 +2,12 @@
 
 import {
   Add01Icon,
+  Calendar03Icon,
+  DeliveryTruck01Icon,
   InformationCircleIcon,
+  Invoice01Icon,
+  Money03Icon,
+  PackageIcon,
   PaintBoardIcon,
   SparklesIcon,
 } from "@hugeicons/core-free-icons";
@@ -13,6 +18,7 @@ import { FieldLabel } from "@/components/FieldLabel";
 import { FormDialog } from "@/components/form/FormDialog";
 import { useFormDialogAction } from "@/components/form/useFormDialogAction";
 import { Icon } from "@/components/Icon";
+import { LazyDialog } from "@/components/LazyDialog";
 import { RelativeTime } from "@/components/RelativeTime";
 import { ResponsivePopover } from "@/components/ResponsivePopover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
@@ -66,6 +72,55 @@ function ResponsivePopoverDemo() {
         ))}
       </div>
     </ResponsivePopover>
+  );
+}
+
+// pretend api, the first open fails so the retry path shows up too
+const loadAttempts = { count: 0 };
+async function loadOrder() {
+  await wait(1200);
+  loadAttempts.count += 1;
+  if (loadAttempts.count === 1) throw new Error("showcase LazyDialog demo: first load fails on purpose");
+  return [
+    { icon: PackageIcon, label: "Items", value: "3 mugs, 1 teapot" },
+    { icon: Money03Icon, label: "Total", value: "420 MAD" },
+    {
+      icon: DeliveryTruck01Icon,
+      label: "Shipping",
+      value: "Casablanca, 2 days",
+    },
+    { icon: Calendar03Icon, label: "Ordered", value: "Sep 24, 2026" },
+  ];
+}
+
+function LazyDialogDemo() {
+  return (
+    <LazyDialog
+      title="Order #1042"
+      icon={Invoice01Icon}
+      load={loadOrder}
+      trigger={
+        <Button variant="outline">
+          <Icon icon={Invoice01Icon} />
+          View order
+        </Button>
+      }
+    >
+      {(rows) => (
+        <dl className="flex flex-col gap-1">
+          {rows.map(({ icon, label, value }) => (
+            <div
+              key={label}
+              className="flex items-center gap-3 rounded-lg px-2 py-2 odd:bg-muted/50 corner-squircle"
+            >
+              <Icon {...{ icon }} className="size-4 text-muted-foreground" />
+              <dt className="text-muted-foreground">{label}</dt>
+              <dd className="ml-auto font-medium">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </LazyDialog>
   );
 }
 
@@ -128,6 +183,13 @@ export const OVERLAY_ITEMS: ShowcaseItem[] = [
     description:
       "popover on desktop, bottom sheet on phones. shrink the window and open it again",
     Demo: ResponsivePopoverDemo,
+  },
+  {
+    name: "LazyDialog",
+    path: "src/components/LazyDialog.tsx",
+    description:
+      "fetches on first hover/open and keeps it. the first try fails on purpose so you see the retry",
+    Demo: LazyDialogDemo,
   },
   {
     name: "FormDialog + useFormDialogAction",
