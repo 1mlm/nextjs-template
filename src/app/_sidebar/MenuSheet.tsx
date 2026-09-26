@@ -56,7 +56,15 @@ function useInstallPrompt() {
     };
   }, []);
 
-  return installEvent;
+  // chrome only lets one event prompt once, so the row goes away after
+  const install = installEvent
+    ? async () => {
+        await installEvent.prompt();
+        setInstallEvent(undefined);
+      }
+    : undefined;
+
+  return install;
 }
 
 // a vaul drawer (drag it down to close, like ios sheets) that's itself
@@ -65,7 +73,7 @@ function useInstallPrompt() {
 export function MenuSheet({ tabClassName }: { tabClassName: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const installEvent = useInstallPrompt();
+  const install = useInstallPrompt();
 
   const closeMenu = () => {
     triggerHaptic("selection");
@@ -133,10 +141,10 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
             ))}
           </nav>
 
-          {installEvent && (
+          {install && (
             <button
               type="button"
-              onClick={() => installEvent.prompt()}
+              onClick={install}
               className="flex items-center gap-2.5 rounded-lg bg-sidebar-accent p-2.5 text-left transition-colors corner-squircle active:scale-[0.98]"
             >
               <span className="grid size-8 place-items-center rounded-lg bg-sidebar-foreground text-sidebar corner-squircle">

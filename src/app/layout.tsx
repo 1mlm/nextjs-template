@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import { cookies } from "next/headers";
 import "@/shadcn/styles/globals.css";
@@ -24,6 +24,14 @@ const SIDEBAR_SIZES: CSSProperties & Record<`--${string}`, string> = {
   "--sidebar-width-icon": "calc(3.5rem - 2px)",
 };
 
+// the browser / installed app bar follows the system theme like the app does
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
+
 export const metadata: Metadata = {
   title: "Template Next.js App",
 };
@@ -34,9 +42,10 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   const cookieStore = await cookies();
   const isSidebarOpen = cookieStore.get(SIDEBAR_COOKIE_NAME)?.value !== "false";
 
-  // flip MAINTENANCE_MODE=true in the env for planned downtime (a migration
-  // etc), every page becomes the maintenance screen. normal deploys don't
-  // need it, they swap over with zero downtime
+  // set MAINTENANCE_MODE=true for planned downtime (a migration etc) and every
+  // page becomes the maintenance screen. on vercel env changes only apply to a
+  // new deploy, so it's set + redeploy, then unset + redeploy. normal deploys
+  // don't need any of this, they swap over with zero downtime
   const isUnderMaintenance = process.env.MAINTENANCE_MODE === "true";
   if (isUnderMaintenance)
     return (

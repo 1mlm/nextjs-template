@@ -67,10 +67,8 @@ function PageJumpButton({
         }}
       >
         <Input
-          type="number"
           inputMode="numeric"
-          min={1}
-          max={pageCount}
+          aria-label={`Page number, 1 to ${pageCount}`}
           autoFocus
           value={typedPage}
           onChange={(event) => setTypedPage(event.target.value)}

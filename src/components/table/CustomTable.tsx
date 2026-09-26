@@ -44,9 +44,12 @@ const NO_PINNED_IDS: string[] = [];
 // opaque mixes over the page surface, not translucent bg-x/15: the sticky
 // checkbox cell repaints the row color on itself and a see-through one showed
 // the other columns sliding underneath it
+// (the hover: twins keep shadcn's row hover wash from hiding the tint)
 const ROW_BACKGROUNDS = {
-  selected: "bg-[color-mix(in_oklch,var(--muted),var(--color-green-500)_15%)]",
-  pinned: "bg-[color-mix(in_oklch,var(--muted),var(--color-amber-400)_12%)]",
+  selected:
+    "bg-[color-mix(in_oklch,var(--muted),var(--color-green-500)_15%)] hover:bg-[color-mix(in_oklch,var(--muted),var(--color-green-500)_20%)]",
+  pinned:
+    "bg-[color-mix(in_oklch,var(--muted),var(--color-amber-400)_12%)] hover:bg-[color-mix(in_oklch,var(--muted),var(--color-amber-400)_17%)]",
   striped: "bg-[color-mix(in_oklch,var(--muted),var(--foreground)_5%)]",
   plain: "bg-muted",
 };
@@ -171,9 +174,10 @@ export function CustomTable<T>({
   const canResetFilterAndSort =
     (filterable || sortable) && hasActiveFilterOrSort;
 
+  const sortedByColumnId = sort?.columnId ?? defaultSort[0]?.columnId;
   const mergeRuns = useMemo(
-    () => getMergeRuns(columns, paginatedItems),
-    [columns, paginatedItems],
+    () => getMergeRuns(columns, paginatedItems, sortedByColumnId),
+    [columns, paginatedItems, sortedByColumnId],
   );
 
   const { scrollContainerRef, checkboxColumnRef, maskImage } = useScrollFade(

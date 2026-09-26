@@ -17,12 +17,20 @@ function getColumnRuns(keys: string[]): MergeRun[] {
   });
 }
 
+// only the column the rows are actually sorted by merges. sorted by
+// something else, two neighbours sharing a value is a coincidence and a tall
+// cell over them would fake a grouping that isn't there
 export function getMergeRuns<T>(
   columns: CustomTableColumn<T>[],
   pageItems: T[],
+  sortedByColumnId: string | undefined,
 ): Map<string, MergeRun[]> {
   const mergeableColumns = columns.flatMap((column) =>
-    column.type === ColumnType.String && column.mergeAdjacent ? [column] : [],
+    column.type === ColumnType.String &&
+    column.mergeAdjacent &&
+    column.id === sortedByColumnId
+      ? [column]
+      : [],
   );
   return new Map(
     mergeableColumns.map((column) => {

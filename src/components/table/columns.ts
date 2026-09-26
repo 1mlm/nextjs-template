@@ -56,8 +56,8 @@ export type CustomTableColumn<T> = {
       // fully custom cell (an inline input, a dropdown...). getString still
       // drives sort, filter, search and export, this only changes what's drawn
       render?: (item: T) => ReactNode;
-      // consecutive rows with the same value become one tall cell, only reads
-      // right while the rows are sorted by this column (see defaultSort)
+      // consecutive rows with the same value become one tall cell, only while
+      // this is the column the table is sorted by (the user's sort or defaultSort)
       mergeAdjacent?: boolean;
       // groups by this instead of getString, for when two unrelated rows could
       // display the same text (two blanks) and shouldn't merge
