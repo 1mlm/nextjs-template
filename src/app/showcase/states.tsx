@@ -6,6 +6,7 @@ import {
   InboxIcon,
   Tag01Icon,
 } from "@hugeicons/core-free-icons";
+import { useState } from "react";
 import { EmptyState, EmptyStateVariant } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import { Icon } from "@/components/Icon";
@@ -17,10 +18,39 @@ import {
   ListRowSkeleton,
   TableBlockSkeleton,
 } from "@/components/PageSkeleton";
+import { ReorderList } from "@/components/ReorderList";
 import { AlignedNumber } from "@/components/table/AlignedNumber";
 import { CornerCountBadge } from "@/components/table/CornerCountBadge";
 import { EnumBadge } from "@/components/table/CustomTableCell";
 import type { ShowcaseItem } from "./ShowcaseCard";
+
+const PRIORITIES = [
+  { id: "ship", label: "Ship the onboarding flow", emoji: "🚀" },
+  { id: "bugs", label: "Fix the login bugs", emoji: "🐛" },
+  { id: "docs", label: "Write the API docs", emoji: "📚" },
+  { id: "coffee", label: "Get coffee", emoji: "☕" },
+];
+
+function ReorderListDemo() {
+  const [priorities, setPriorities] = useState(PRIORITIES);
+  return (
+    <ReorderList
+      items={priorities}
+      getItemId={(priority) => priority.id}
+      onReorder={setPriorities}
+      className="w-full"
+      renderItem={({ label, emoji }, index) => (
+        <span className="flex items-center gap-2 text-sm">
+          <span className="w-4 text-center tabular-nums text-muted-foreground">
+            {index + 1}
+          </span>
+          <span>{emoji}</span>
+          <span className="truncate">{label}</span>
+        </span>
+      )}
+    />
+  );
+}
 
 const ALIGNED_NUMBERS = [1.2, 3.4567, 120, 0.05];
 
@@ -87,6 +117,13 @@ export const STATE_ITEMS: ShowcaseItem[] = [
         <TableBlockSkeleton rows={3} />
       </div>
     ),
+  },
+  {
+    name: "ReorderList",
+    path: "src/components/ReorderList.tsx",
+    description:
+      "drag the handle to rearrange, rows spring out of the way. focus a handle and use up/down on a keyboard",
+    Demo: ReorderListDemo,
   },
   {
     name: "Kbd",
