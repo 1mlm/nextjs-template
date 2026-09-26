@@ -12,7 +12,7 @@ import {
   formatExactDate,
   formatRelativeDate,
 } from "@/utils/date";
-import { useIsClient } from "@/utils/useIsClient";
+import { useNow } from "@/utils/useNow";
 
 // relative date, a clock shows up on hover with the exact date, the elapsed
 // duration and the raw timestamp. same thing inside and outside tables
@@ -23,9 +23,10 @@ export function RelativeTime({
   date: string | Date;
   className?: string;
 }) {
-  const isClient = useIsClient();
-  if (!isClient) return null;
+  const nowMs = useNow();
+  if (nowMs === null) return null;
 
+  const now = new Date(nowMs);
   const target = new Date(date);
 
   return (
@@ -40,7 +41,7 @@ export function RelativeTime({
             className,
           )}
         >
-          {formatRelativeDate(target)}
+          {formatRelativeDate(target, now)}
           <Icon
             icon={Clock01Icon}
             className="size-3 opacity-0 transition-opacity group-hover/date:opacity-100 group-focus-visible/date:opacity-100 pointer-coarse:opacity-100"
@@ -54,7 +55,7 @@ export function RelativeTime({
         </span>
         <span className="inline-flex items-center gap-1.5">
           <Icon icon={Forward02Icon} />
-          {formatDetailedDuration(target)}
+          {formatDetailedDuration(target, now)}
         </span>
         <span className="inline-flex items-center gap-1.5">
           <Icon icon={CodeIcon} />

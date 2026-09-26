@@ -111,9 +111,11 @@ function FormDialogDemo() {
 }
 
 function RelativeTimeDemo() {
+  // 50s ago so "Just now" visibly flips to "1 minute ago" after a few seconds
+  const [editedAt] = useState(() => new Date(Date.now() - 50_000));
   return (
     <span className="text-sm">
-      edited <RelativeTime date={new Date(Date.now() - 35 * 60_000)} />
+      edited <RelativeTime date={editedAt} />
     </span>
   );
 }
@@ -184,7 +186,7 @@ export const OVERLAY_ITEMS: ShowcaseItem[] = [
     name: "RelativeTime",
     path: "src/components/RelativeTime.tsx",
     description:
-      "relative date, hover for the clock: exact date, elapsed time, timestamp. same one table date cells use",
+      "live relative date, hover for the clock: exact date, elapsed time ticking by the second, timestamp. same one table date cells use",
     Demo: RelativeTimeDemo,
   },
 ];
