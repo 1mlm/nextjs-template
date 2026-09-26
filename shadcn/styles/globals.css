@@ -374,3 +374,14 @@
     animation: none !important;
   }
 }
+
+/* the maintenance screen's icon, a little "someone's working on it" wobble */
+@keyframes wiggle {
+  0%,
+  100% {
+    rotate: -6deg;
+  }
+  50% {
+    rotate: 6deg;
+  }
+}

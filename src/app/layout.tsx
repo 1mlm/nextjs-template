@@ -7,6 +7,7 @@ import type { CSSProperties, PropsWithChildren } from "react";
 import { TooltipProvider } from "@/components/Tooltip";
 import { SidebarInset, SidebarProvider } from "@/shadcn/ui/sidebar";
 import { Toaster } from "@/shadcn/ui/sonner";
+import { Maintenance } from "./_maintenance/Maintenance";
 import { AppSidebar } from "./_sidebar/AppSidebar";
 import { MobileTopBar } from "./_sidebar/MobileTopBar";
 import { NewVersionToast } from "./NewVersionToast";
@@ -32,6 +33,19 @@ export default async function RootLayout({ children }: PropsWithChildren) {
   // catch: cookies() makes every route render dynamically instead of static
   const cookieStore = await cookies();
   const isSidebarOpen = cookieStore.get(SIDEBAR_COOKIE_NAME)?.value !== "false";
+
+  // flip MAINTENANCE_MODE=true in the env for planned downtime (a migration
+  // etc), every page becomes the maintenance screen. normal deploys don't
+  // need it, they swap over with zero downtime
+  const isUnderMaintenance = process.env.MAINTENANCE_MODE === "true";
+  if (isUnderMaintenance)
+    return (
+      <html lang="en" className={outfit.className}>
+        <body className="antialiased">
+          <Maintenance />
+        </body>
+      </html>
+    );
 
   return (
     <html lang="en" className={outfit.className}>
