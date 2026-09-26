@@ -10,6 +10,7 @@ import { type ReactNode, useState } from "react";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { Icon } from "@/components/Icon";
 import { ResponsivePopover } from "@/components/ResponsivePopover";
+import { ScrollRow } from "@/components/ScrollRow";
 import { Button } from "@/shadcn/ui/button";
 import { Input } from "@/shadcn/ui/input";
 import {
@@ -81,7 +82,8 @@ function PageJumpButton({
 }
 
 // the floating bar under a table: selection actions, filter reset and
-// pagination. renders nothing when there's nothing to show
+// pagination, always one row that scrolls sideways on a narrow phone.
+// renders nothing when there's nothing to show
 export function ActionBar<T>({
   currentPage,
   setPage,
@@ -114,90 +116,94 @@ export function ActionBar<T>({
   if (!canResetFilterAndSort && !hasSelection && pageCount <= 1) return null;
 
   return (
-    <div className="fixed inset-x-4 bottom-4 z-30 flex flex-wrap items-center justify-end gap-2 rounded-3xl border border-border bg-sidebar px-3 py-2 shadow-[0_0_16px_rgba(0,0,0,0.35)] corner-squircle sm:inset-x-auto sm:right-8 sm:bottom-8 sm:rounded-full">
-      {hasSelection && (
-        <>
-          <span className="flex h-9 items-center gap-1 rounded-full bg-muted pr-1 pl-3 text-sm font-medium tabular-nums corner-squircle">
-            {selectedCount} selected
-            <button
-              type="button"
-              aria-label="Clear selection"
-              onClick={clearSelection}
-              className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-background hover:text-foreground"
-            >
-              <Icon icon={Cancel01Icon} className="size-3.5" />
-            </button>
-          </span>
-          {selectionActions?.(selectedItems)}
-          {onDeleteSelected && (
-            <ConfirmButton
-              icon={Delete02Icon}
-              label={`Delete ${selectedCount} ${selectedCount === 1 ? "row" : "rows"}`}
-              confirmLabel="Delete"
-              holdSeconds={2}
-              onConfirm={async () => {
-                await onDeleteSelected(selectedItems);
-                clearSelection();
-              }}
-              trigger={
-                <Button variant="destructive" className="shadow-lg">
-                  <Icon icon={Delete02Icon} />
-                  Delete {selectedCount}
-                </Button>
-              }
+    <div className="fixed inset-x-4 bottom-4 z-30 flex justify-end rounded-full border border-border bg-sidebar px-2 py-2 shadow-[0_0_16px_rgba(0,0,0,0.35)] corner-squircle sm:inset-x-auto sm:right-8 sm:bottom-8 sm:max-w-[calc(100vw-4rem)]">
+      <ScrollRow>
+        {hasSelection && (
+          <>
+            <span className="flex h-9 items-center gap-1 rounded-full bg-muted pr-1 pl-3 text-sm font-medium tabular-nums corner-squircle">
+              {selectedCount} selected
+              <button
+                type="button"
+                aria-label="Clear selection"
+                onClick={clearSelection}
+                className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-background hover:text-foreground"
+              >
+                <Icon icon={Cancel01Icon} className="size-3.5" />
+              </button>
+            </span>
+            {selectionActions?.(selectedItems)}
+            {onDeleteSelected && (
+              <ConfirmButton
+                icon={Delete02Icon}
+                label={`Delete ${selectedCount} ${selectedCount === 1 ? "row" : "rows"}`}
+                confirmLabel="Delete"
+                holdSeconds={2}
+                onConfirm={async () => {
+                  await onDeleteSelected(selectedItems);
+                  clearSelection();
+                }}
+                trigger={
+                  <Button variant="destructive" className="shadow-lg">
+                    <Icon icon={Delete02Icon} />
+                    Delete {selectedCount}
+                  </Button>
+                }
+              />
+            )}
+            <ExtractButton
+              {...{ selectedItems, columns }}
+              filePrefix={exportFilePrefix}
             />
-          )}
-          <ExtractButton
-            {...{ selectedItems, columns }}
-            filePrefix={exportFilePrefix}
-          />
-        </>
-      )}
-      {canResetFilterAndSort && (
-        <Button
-          variant="outline"
-          className="shadow-lg"
-          onClick={resetFilterAndSort}
-        >
-          <Icon icon={BrushCleaningIcon} />
-          <span className="hidden sm:inline">Reset filters &amp; sorting</span>
-          <span className="sm:hidden">Reset</span>
-        </Button>
-      )}
-      {pageCount > 1 && (
-        <Pagination className="w-auto">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                aria-disabled={currentPage === 1}
-                className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-                onClick={(event) => {
-                  event.preventDefault();
-                  setPage(clampPage(currentPage - 1, pageCount));
-                }}
-              />
-            </PaginationItem>
-            <PaginationItem>
-              <PageJumpButton
-                {...{ currentPage, pageCount }}
-                onJump={setPage}
-              />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                aria-disabled={currentPage === pageCount}
-                className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-                onClick={(event) => {
-                  event.preventDefault();
-                  setPage(clampPage(currentPage + 1, pageCount));
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
+          </>
+        )}
+        {canResetFilterAndSort && (
+          <Button
+            variant="outline"
+            className="shadow-lg"
+            onClick={resetFilterAndSort}
+          >
+            <Icon icon={BrushCleaningIcon} />
+            <span className="hidden sm:inline">
+              Reset filters &amp; sorting
+            </span>
+            <span className="sm:hidden">Reset</span>
+          </Button>
+        )}
+        {pageCount > 1 && (
+          <Pagination className="w-auto">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  aria-disabled={currentPage === 1}
+                  className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setPage(clampPage(currentPage - 1, pageCount));
+                  }}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PageJumpButton
+                  {...{ currentPage, pageCount }}
+                  onJump={setPage}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  aria-disabled={currentPage === pageCount}
+                  className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setPage(clampPage(currentPage + 1, pageCount));
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
+      </ScrollRow>
     </div>
   );
 }
