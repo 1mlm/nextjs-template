@@ -1,7 +1,11 @@
 "use client";
 
 import {
+  Archive02Icon,
+  Calendar03Icon,
   Delete02Icon,
+  GridViewIcon,
+  LeftToRightListBulletIcon,
   PencilEdit02Icon,
   Rocket01Icon,
   Settings02Icon,
@@ -15,11 +19,48 @@ import { useState } from "react";
 import { Chip } from "@/components/Chip";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { SubmitButton } from "@/components/form/SubmitButton";
+import { HoldButton } from "@/components/HoldButton";
 import { MiniButton, MiniButtonTone } from "@/components/MiniButton";
+import { type SlidingTab, SlidingTabs } from "@/components/SlidingTabs";
 import { toggleListItem } from "@/utils/array";
 import { getColorForKey, getColorStyle } from "@/utils/color";
 import type { ShowcaseItem } from "./ShowcaseCard";
 import { wait } from "./util";
+
+enum ViewMode {
+  Grid = "grid",
+  List = "list",
+  Calendar = "calendar",
+}
+
+const VIEW_TABS: SlidingTab<ViewMode>[] = [
+  { value: ViewMode.Grid, label: "Grid", icon: GridViewIcon },
+  { value: ViewMode.List, label: "List", icon: LeftToRightListBulletIcon },
+  { value: ViewMode.Calendar, label: "Calendar", icon: Calendar03Icon },
+];
+
+function SlidingTabsDemo() {
+  const [view, setView] = useState(ViewMode.Grid);
+  return <SlidingTabs tabs={VIEW_TABS} value={view} onValueChange={setView} />;
+}
+
+function HoldButtonDemo() {
+  const [archivedCount, setArchivedCount] = useState(0);
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <HoldButton
+        variant="outline"
+        icon={Archive02Icon}
+        onConfirm={() => setArchivedCount(archivedCount + 1)}
+      >
+        Hold to archive
+      </HoldButton>
+      <span className="text-xs text-muted-foreground tabular-nums">
+        archived {archivedCount} {archivedCount === 1 ? "time" : "times"}
+      </span>
+    </div>
+  );
+}
 
 const MINI_BUTTON_TONES: {
   tone: MiniButtonTone;
@@ -108,6 +149,19 @@ export const BUTTON_ITEMS: ShowcaseItem[] = [
         />
       </>
     ),
+  },
+  {
+    name: "HoldButton",
+    path: "src/components/HoldButton.tsx",
+    description:
+      "press and hold to confirm, letting go early cancels. haptic + chime when it lands",
+    Demo: HoldButtonDemo,
+  },
+  {
+    name: "SlidingTabs",
+    path: "src/components/SlidingTabs.tsx",
+    description: "the active pill springs over to the tab you pick",
+    Demo: SlidingTabsDemo,
   },
   {
     name: "Chip",

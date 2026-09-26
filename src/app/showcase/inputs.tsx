@@ -24,6 +24,7 @@ import {
   DateRangePicker,
   DateTimePicker,
 } from "@/components/DatePicker";
+import { EditableText } from "@/components/EditableText";
 import { FieldLabel } from "@/components/FieldLabel";
 import { FileDropZone } from "@/components/FileDropZone";
 import { NumberTextInput } from "@/components/NumberTextInput";
@@ -32,6 +33,7 @@ import { SuggestionInput } from "@/components/SuggestionInput";
 import type { CustomTableEnumValue } from "@/components/table/columns";
 import { SegmentedPicker } from "@/components/table/SegmentedPicker";
 import type { ShowcaseItem } from "./ShowcaseCard";
+import { wait } from "./util";
 
 enum Status {
   Active = "active",
@@ -142,6 +144,27 @@ function SuggestionInputDemo() {
       placeholder="City (try typing an a)"
       className="w-full"
     />
+  );
+}
+
+function EditableTextDemo() {
+  const [title, setTitle] = useState("Q4 roadmap");
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <EditableText
+        value={title}
+        className="text-lg font-semibold"
+        onSave={async (nextTitle) => {
+          await wait(600);
+          if (nextTitle.toLowerCase() === "oops")
+            throw new Error("the server said no, try anything else");
+          setTitle(nextTitle);
+        }}
+      />
+      <span className="text-xs text-muted-foreground">
+        click the title, "oops" fails
+      </span>
+    </div>
   );
 }
 
@@ -259,6 +282,13 @@ export const INPUT_ITEMS: ShowcaseItem[] = [
     description:
       "free text with past values underneath, a datalist that respects the theme",
     Demo: SuggestionInputDemo,
+  },
+  {
+    name: "EditableText",
+    path: "src/components/EditableText.tsx",
+    description:
+      "click to edit in place, enter or click away saves, escape reverts. shows the new text right away while saving",
+    Demo: EditableTextDemo,
   },
   {
     name: "AvatarPicker + UserAvatar",
