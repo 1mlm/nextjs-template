@@ -13,12 +13,12 @@ import { Icon } from "@/components/Icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import { UserAvatar } from "@/components/UserAvatar";
 import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/shadcn/ui/sheet";
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/shadcn/ui/drawer";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { version } from "../../../package.json";
@@ -59,8 +59,9 @@ function useInstallPrompt() {
   return installEvent;
 }
 
-// the sheet itself is transparent, the visible part is a card inset from the
-// screen edges so it floats instead of being glued to the bottom
+// a vaul drawer (drag it down to close, like ios sheets) that's itself
+// transparent, the visible part is a card inset from the screen edges so it
+// floats instead of being glued to the bottom
 export function MenuSheet({ tabClassName }: { tabClassName: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -72,8 +73,8 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
   };
 
   return (
-    <Sheet {...{ open }} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
+    <Drawer {...{ open }} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
         <button
           type="button"
           onClick={() => triggerHaptic("selection")}
@@ -82,32 +83,33 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
           <Icon icon={MoreHorizontalIcon} className="size-5" />
           More
         </button>
-      </SheetTrigger>
-      <SheetContent
-        side="bottom"
-        showCloseButton={false}
+      </DrawerTrigger>
+      {/* the drawer's own handle sits outside the card, so it's hidden and
+      the card draws one inside itself. drag it down (or anywhere) to close */}
+      <DrawerContent
         aria-describedby={undefined}
-        className="border-none bg-transparent p-2 shadow-none"
+        className="border-none! bg-transparent p-2 [&>div:first-child]:hidden"
       >
-        <div className="flex flex-col gap-3 rounded-2xl bg-sidebar p-3.5 text-sidebar-foreground ring-1 ring-sidebar-border corner-squircle">
+        <div className="flex flex-col gap-3 rounded-2xl bg-sidebar p-3.5 pt-2 text-sidebar-foreground ring-1 ring-sidebar-border corner-squircle">
+          <span className="mx-auto h-1 w-10 rounded-full bg-sidebar-foreground/20" />
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2.5">
               <AppIcon />
               <span className="leading-tight">
-                <SheetTitle className="text-sm font-semibold">
+                <DrawerTitle className="text-sm font-semibold">
                   {APP_INFO.name}
-                </SheetTitle>
+                </DrawerTitle>
                 <span className="text-xs text-sidebar-foreground/60">
                   {APP_INFO.description}
                 </span>
               </span>
             </span>
-            <SheetClose
+            <DrawerClose
               aria-label="Close menu"
               className="grid size-7 place-items-center rounded-full text-sidebar-foreground/60 ring-1 ring-sidebar-border transition-colors hover:text-sidebar-foreground active:scale-95"
             >
               <Icon icon={Cancel01Icon} className="size-3.5" />
-            </SheetClose>
+            </DrawerClose>
           </div>
 
           <nav className="grid grid-cols-2 gap-1.5 [&>*:last-child:nth-child(odd)]:col-span-2">
@@ -185,7 +187,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
             <span>v{version}</span>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }
