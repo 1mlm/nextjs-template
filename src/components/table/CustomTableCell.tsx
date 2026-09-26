@@ -163,6 +163,7 @@ export function CustomTableCell<T>({
   item: T;
 }) {
   if (column.type === ColumnType.String) {
+    if (column.render) return column.render(item);
     const value = column.getString(item);
     if (!value) return <CustomTableEmptyValue />;
     const content =

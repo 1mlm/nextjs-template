@@ -80,7 +80,8 @@ const loadAttempts = { count: 0 };
 async function loadOrder() {
   await wait(1200);
   loadAttempts.count += 1;
-  if (loadAttempts.count === 1) throw new Error("showcase LazyDialog demo: first load fails on purpose");
+  if (loadAttempts.count === 1)
+    throw new Error("showcase LazyDialog demo: first load fails on purpose");
   return [
     { icon: PackageIcon, label: "Items", value: "3 mugs, 1 teapot" },
     { icon: Money03Icon, label: "Total", value: "420 MAD" },

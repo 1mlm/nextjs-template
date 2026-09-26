@@ -7,6 +7,7 @@ import {
 } from "./columns";
 import {
   type ColumnFilterField,
+  type CustomTableSort,
   columnMatchesFilter,
   compareColumnValues,
   getColumnFilterFields,
@@ -43,6 +44,40 @@ const readColumnField =
   (field: ColumnFilterField) =>
     filterValues[getFilterKey(columnId, field)] ?? "";
 
+type SortKey = NonNullable<CustomTableSort>;
+
+// compares by each key in turn until one breaks the tie
+function compareBySortKeys<T>(
+  columns: CustomTableColumn<T>[],
+  sortKeys: SortKey[],
+  a: T,
+  b: T,
+) {
+  return sortKeys.reduce((result, { columnId, dir }) => {
+    if (result !== 0) return result;
+    const column = columns.find(({ id }) => id === columnId);
+    if (!column) return 0;
+    const direction = dir === SortDirection.Desc ? -1 : 1;
+    return compareColumnValues(column, a, b) * direction;
+  }, 0);
+}
+
+// pinned rows go first in the order given, everything else keeps its place
+function movePinnedFirst<T>(
+  items: T[],
+  pinnedItemIds: string[],
+  getItemId: (item: T) => string,
+) {
+  const pinnedIds = new Set(pinnedItemIds);
+  const pinnedItems = pinnedItemIds.flatMap((id) =>
+    items.filter((item) => getItemId(item) === id),
+  );
+  return [
+    ...pinnedItems,
+    ...items.filter((item) => !pinnedIds.has(getItemId(item))),
+  ];
+}
+
 // owns everything url driven about what's visible: the search box, every
 // column's filter fields and the sort, and turns it into the filtered/sorted
 // list. `search`, `filterValues` and `sortRaw` are handed back too so the
@@ -53,12 +88,18 @@ export function useTableFilterSort<T>({
   filterable,
   sortable,
   searchQueryKey,
+  defaultSort,
+  pinnedItemIds,
+  getItemId,
 }: {
   columns: CustomTableColumn<T>[];
   items: T[];
   filterable: boolean;
   sortable: boolean;
   searchQueryKey: string;
+  defaultSort: SortKey[];
+  pinnedItemIds: string[];
+  getItemId: (item: T) => string;
 }) {
   const [search] = useQueryState(searchQueryKey, { defaultValue: "" });
   const [sortRaw, setSortRaw] = useQueryState("sort", { defaultValue: "" });
@@ -117,14 +158,23 @@ export function useTableFilterSort<T>({
         ),
       );
     });
-    if (!sort) return filtered;
-    const sortColumn = columns.find((column) => column.id === sort.columnId);
-    if (!sortColumn) return filtered;
+    // the user's own sort wins, defaultSort only orders an unsorted table
+    const sortKeys = sort ? [sort] : defaultSort;
     const sorted = [...filtered].sort((a, b) =>
-      compareColumnValues(sortColumn, a, b),
+      compareBySortKeys(columns, sortKeys, a, b),
     );
-    return sort.dir === SortDirection.Desc ? sorted.reverse() : sorted;
-  }, [items, columns, search, sort, filterValues, filterable]);
+    return movePinnedFirst(sorted, pinnedItemIds, getItemId);
+  }, [
+    items,
+    columns,
+    search,
+    sort,
+    defaultSort,
+    filterValues,
+    filterable,
+    pinnedItemIds,
+    getItemId,
+  ]);
 
   return {
     visibleItems,

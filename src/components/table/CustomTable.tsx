@@ -1,19 +1,10 @@
 "use client";
 
-import { BrushCleaningIcon, InboxIcon } from "@hugeicons/core-free-icons";
-import { useEffect, useRef } from "react";
+import { InboxIcon } from "@hugeicons/core-free-icons";
+import { type ReactNode, useEffect, useMemo, useRef } from "react";
 import { EmptyState } from "@/components/EmptyState";
-import { Icon } from "@/components/Icon";
 import { DEFAULT_SEARCH_QUERY_KEY } from "@/components/SearchBar";
-import { Button } from "@/shadcn/ui/button";
 import { Checkbox } from "@/shadcn/ui/checkbox";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/shadcn/ui/pagination";
 import {
   TableBody,
   TableCell,
@@ -22,16 +13,18 @@ import {
   TableRow,
 } from "@/shadcn/ui/table";
 import { cn } from "@/shadcn/utils";
+import { ActionBar } from "./ActionBar";
 import { CustomTableCell } from "./CustomTableCell";
 import { CustomTableColumnHeader } from "./CustomTableColumnHeader";
 import { CustomTableSkeletonRows } from "./CustomTableSkeletonRows";
 import { ColumnAlign, ColumnType, type CustomTableColumn } from "./columns";
-import { ExtractButton } from "./ExtractButton";
 import {
   type ColumnFilterField,
+  type CustomTableSort,
   getTriState,
   type SortDirection,
 } from "./filtering";
+import { getMergeRuns } from "./mergeRuns";
 import { useRowSelection } from "./useRowSelection";
 import { useScrollFade } from "./useScrollFade";
 import { useTableFilterSort } from "./useTableFilterSort";
@@ -43,6 +36,30 @@ const CENTERED_COLUMN_TYPES = new Set([
   ColumnType.Tags,
   ColumnType.Buttons,
 ]);
+
+// stable empties so a table without these doesn't rerun the sort every render
+const NO_SORT: NonNullable<CustomTableSort>[] = [];
+const NO_PINNED_IDS: string[] = [];
+
+// opaque mixes over the page surface, not translucent bg-x/15: the sticky
+// checkbox cell repaints the row color on itself and a see-through one showed
+// the other columns sliding underneath it
+const ROW_BACKGROUNDS = {
+  selected: "bg-[color-mix(in_oklch,var(--muted),var(--color-green-500)_15%)]",
+  pinned: "bg-[color-mix(in_oklch,var(--muted),var(--color-amber-400)_12%)]",
+  striped: "bg-[color-mix(in_oklch,var(--muted),var(--foreground)_5%)]",
+  plain: "bg-muted",
+};
+
+const getRowBackground = (
+  isSelected: boolean,
+  isPinned: boolean,
+  index: number,
+) => {
+  if (isSelected) return ROW_BACKGROUNDS.selected;
+  if (isPinned) return ROW_BACKGROUNDS.pinned;
+  return index % 2 === 1 ? ROW_BACKGROUNDS.striped : ROW_BACKGROUNDS.plain;
+};
 
 export function CustomTable<T>({
   items,
@@ -57,6 +74,10 @@ export function CustomTable<T>({
   exportFilePrefix = "export",
   onVisibleCountChange,
   emptyLabel = "items",
+  defaultSort = NO_SORT,
+  pinnedItemIds = NO_PINNED_IDS,
+  selectionActions,
+  onDeleteSelected,
 }: {
   items: T[];
   columns: CustomTableColumn<T>[];
@@ -75,6 +96,15 @@ export function CustomTable<T>({
   onVisibleCountChange?: (count: number) => void;
   // shown in the empty state, e.g. "users" -> "No users to show"
   emptyLabel?: string;
+  // tie breakers applied in order while the user hasn't picked a sort, and
+  // not counted as a sort for the reset button. what mergeAdjacent needs
+  defaultSort?: NonNullable<CustomTableSort>[];
+  // kept on top with a highlight in this order, e.g. useJustCreatedIds
+  pinnedItemIds?: string[];
+  // your own buttons in the action bar, only shown while rows are selected
+  selectionActions?: (items: T[]) => ReactNode;
+  // adds a confirm-gated bulk delete, throw to show an error in the confirm
+  onDeleteSelected?: (items: T[]) => Promise<void>;
 }) {
   const {
     visibleItems,
@@ -93,6 +123,9 @@ export function CustomTable<T>({
     filterable,
     sortable,
     searchQueryKey,
+    defaultSort,
+    pinnedItemIds,
+    getItemId,
   });
 
   useEffect(() => {
@@ -108,7 +141,13 @@ export function CustomTable<T>({
 
   // compared against the last seen key instead of just running on change,
   // otherwise the mount run wipes a deep-linked ?page=3
-  const filterSortKey = JSON.stringify([search, filterValues, sortRaw]);
+  // a newly pinned row lands on page 1, so jump there too
+  const filterSortKey = JSON.stringify([
+    search,
+    filterValues,
+    sortRaw,
+    pinnedItemIds,
+  ]);
   const lastFilterSortKeyRef = useRef(filterSortKey);
   useEffect(() => {
     if (lastFilterSortKeyRef.current === filterSortKey) return;
@@ -118,6 +157,7 @@ export function CustomTable<T>({
 
   const {
     selectedIds,
+    clearSelection,
     visibleSelectedCount,
     toggleRow,
     toggleAll,
@@ -130,10 +170,11 @@ export function CustomTable<T>({
 
   const canResetFilterAndSort =
     (filterable || sortable) && hasActiveFilterOrSort;
-  // selectedItems, not selectedIds, so a selected row that got deleted doesn't
-  // leave an empty action bar floating around
-  const hasSelection = Boolean(selectable) && selectedItems.length > 0;
-  const showActionBar = canResetFilterAndSort || hasSelection || pageCount > 1;
+
+  const mergeRuns = useMemo(
+    () => getMergeRuns(columns, paginatedItems),
+    [columns, paginatedItems],
+  );
 
   const { scrollContainerRef, checkboxColumnRef, maskImage } = useScrollFade(
     paginatedItems.length,
@@ -191,17 +232,28 @@ export function CustomTable<T>({
             {!loading &&
               paginatedItems.map((item, index) => {
                 const id = getItemId(item);
+                const isPinned = pinnedItemIds.includes(id);
+                const rowBackground = getRowBackground(
+                  selectedIds.has(id),
+                  isPinned,
+                  index,
+                );
                 return (
                   <TableRow
                     key={id}
                     className={cn(
                       "group/row",
-                      index % 2 === 1 && "bg-foreground/5",
-                      selectedIds.has(id) && "bg-green-500/15",
+                      rowBackground,
+                      isPinned && "animate-in fade-in-0 duration-500",
                     )}
                   >
                     {selectable && (
-                      <TableCell className="sticky left-0 z-10 border-r border-border/50 text-center">
+                      <TableCell
+                        className={cn(
+                          "sticky left-0 z-10 border-r border-border/50 text-center",
+                          rowBackground,
+                        )}
+                      >
                         <div className="flex justify-center pr-2!">
                           <Checkbox
                             checked={selectedIds.has(id)}
@@ -211,21 +263,32 @@ export function CustomTable<T>({
                         </div>
                       </TableCell>
                     )}
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.id}
-                        className={cn(
-                          "border-r border-border/50 last:border-r-0",
-                          column.type === ColumnType.String &&
-                            column.align === ColumnAlign.Right &&
-                            "text-right",
-                          CENTERED_COLUMN_TYPES.has(column.type) &&
-                            "text-center",
-                        )}
-                      >
-                        <CustomTableCell {...{ column, item }} />
-                      </TableCell>
-                    ))}
+                    {columns.map((column) => {
+                      const run = mergeRuns.get(column.id)?.[index];
+                      // swallowed by the tall cell of the row that started the run
+                      if (run && !run.isStart) return null;
+                      const isMergedCell = run !== undefined && run.length > 1;
+                      return (
+                        <TableCell
+                          key={column.id}
+                          rowSpan={isMergedCell ? run.length : undefined}
+                          className={cn(
+                            "border-r border-border/50 last:border-r-0",
+                            column.type === ColumnType.String &&
+                              column.align === ColumnAlign.Right &&
+                              "text-right",
+                            CENTERED_COLUMN_TYPES.has(column.type) &&
+                              "text-center",
+                            isMergedCell &&
+                              "border-b border-b-border bg-muted/60 align-top font-medium",
+                            column.getCellError?.(item) &&
+                              "bg-destructive/10 shadow-[inset_0_0_0_1px_var(--destructive)]",
+                          )}
+                        >
+                          <CustomTableCell {...{ column, item }} />
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 );
               })}
@@ -239,68 +302,22 @@ export function CustomTable<T>({
           className="border-t border-border"
         />
       )}
-      {showActionBar && (
-        <div className="fixed inset-x-4 bottom-4 flex flex-col items-end gap-2 sm:inset-x-auto sm:bottom-8 sm:right-8 sm:flex-row border border-border bg-sidebar px-4 py-2 rounded-full corner-squircle shadow-[0_0_16px_rgba(0,0,0,0.35)]">
-          {pageCount > 1 && (
-            <Pagination className="w-auto">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    className={
-                      currentPage === 1
-                        ? "pointer-events-none opacity-50"
-                        : undefined
-                    }
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage > 1) setPage(currentPage - 1);
-                    }}
-                  />
-                </PaginationItem>
-                <PaginationItem>
-                  <span className="px-2 text-sm whitespace-nowrap text-muted-foreground">
-                    Page {currentPage} of {pageCount}
-                  </span>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    className={
-                      currentPage === pageCount
-                        ? "pointer-events-none opacity-50"
-                        : undefined
-                    }
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (currentPage < pageCount) setPage(currentPage + 1);
-                    }}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
-          {canResetFilterAndSort && (
-            <Button
-              variant="outline"
-              className="shadow-lg"
-              onClick={resetFilterAndSort}
-            >
-              <Icon icon={BrushCleaningIcon} />
-              <span className="hidden sm:inline">
-                Reset filters &amp; sorting
-              </span>
-              <span className="sm:hidden">Reset</span>
-            </Button>
-          )}
-          {selectable && (
-            <ExtractButton
-              {...{ selectedItems, columns }}
-              filePrefix={exportFilePrefix}
-            />
-          )}
-        </div>
-      )}
+      <ActionBar
+        {...{
+          currentPage,
+          setPage,
+          pageCount,
+          canResetFilterAndSort,
+          resetFilterAndSort,
+          selectedItems,
+          clearSelection,
+          selectionActions,
+          onDeleteSelected,
+          columns,
+          exportFilePrefix,
+        }}
+        selectable={Boolean(selectable)}
+      />
     </div>
   );
 }

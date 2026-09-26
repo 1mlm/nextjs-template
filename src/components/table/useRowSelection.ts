@@ -40,8 +40,11 @@ export function useRowSelection<T>({
     selectedIds.has(getItemId(item)),
   );
 
+  const clearSelection = () => setSelectedIds(new Set());
+
   return {
     selectedIds,
+    clearSelection,
     visibleSelectedCount,
     toggleRow,
     toggleAll,

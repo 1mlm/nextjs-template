@@ -1,7 +1,7 @@
 "use client";
 
 import type { IconSvgElement } from "@hugeicons/react";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MiniButton, MiniButtonTone } from "@/components/MiniButton";
 import { ResponsivePopover } from "@/components/ResponsivePopover";
@@ -24,6 +24,7 @@ export function ConfirmButton({
   confirmText,
   confirmTextPlaceholder,
   disabled,
+  trigger,
   onConfirm,
 }: {
   icon: IconSvgElement;
@@ -36,6 +37,8 @@ export function ConfirmButton({
   confirmTextPlaceholder?: string;
   // outside reason to keep confirm locked (a required field left blank etc)
   disabled?: boolean;
+  // swaps the icon-only MiniButton for your own button, e.g. a labeled one
+  trigger?: ReactNode;
   onConfirm: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
@@ -85,7 +88,7 @@ export function ConfirmButton({
       onOpenChange={(next) => !pending && setOpen(next)}
       title={label}
       {...{ icon }}
-      trigger={<MiniButton {...{ icon, label, tone, className }} />}
+      trigger={trigger ?? <MiniButton {...{ icon, label, tone, className }} />}
       className="max-md:px-4 max-md:pb-6 md:w-auto"
     >
       {/* a form so the phone keyboard's enter/go key confirms too */}

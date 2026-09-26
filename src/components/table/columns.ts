@@ -37,6 +37,8 @@ export type CustomTableColumn<T> = {
   id: string;
   label: string;
   icon: IconSvgElement;
+  // tints the cell red, e.g. an editable cell holding an invalid value
+  getCellError?: (item: T) => boolean;
 } & (
   | {
       type: ColumnType.String;
@@ -51,6 +53,15 @@ export type CustomTableColumn<T> = {
       getString: (item: T) => string;
       // renders the value as a clickable button instead of plain text
       onClick?: (item: T) => void;
+      // fully custom cell (an inline input, a dropdown...). getString still
+      // drives sort, filter, search and export, this only changes what's drawn
+      render?: (item: T) => ReactNode;
+      // consecutive rows with the same value become one tall cell, only reads
+      // right while the rows are sorted by this column (see defaultSort)
+      mergeAdjacent?: boolean;
+      // groups by this instead of getString, for when two unrelated rows could
+      // display the same text (two blanks) and shouldn't merge
+      getMergeKey?: (item: T) => string;
     }
   | {
       type: ColumnType.Copy;

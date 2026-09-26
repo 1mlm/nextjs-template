@@ -1,20 +1,26 @@
 "use client";
 
 import {
+  Add01Icon,
   Alert02Icon,
   Calendar04Icon,
   CheckmarkBadge02Icon,
   Coins01Icon,
+  Copy01Icon,
   Delete02Icon,
   Key01Icon,
   Link01Icon,
   Mail01Icon,
   MoreVerticalIcon,
+  Note01Icon,
   StarIcon,
   Tag01Icon,
+  UserGroupIcon,
   UserIcon,
 } from "@hugeicons/core-free-icons";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import { ErrorTooltip } from "@/components/ErrorTooltip";
+import { Icon } from "@/components/Icon";
 import { SearchBar } from "@/components/SearchBar";
 import { CustomTable } from "@/components/table/CustomTable";
 import {
@@ -25,13 +31,19 @@ import {
   StringFilterType,
 } from "@/components/table/columns";
 import { DeleteRowMenuItem } from "@/components/table/DeleteRowMenuItem";
+import { SortDirection } from "@/components/table/filtering";
 import { CopyMenuItem, RowMenu } from "@/components/table/RowMenu";
+import { useJustCreatedIds } from "@/components/table/useJustCreatedIds";
 import { useOptimisticRowRemoval } from "@/components/table/useOptimisticRowRemoval";
+import { Button } from "@/shadcn/ui/button";
+import { Input } from "@/shadcn/ui/input";
+import { useCopyToClipboard } from "@/utils/clipboard";
 
 type Row = {
   id: string;
   name: string;
   email: string;
+  team: string;
   url: string;
   credits: number;
   status: keyof typeof statusOptions | undefined;
@@ -73,19 +85,22 @@ const LAST_NAMES = [
   "Fassi",
 ];
 const STATUSES = ["ACTIVE", "PENDING", "BANNED", undefined] as const;
+const TEAMS = ["Design", "Engineering", "Growth", "Support"];
+const NOTE_MAX_LENGTH = 20;
 
 // fixed epoch, not Date.now(), a module-scope clock read differs between the
 // server render and the client hydration and blows up as a mismatch
 const EPOCH = new Date("2026-07-27T12:00:00Z").getTime();
 
 // deterministic so server and client render the same rows
-const ROWS: Row[] = Array.from({ length: 43 }, (_, i) => {
+const makeRow = (i: number): Row => {
   const name = `${FIRST_NAMES[i % FIRST_NAMES.length]} ${LAST_NAMES[i % LAST_NAMES.length]}`;
   const labels = Object.keys(LABEL_COLORS).slice(0, i % 5);
   return {
     id: `usr_${String(i).padStart(3, "0")}_9f4c2ba7e1d${i}`,
     name,
     email: `${name.split(" ")[0]?.toLowerCase()}${i}@example.com`,
+    team: TEAMS[i % TEAMS.length] ?? "Support",
     url: `https://example.com/profile/${i}`,
     credits: (i * 137) % 5000,
     status: STATUSES[i % STATUSES.length],
@@ -93,7 +108,15 @@ const ROWS: Row[] = Array.from({ length: 43 }, (_, i) => {
     joinedAt: i % 7 === 0 ? undefined : new Date(EPOCH - i * 36_000_000),
     labels,
   };
-});
+};
+
+const ROWS = Array.from({ length: 43 }, (_, i) => makeRow(i));
+
+// groups the table by team so the merged team cells show up untouched
+const DEFAULT_SORT = [
+  { columnId: "team", dir: SortDirection.Asc },
+  { columnId: "name", dir: SortDirection.Asc },
+];
 
 const getRowId = (row: Row) => row.id;
 
@@ -128,6 +151,14 @@ const columns: CustomTableColumn<Row>[] = [
     icon: Mail01Icon,
     type: ColumnType.String,
     getString: (row) => row.email,
+  },
+  {
+    id: "team",
+    label: "Team",
+    icon: UserGroupIcon,
+    type: ColumnType.String,
+    mergeAdjacent: true,
+    getString: (row) => row.team,
   },
   {
     id: "credits",
@@ -185,15 +216,77 @@ const columns: CustomTableColumn<Row>[] = [
 
 // CustomTable/SearchBar read the url through nuqs (useSearchParams), and next
 // wants a suspense boundary around that on a static page or the build yells
+function CopyEmailsButton({ rows }: { rows: Row[] }) {
+  const { copied, copy } = useCopyToClipboard();
+  return (
+    <Button
+      variant="outline"
+      className="shadow-lg"
+      onClick={() => copy(rows.map((row) => row.email).join(", "))}
+    >
+      <Icon icon={Copy01Icon} />
+      {copied ? "Copied!" : "Copy emails"}
+    </Button>
+  );
+}
+
 function TableDemo() {
   const [resultCount, setResultCount] = useState(ROWS.length);
+  const [createdRows, setCreatedRows] = useState<Row[]>([]);
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  const allRows = useMemo(
+    () => [...createdRows, ...ROWS].filter((row) => !deletedIds.has(row.id)),
+    [createdRows, deletedIds],
+  );
+  const justCreatedIds = useJustCreatedIds(allRows, getRowId);
   const { visibleItems, markRemoved, unmarkRemoved } = useOptimisticRowRemoval(
-    ROWS,
+    allRows,
     getRowId,
   );
 
+  const addPerson = () =>
+    setCreatedRows((rows) => [
+      { ...makeRow(ROWS.length + rows.length), joinedAt: new Date() },
+      ...rows,
+    ]);
+
+  const getNote = (row: Row) => notes[row.id] ?? "";
+  const isNoteTooLong = (row: Row) => getNote(row).length > NOTE_MAX_LENGTH;
+
   const columnsWithActions: CustomTableColumn<Row>[] = [
     ...columns,
+    {
+      id: "note",
+      label: "Note",
+      icon: Note01Icon,
+      type: ColumnType.String,
+      getString: getNote,
+      getCellError: isNoteTooLong,
+      render: (row) => (
+        <span className="flex items-center gap-1.5">
+          <Input
+            value={getNote(row)}
+            onChange={(event) =>
+              setNotes((current) => ({
+                ...current,
+                [row.id]: event.target.value,
+              }))
+            }
+            placeholder="add a note"
+            aria-label={`Note for ${row.name}`}
+            aria-invalid={isNoteTooLong(row)}
+            className="h-7 min-w-32 bg-transparent"
+          />
+          {isNoteTooLong(row) && (
+            <ErrorTooltip
+              message={`${NOTE_MAX_LENGTH} characters max, this one has ${getNote(row).length}`}
+            />
+          )}
+        </span>
+      ),
+    },
     {
       id: "actions",
       label: "Actions",
@@ -217,11 +310,17 @@ function TableDemo() {
 
   return (
     <div className="flex flex-col gap-4 p-5">
-      <SearchBar
-        className="flex-1"
-        placeholder="Search people..."
-        trailing={`${resultCount} ${resultCount === 1 ? "person" : "people"}`}
-      />
+      <div className="flex gap-2">
+        <SearchBar
+          className="flex-1"
+          placeholder="Search people..."
+          trailing={`${resultCount} ${resultCount === 1 ? "person" : "people"}`}
+        />
+        <Button onClick={addPerson}>
+          <Icon icon={Add01Icon} />
+          <span className="max-sm:sr-only">Add person</span>
+        </Button>
+      </div>
       <CustomTable
         columns={columnsWithActions}
         items={visibleItems}
@@ -230,6 +329,14 @@ function TableDemo() {
         emptyLabel="people"
         exportFilePrefix="people"
         onVisibleCountChange={setResultCount}
+        defaultSort={DEFAULT_SORT}
+        pinnedItemIds={justCreatedIds}
+        selectionActions={(rows) => <CopyEmailsButton {...{ rows }} />}
+        onDeleteSelected={async (rows) =>
+          setDeletedIds(
+            (current) => new Set([...current, ...rows.map(getRowId)]),
+          )
+        }
       />
     </div>
   );
