@@ -25,6 +25,7 @@ import {
   type SortDirection,
 } from "./filtering";
 import { getMergeRuns } from "./mergeRuns";
+import { RowContextMenu } from "./RowContextMenu";
 import { useRowSelection } from "./useRowSelection";
 import { useScrollFade } from "./useScrollFade";
 import { useTableFilterSort } from "./useTableFilterSort";
@@ -81,6 +82,7 @@ export function CustomTable<T>({
   pinnedItemIds = NO_PINNED_IDS,
   selectionActions,
   onDeleteSelected,
+  getRowMenuItems,
 }: {
   items: T[];
   columns: CustomTableColumn<T>[];
@@ -108,6 +110,8 @@ export function CustomTable<T>({
   selectionActions?: (items: T[]) => ReactNode;
   // adds a confirm-gated bulk delete, throw to show an error in the confirm
   onDeleteSelected?: (items: T[]) => Promise<void>;
+  // your own ContextMenuItems under the built in copy/select ones on right click
+  getRowMenuItems?: (item: T) => ReactNode;
 }) {
   const {
     visibleItems,
@@ -243,57 +247,68 @@ export function CustomTable<T>({
                   index,
                 );
                 return (
-                  <TableRow
+                  <RowContextMenu
                     key={id}
-                    className={cn(
-                      "group/row",
-                      rowBackground,
-                      isPinned && "animate-in fade-in-0 duration-500",
-                    )}
+                    {...{ item, columns }}
+                    isSelected={selectedIds.has(id)}
+                    onToggleSelected={
+                      selectable ? () => toggleRow(id) : undefined
+                    }
+                    extraItems={getRowMenuItems?.(item)}
                   >
-                    {selectable && (
-                      <TableCell
-                        className={cn(
-                          "sticky left-0 z-10 border-r border-border/50 text-center",
-                          rowBackground,
-                        )}
-                      >
-                        <div className="flex justify-center pr-2!">
-                          <Checkbox
-                            checked={selectedIds.has(id)}
-                            onCheckedChange={() => toggleRow(id)}
-                            aria-label="Select row"
-                          />
-                        </div>
-                      </TableCell>
-                    )}
-                    {columns.map((column) => {
-                      const run = mergeRuns.get(column.id)?.[index];
-                      // swallowed by the tall cell of the row that started the run
-                      if (run && !run.isStart) return null;
-                      const isMergedCell = run !== undefined && run.length > 1;
-                      return (
+                    <TableRow
+                      className={cn(
+                        "group/row",
+                        rowBackground,
+                        isPinned && "animate-in fade-in-0 duration-500",
+                      )}
+                    >
+                      {selectable && (
                         <TableCell
-                          key={column.id}
-                          rowSpan={isMergedCell ? run.length : undefined}
                           className={cn(
-                            "border-r border-border/50 last:border-r-0",
-                            column.type === ColumnType.String &&
-                              column.align === ColumnAlign.Right &&
-                              "text-right",
-                            CENTERED_COLUMN_TYPES.has(column.type) &&
-                              "text-center",
-                            isMergedCell &&
-                              "border-b border-b-border bg-muted/60 align-top font-medium",
-                            column.getCellError?.(item) &&
-                              "bg-destructive/10 shadow-[inset_0_0_0_1px_var(--destructive)]",
+                            "sticky left-0 z-10 border-r border-border/50 text-center",
+                            rowBackground,
                           )}
                         >
-                          <CustomTableCell {...{ column, item }} />
+                          <div className="flex justify-center pr-2!">
+                            <Checkbox
+                              checked={selectedIds.has(id)}
+                              onCheckedChange={() => toggleRow(id)}
+                              aria-label="Select row"
+                            />
+                          </div>
                         </TableCell>
-                      );
-                    })}
-                  </TableRow>
+                      )}
+                      {columns.map((column) => {
+                        const run = mergeRuns.get(column.id)?.[index];
+                        // swallowed by the tall cell of the row that started the run
+                        if (run && !run.isStart) return null;
+                        const isMergedCell =
+                          run !== undefined && run.length > 1;
+                        return (
+                          <TableCell
+                            key={column.id}
+                            data-column-id={column.id}
+                            rowSpan={isMergedCell ? run.length : undefined}
+                            className={cn(
+                              "border-r border-border/50 last:border-r-0",
+                              column.type === ColumnType.String &&
+                                column.align === ColumnAlign.Right &&
+                                "text-right",
+                              CENTERED_COLUMN_TYPES.has(column.type) &&
+                                "text-center",
+                              isMergedCell &&
+                                "border-b border-b-border bg-muted/60 align-top font-medium",
+                              column.getCellError?.(item) &&
+                                "bg-destructive/10 shadow-[inset_0_0_0_1px_var(--destructive)]",
+                            )}
+                          >
+                            <CustomTableCell {...{ column, item }} />
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  </RowContextMenu>
                 );
               })}
           </TableBody>

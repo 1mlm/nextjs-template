@@ -36,6 +36,7 @@ import { CopyMenuItem, RowMenu } from "@/components/table/RowMenu";
 import { useJustCreatedIds } from "@/components/table/useJustCreatedIds";
 import { useOptimisticRowRemoval } from "@/components/table/useOptimisticRowRemoval";
 import { Button } from "@/shadcn/ui/button";
+import { ContextMenuItem } from "@/shadcn/ui/context-menu";
 import { Input } from "@/shadcn/ui/input";
 import { useCopyToClipboard } from "@/utils/clipboard";
 
@@ -332,6 +333,14 @@ function TableDemo() {
         defaultSort={DEFAULT_SORT}
         pinnedItemIds={justCreatedIds}
         selectionActions={(rows) => <CopyEmailsButton {...{ rows }} />}
+        getRowMenuItems={(row) => (
+          <ContextMenuItem asChild>
+            <a href={`mailto:${row.email}`}>
+              <Icon icon={Mail01Icon} />
+              Email {row.name.split(" ")[0]}
+            </a>
+          </ContextMenuItem>
+        )}
         onDeleteSelected={async (rows) =>
           setDeletedIds(
             (current) => new Set([...current, ...rows.map(getRowId)]),
