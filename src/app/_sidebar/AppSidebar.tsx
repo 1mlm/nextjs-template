@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
+import { Badge } from "@/shadcn/ui/badge";
 import { Button } from "@/shadcn/ui/button";
 import {
   Sidebar,
@@ -67,15 +68,8 @@ function NavLinks() {
   const { state } = useSidebar();
 
   return (
-    <nav className="relative flex flex-col gap-1">
-      <div
-        aria-hidden
-        className={cn(
-          "absolute top-4 bottom-4 left-[15.5px] w-px bg-sidebar-border",
-          FADE_ON_COLLAPSE,
-        )}
-      />
-      {NAV_ITEMS.map(({ href, label, icon }) => {
+    <nav className="flex flex-col gap-1">
+      {NAV_ITEMS.map(({ href, label, icon, badge }) => {
         const isActive = pathname === href;
         return (
           <Tooltip key={href}>
@@ -83,33 +77,32 @@ function NavLinks() {
               <Link
                 {...{ href }}
                 aria-current={isActive ? "page" : undefined}
-                className="group/link relative flex h-8 items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+                className={cn(
+                  "flex h-8 items-center gap-2 overflow-hidden rounded-lg px-2 text-sm whitespace-nowrap outline-none transition-colors corner-squircle hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+                  isActive
+                    ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground"
+                    : "font-medium text-sidebar-foreground/70",
+                )}
               >
-                <span
-                  className={cn(
-                    "grid size-8 shrink-0 place-items-center rounded-lg ring-1 transition-colors corner-squircle",
-                    isActive
-                      ? "bg-sidebar-foreground text-sidebar ring-sidebar-foreground"
-                      : "bg-sidebar text-sidebar-foreground/60 ring-sidebar-border group-hover/link:text-sidebar-foreground group-hover/link:ring-sidebar-foreground/25",
-                  )}
-                >
-                  <Icon {...{ icon }} className="size-4" />
-                </span>
-                <span
-                  className={cn(
-                    "text-sm whitespace-nowrap",
-                    isActive
-                      ? "font-semibold"
-                      : "font-medium text-sidebar-foreground/70 group-hover/link:text-sidebar-foreground",
-                    FADE_ON_COLLAPSE,
-                  )}
-                >
-                  {label}
-                </span>
+                <Icon {...{ icon }} className="size-4 shrink-0" />
+                <span className={FADE_ON_COLLAPSE}>{label}</span>
+                {badge ? (
+                  <Badge
+                    variant="secondary"
+                    className={cn("ml-auto", FADE_ON_COLLAPSE)}
+                  >
+                    {badge}
+                  </Badge>
+                ) : null}
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right" hidden={state !== "collapsed"}>
+            <TooltipContent
+              side="right"
+              hidden={state !== "collapsed"}
+              className="flex items-center gap-2"
+            >
               {label}
+              {badge ? <Badge variant="secondary">{badge}</Badge> : null}
             </TooltipContent>
           </Tooltip>
         );

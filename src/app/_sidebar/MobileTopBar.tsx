@@ -1,72 +1,54 @@
 "use client";
 
-import { Menu01Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { Icon } from "@/components/Icon";
-import { Button } from "@/shadcn/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/shadcn/ui/sheet";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
-import { APP_INFO, AppIcon, NAV_ITEMS } from "./nav";
+import { MenuSheet } from "./MenuSheet";
+import { NAV_ITEMS } from "./nav";
 
-// phones get a top bar instead of the sidebar, the menu opens as a bottom
-// sheet with the pages as a 2 column grid (odd one out spans the full row)
+const MAX_TABS = 4;
+
+const TAB_CLASS =
+  "flex flex-1 flex-col items-center gap-0.5 py-2 text-[0.65rem] font-medium transition-colors active:scale-95";
+
+// up to 4 pages fit as tabs, past that the bar keeps 3 so "More" still has
+// room, the rest are only reachable from the menu sheet
+const getTabItems = () =>
+  NAV_ITEMS.length > MAX_TABS ? NAV_ITEMS.slice(0, MAX_TABS - 1) : NAV_ITEMS;
+
+// phones get a tab bar at the top instead of the sidebar, "More" opens the
+// full menu sheet (every page, profile, log out)
 export function MobileTopBar() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const tabItems = getTabItems();
 
   return (
-    <header className="sticky top-2 z-20 m-2 flex items-center justify-between rounded-xl bg-sidebar py-2 pr-2 pl-3 text-sidebar-foreground ring-1 ring-sidebar-border corner-squircle md:hidden">
-      <span className="flex items-center gap-2.5">
-        <AppIcon />
-        <span className="text-sm font-semibold">{APP_INFO.name}</span>
-      </span>
-      <Sheet {...{ open }} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label="Open menu">
-            <Icon icon={Menu01Icon} className="size-4" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent
-          side="bottom"
-          className="rounded-t-2xl"
-          aria-describedby={undefined}
+    <nav className="sticky top-2 z-20 m-2 flex rounded-2xl bg-sidebar/90 px-1 text-sidebar-foreground ring-1 ring-sidebar-border backdrop-blur-sm corner-squircle md:hidden">
+      {tabItems.map(({ href, label, icon, badge }) => (
+        <Link
+          key={href}
+          {...{ href }}
+          onClick={() => triggerHaptic("selection")}
+          aria-current={pathname === href ? "page" : undefined}
+          className={cn(
+            TAB_CLASS,
+            pathname !== href && "text-sidebar-foreground/60",
+          )}
         >
-          <SheetHeader>
-            <SheetTitle>Menu</SheetTitle>
-          </SheetHeader>
-          <nav className="grid grid-cols-2 gap-2 px-4 pb-6 [&>*:last-child:nth-child(odd)]:col-span-2">
-            {NAV_ITEMS.map(({ href, label, icon }) => (
-              <Link
-                key={href}
-                {...{ href }}
-                onClick={() => {
-                  triggerHaptic("selection");
-                  setOpen(false);
-                }}
-                aria-current={pathname === href ? "page" : undefined}
-                className={cn(
-                  "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium ring-1 transition-colors corner-squircle active:scale-[0.97]",
-                  pathname === href
-                    ? "bg-foreground text-background ring-foreground"
-                    : "ring-border hover:bg-muted",
-                )}
-              >
-                <Icon {...{ icon }} className="size-4" />
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </SheetContent>
-      </Sheet>
-    </header>
+          <span className="relative">
+            <Icon {...{ icon }} className="size-5" />
+            {badge ? (
+              <span className="absolute -top-1.5 -right-2.5 grid h-4 min-w-4 place-items-center rounded-full bg-sidebar-accent px-1 text-[0.6rem] text-sidebar-accent-foreground">
+                {badge}
+              </span>
+            ) : null}
+          </span>
+          {label}
+        </Link>
+      ))}
+      <MenuSheet tabClassName={TAB_CLASS} />
+    </nav>
   );
 }

@@ -4,6 +4,7 @@ import {
   Home01Icon,
   Table01Icon,
 } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 import { Icon } from "@/components/Icon";
 
 // the one place a fork renames the app and edits the sidebar links
@@ -12,7 +13,24 @@ export const APP_INFO = {
   description: "starter kit",
 };
 
-export const NAV_ITEMS = [
+// no auth in the template, a fork swaps this for the real session user
+export const DEMO_USER = {
+  name: "Jane Doe",
+  email: "jane@example.com",
+};
+
+// decoration for the menu footer, nobody is ever reading these lol
+export const LEGAL_LINKS = [
+  { label: "Terms", tooltip: "Never" },
+  { label: "Privacy", tooltip: "Never ever" },
+];
+
+export const NAV_ITEMS: {
+  href: string;
+  label: string;
+  icon: IconSvgElement;
+  badge?: number;
+}[] = [
   { href: "/", label: "Home", icon: Home01Icon },
   { href: "/showcase", label: "Showcase", icon: GridViewIcon },
   { href: "/table", label: "Table", icon: Table01Icon },
