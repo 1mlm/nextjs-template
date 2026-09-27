@@ -1,6 +1,6 @@
 import {
-  CubeIcon,
   Cursor01Icon,
+  GiftIcon,
   Home01Icon,
   PuzzleIcon,
   TablePropertiesIcon,
@@ -58,6 +58,6 @@ export const getNavTransitionTypes = (
 
 export function AppIcon() {
   return (
-    <IconChip icon={CubeIcon} className="bg-sidebar-foreground text-sidebar" />
+    <IconChip icon={GiftIcon} className="bg-sidebar-foreground text-sidebar" />
   );
 }

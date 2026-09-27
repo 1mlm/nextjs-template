@@ -232,12 +232,13 @@
 @media (max-width: 767px) {
   [data-slot="dialog-content"] {
     top: auto;
-    bottom: 0;
+    /* sits on top of the phone keyboard, see KeyboardInset.tsx */
+    bottom: var(--keyboard-inset, 0px);
     left: 0;
     translate: none;
     width: 100% !important;
     max-width: none;
-    max-height: 90dvh;
+    max-height: calc(var(--visible-height, 100dvh) * 0.9);
     overflow-y: auto;
     border-radius: 1rem 1rem 0 0;
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
@@ -246,6 +247,12 @@
     --tw-enter-translate-y: 100%;
     --tw-exit-translate-y: 100%;
   }
+}
+
+/* same for the bottom sheets (combobox, pickers on phones) */
+[data-slot="sheet-content"][data-side="bottom"] {
+  bottom: var(--keyboard-inset, 0px);
+  max-height: calc(var(--visible-height, 100dvh) * 0.9);
 }
 
 /* shadcn's footer bleeds to the dialog edges with its own tinted strip and top
@@ -533,4 +540,91 @@ label:has(:disabled) {
    basically invisible. a foreground tint shows on any surface in both themes */
 [data-slot="skeleton"] {
   @apply bg-foreground/8;
+}
+
+/* the undo toast's bar, draining for the time left to undo */
+@keyframes toast-drain {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* loaded content arriving: each row pops in after the one above it
+   (.pop-rows) and the pieces inside a row pop one by one (.pop-items), so a
+   skeleton turning into content feels like it lands instead of just clicking
+   over. nth-child and not sibling-index() cuz safari and firefox lack it */
+.pop-rows > *,
+.pop-items > * {
+  animation: pop-in 460ms var(--ease-spring) both;
+  animation-delay: calc(var(--pop-row, 0) * 70ms + var(--pop-item, 0) * 50ms);
+}
+.pop-rows > :nth-child(2) {
+  --pop-row: 1;
+}
+.pop-rows > :nth-child(3) {
+  --pop-row: 2;
+}
+.pop-rows > :nth-child(4) {
+  --pop-row: 3;
+}
+.pop-rows > :nth-child(5) {
+  --pop-row: 4;
+}
+.pop-rows > :nth-child(6) {
+  --pop-row: 5;
+}
+.pop-rows > :nth-child(7) {
+  --pop-row: 6;
+}
+.pop-rows > :nth-child(8) {
+  --pop-row: 7;
+}
+.pop-items > :nth-child(2) {
+  --pop-item: 1;
+}
+.pop-items > :nth-child(3) {
+  --pop-item: 2;
+}
+.pop-items > :nth-child(4) {
+  --pop-item: 3;
+}
+.pop-items > :nth-child(5) {
+  --pop-item: 4;
+}
+.pop-items > :nth-child(6) {
+  --pop-item: 5;
+}
+.pop-items > :nth-child(7) {
+  --pop-item: 6;
+}
+.pop-items > :nth-child(8) {
+  --pop-item: 7;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    scale: 0.9;
+    translate: 0 6px;
+    filter: blur(3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pop-rows > *,
+  .pop-items > * {
+    animation: none;
+  }
+}
+
+/* the trigger is justify-between, so with an icon in front the value floated
+   to the middle and item-aligned selects lined their list up with that
+   floating text instead of the trigger. the value takes the room instead */
+[data-slot="select-value"] {
+  flex: 1;
+  justify-content: flex-start;
+  text-align: left;
 }

@@ -121,7 +121,9 @@ function useMeasuredShape(
 }
 
 // the block's painted outline, behind its content. overflow visible: the
-// bump hangs below the box
+// bump hangs below the box. the shadow falls on whatever is behind: the
+// canvas, or the C block around it (depth inside its mouth). the block
+// stacked below paints over it, so joints stay seamless
 function BlockShape({
   shape,
   fillClassName,
@@ -136,7 +138,7 @@ function BlockShape({
       width={shape.width}
       height={shape.height}
       className={cn(
-        "pointer-events-none absolute top-0 left-0 -z-10 overflow-visible",
+        "pointer-events-none absolute top-0 left-0 -z-10 overflow-visible [filter:drop-shadow(0_2px_0_rgb(0_0_0/0.3))_drop-shadow(0_4px_8px_rgb(0_0_0/0.25))]",
         fillClassName,
       )}
     >
@@ -502,7 +504,7 @@ export function StatementList({
       initial={{ height: 0 }}
       animate={{ height: dragHeight }}
       transition={{ type: "spring", bounce: 0, duration: 0.2 }}
-      className="w-40 rounded-[8px] bg-foreground/15"
+      className="w-40 rounded-l-[10px] rounded-r-[20px] bg-foreground/15"
     />
   );
 

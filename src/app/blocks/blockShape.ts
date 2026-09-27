@@ -10,7 +10,11 @@
 // a half covered edge pixel always has block color under it, never the canvas
 
 export const SPINE_WIDTH = 16;
-const CORNER_RADIUS = 8;
+// the left side, where holes and bumps sit: rounded but kept tight so the
+// connector never runs into a corner curve
+const CORNER_RADIUS = 10;
+// the right side is as round as the piece allows, half its height (a pill end)
+const getRightRadius = (height: number) => Math.min(height / 2, 20);
 // how square the corners are: 0.55 is a circle, higher is flatter (squircle)
 const CORNER_TENSION = 0.8;
 const CONNECTOR_WIDTH = 16;
@@ -126,10 +130,11 @@ export function getStatementPath({
     const top = mouthAbove ? section.top - UNDERLAP : section.top;
     const reachesBelow = mouthBelow || (isLast && hasBlockBelow);
     const height = bottom + (reachesBelow ? UNDERLAP : 0) - top;
+    const rightRadius = getRightRadius(section.height);
     const arm = getRoundedRect(0, top, width, height, {
       tl: isFirst && !hasBlockAbove ? radius : 0,
-      tr: radius,
-      br: radius,
+      tr: rightRadius,
+      br: rightRadius,
       bl: isLast && !hasBlockBelow ? radius : 0,
     });
     const hole = isFirst
@@ -155,8 +160,8 @@ export function getHatPath(
   return [
     getRoundedRect(0, 0, width, height + UNDERLAP, {
       tl: 16,
-      tr: 16,
-      br: CORNER_RADIUS,
+      tr: getRightRadius(height),
+      br: getRightRadius(height),
       bl: hasBlockBelow ? 0 : CORNER_RADIUS,
     }),
     getConnector(OUTER_CONNECTOR_X, height, false, BUMP_BLEED),

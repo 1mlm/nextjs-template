@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Skeleton } from "@/shadcn/ui/skeleton";
+import { cn } from "@/shadcn/utils";
 
 // the real row and its skeleton share this one layout, so when loading
 // finishes nothing moves a single pixel. text slots sit in text-sm and the
@@ -8,13 +9,20 @@ export function ListRow({
   leading,
   title,
   trailing,
+  className,
 }: {
   leading: ReactNode;
   title: ReactNode;
   trailing: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm">
+    <div
+      className={cn(
+        "flex items-center gap-3 rounded-lg border border-border p-3 text-sm",
+        className,
+      )}
+    >
       <span className="grid size-8 shrink-0 place-items-center">{leading}</span>
       <span className="min-w-0 flex-1 truncate">{title}</span>
       <span className="flex h-6 shrink-0 items-center">{trailing}</span>

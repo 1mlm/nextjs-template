@@ -57,26 +57,44 @@ export function EditableText({
     }
   };
 
+  // same box as the resting text, the input just sits where the text was:
+  // a hidden copy of the draft sizes it, so nothing around it moves
   if (isEditing)
     return (
-      <input
-        // biome-ignore lint/a11y/noAutofocus: the user just clicked to edit this, focus belongs here
-        autoFocus
-        value={draft}
-        onChange={(event) => setDraft(event.target.value)}
-        onFocus={(event) => event.target.select()}
-        onBlur={save}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") event.currentTarget.blur();
-          if (event.key !== "Escape") return;
-          isCancelling.current = true;
-          event.currentTarget.blur();
-        }}
-        className={cn(
-          "-mx-1.5 rounded-md bg-muted px-1.5 outline-none ring-2 ring-ring/50",
-          className,
-        )}
-      />
+      <span className="inline-flex items-center gap-1.5">
+        <span
+          className={cn(
+            "-mx-1.5 inline-flex items-center gap-1.5 rounded-md bg-muted px-1.5 ring-2 ring-ring/50",
+            className,
+          )}
+        >
+          <span className="inline-grid">
+            <span className="invisible col-start-1 row-start-1 whitespace-pre">
+              {draft || " "}
+            </span>
+            <input
+              // biome-ignore lint/a11y/noAutofocus: the user just clicked to edit this, focus belongs here
+              autoFocus
+              value={draft}
+              size={1}
+              onChange={(event) => setDraft(event.target.value)}
+              onFocus={(event) => event.target.select()}
+              onBlur={save}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") event.currentTarget.blur();
+                if (event.key !== "Escape") return;
+                isCancelling.current = true;
+                event.currentTarget.blur();
+              }}
+              className="col-start-1 row-start-1 w-full min-w-0 bg-transparent p-0 outline-none"
+            />
+          </span>
+          <Icon
+            icon={PencilEdit02Icon}
+            className="size-3.5 text-muted-foreground"
+          />
+        </span>
+      </span>
     );
 
   return (

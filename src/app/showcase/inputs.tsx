@@ -348,10 +348,13 @@ function CenteredSelectDemo() {
         <SelectValue />
       </SelectTrigger>
       {/* item-aligned opens the list with the picked option sitting right
-      where the trigger is, like a native mac menu, so your mouse is already on it */}
+      where the trigger is, like a native mac menu, so your mouse is already on
+      it. radix lines up the texts, so items get the trigger's height and the
+      same room on the left as the trigger (border + padding + icon + gap),
+      then the whole row lands exactly on the trigger */}
       <SelectContent position="item-aligned">
         {SEMESTERS.map((name) => (
-          <SelectItem key={name} value={name}>
+          <SelectItem key={name} value={name} className="h-8 pl-[calc(1px+0.625rem+1em+0.375rem)]">
             {name}
           </SelectItem>
         ))}

@@ -152,7 +152,7 @@ export const FEEL_ITEMS: ShowcaseItem[] = [
   },
   {
     name: "runUndoableAction",
-    path: "src/utils/undoableAction.ts",
+    path: "src/utils/undoableAction.tsx",
     description:
       "the one place toasts are used: defer the real mutation behind an undo window",
     Demo: UndoableDeleteDemo,

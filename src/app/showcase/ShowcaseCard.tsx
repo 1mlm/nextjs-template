@@ -35,7 +35,7 @@ export function ShowcaseCard({
       <CardHeader>
         <CardTitle className="font-mono text-sm">{name}</CardTitle>
         <CardDescription>{description}</CardDescription>
-        <span className="font-mono text-xs text-muted-foreground">
+        <span className="flex min-w-0 font-mono text-xs text-muted-foreground">
           <LabelTag
             icon={SourceCodeIcon}
             label={path}

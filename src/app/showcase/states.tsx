@@ -39,6 +39,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shadcn/ui/dialog";
+import { cn } from "@/shadcn/utils";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
 function LabelTagDemo() {
@@ -145,6 +146,7 @@ function ListRowSkeletonDemo() {
   const loadedRows = names?.map((name, index) => (
     <ListRow
       key={name}
+      className="pop-items"
       leading={<UserAvatar {...{ name }} />}
       title={name}
       trailing={
@@ -160,7 +162,7 @@ function ListRowSkeletonDemo() {
     <div className="flex w-full flex-col items-start gap-3">
       <div className="w-full">
         {loadedRows ? (
-          <div className="flex flex-col gap-2">{loadedRows}</div>
+          <div className="pop-rows flex flex-col gap-2">{loadedRows}</div>
         ) : (
           <ListRowSkeleton count={3} />
         )}
@@ -179,11 +181,14 @@ function CardGridSkeletonDemo() {
     <div className="flex w-full flex-col items-start gap-3">
       <div className="w-full">
         {cards ? (
-          <div className={CARD_GRID_CLASS}>
+          <div className={cn("pop-rows", CARD_GRID_CLASS)}>
             {cards.map(({ emoji, title, text }) => (
               <div
                 key={title}
-                className={`${CARD_HEIGHT_CLASS} flex flex-col justify-between rounded-xl bg-muted p-4`}
+                className={cn(
+                  CARD_HEIGHT_CLASS,
+                  "pop-items flex flex-col justify-between rounded-xl bg-muted p-4",
+                )}
               >
                 <span className="text-4xl">{emoji}</span>
                 <span className="flex flex-col">

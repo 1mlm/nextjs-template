@@ -2,7 +2,7 @@
 
 import { arc, pie } from "d3-shape";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { type PointerEvent, useState } from "react";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 
@@ -62,13 +62,21 @@ export function PieChart({
     if (id && id !== activeId) triggerHaptic("selection");
     setActiveId(id);
   };
+  // a mouse previews on hover. a finger fires enter and leave around every
+  // tap, so touch goes by taps instead: tap a slice to pick it, again to let go
+  const hoverWithMouse =
+    (id: string | undefined) => (event: PointerEvent) => {
+      if (event.pointerType === "mouse") activate(id);
+    };
+  const toggle = (id: string) => activate(id === activeId ? undefined : id);
 
   return (
     <div
       className={cn(
         // sized by its own box, not the screen: a narrow card on a wide
         // screen still stacks the legend under the donut
-        "@container",
+        // no text selection or ios callout from a long press on a slice
+        "@container touch-manipulation select-none [-webkit-touch-callout:none]",
         className,
       )}
     >
@@ -80,7 +88,7 @@ export function PieChart({
           initial={{ rotate: -40, scale: 0.8, opacity: 0 }}
           animate={{ rotate: 0, scale: 1, opacity: 1 }}
           transition={{ type: "spring", bounce: 0.3, duration: 0.8 }}
-          onPointerLeave={() => activate(undefined)}
+          onPointerLeave={hoverWithMouse(undefined)}
         >
           {slices.map(({ data: slice, startAngle, endAngle }) => {
             const direction = getSliceDirection(startAngle, endAngle);
@@ -96,7 +104,8 @@ export function PieChart({
                   opacity: activeId && !isActive ? 0.35 : 1,
                 }}
                 transition={{ type: "spring", bounce: 0.35, duration: 0.4 }}
-                onPointerEnter={() => activate(slice.id)}
+                onPointerEnter={hoverWithMouse(slice.id)}
+                onClick={() => toggle(slice.id)}
                 className="cursor-pointer outline-none"
               />
             );
@@ -124,10 +133,9 @@ export function PieChart({
           <li key={slice.id}>
             <button
               type="button"
-              onPointerEnter={() => activate(slice.id)}
-              onPointerLeave={() => activate(undefined)}
-              onFocus={() => activate(slice.id)}
-              onBlur={() => activate(undefined)}
+              onPointerEnter={hoverWithMouse(slice.id)}
+              onPointerLeave={hoverWithMouse(undefined)}
+              onClick={() => toggle(slice.id)}
               className={cn(
                 "flex w-full items-center gap-2 rounded-lg px-2 py-1 text-sm transition-colors",
                 slice.id === activeId ? "bg-muted" : "hover:bg-muted",

@@ -14,6 +14,7 @@ import { Maintenance } from "./_maintenance/Maintenance";
 import { AppSidebar } from "./_sidebar/AppSidebar";
 import { MobileTopBar } from "./_sidebar/MobileTopBar";
 import { APP_INFO } from "./_sidebar/nav";
+import { KeyboardInset } from "./KeyboardInset";
 
 const outfit = Outfit();
 
@@ -81,6 +82,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         right next to whatever you clicked */}
         <Toaster />
         <TapHaptics />
+        <KeyboardInset />
       </body>
     </html>
   );

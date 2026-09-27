@@ -1,8 +1,8 @@
-import { CubeIcon } from "@hugeicons/core-free-icons";
+import { GiftIcon } from "@hugeicons/core-free-icons";
 
-// the sidebar's cube, drawn as a plain full bleed square for ImageResponse.
+// the sidebar's gift, drawn as a plain full bleed square for ImageResponse.
 // no rounded corners on purpose, phones cut their own shape out of it, and
-// the cube sits well inside the middle 60% so no mask ever clips it
+// the gift sits well inside the middle 60% so no mask ever clips it
 export function drawAppIcon(size: number) {
   return (
     <div
@@ -26,7 +26,7 @@ export function drawAppIcon(size: number) {
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        {CubeIcon.map(([, { d, key }]) => (
+        {GiftIcon.map(([, { d, key }]) => (
           <path key={String(key)} d={String(d)} />
         ))}
       </svg>

@@ -220,8 +220,13 @@ export function CustomTable<T>({
             {/* z-20 so positioned stuff inside body cells (tag count badges,
             the sticky checkbox column) scrolls under the header, not over it */}
             <TableRow className="*:sticky *:top-0 *:z-20 *:outline *:outline-border *:text-center *:text-xs *:bg-muted *:px-1">
+              {/* ! cuz the row's *:z-20 is a variant and would beat a plain z-30,
+              then the other headers slid over this one when scrolling sideways */}
               {selectable && (
-                <TableHead ref={checkboxColumnRef} className="left-0 z-30 px-4">
+                <TableHead
+                  ref={checkboxColumnRef}
+                  className="left-0 z-30! px-4"
+                >
                   <div className="flex justify-center pr-2!">
                     <Checkbox
                       checked={getTriState(
