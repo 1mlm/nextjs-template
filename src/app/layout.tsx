@@ -14,7 +14,6 @@ import { Maintenance } from "./_maintenance/Maintenance";
 import { AppSidebar } from "./_sidebar/AppSidebar";
 import { MobileTopBar } from "./_sidebar/MobileTopBar";
 import { APP_INFO } from "./_sidebar/nav";
-import { NewVersionToast } from "./NewVersionToast";
 
 const outfit = Outfit();
 
@@ -78,11 +77,10 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         </NuqsAdapter>
         {/* barely ever use this. toasts are only for when there's nothing on
         screen to show feedback next to: a row that vanished and needs an undo
-        window (runUndoableAction) or a new deploy (NewVersionToast). everything
-        else gets inline feedback right next to whatever you clicked */}
+        window (runUndoableAction). everything else gets inline feedback
+        right next to whatever you clicked */}
         <Toaster />
         <TapHaptics />
-        <NewVersionToast />
       </body>
     </html>
   );

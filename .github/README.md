@@ -24,7 +24,7 @@
 
 Everything lives on `/showcase`, one card per component, so run `pnpm dev` and poke at them. `Ctrl/⌘ + K` finds any of them.
 
-- **App shell**: collapsible squircle sidebar with a profile footer, phone tab bar with a drag-to-close menu drawer, command palette, page transitions (view transitions), new-version toast, maintenance screen (`MAINTENANCE_MODE=true`), installable (manifest + generated icons)
+- **App shell**: collapsible squircle sidebar with a profile footer, phone tab bar with a drag-to-close menu drawer, command palette, page transitions (view transitions), maintenance screen (`MAINTENANCE_MODE=true`), installable (manifest + generated icons)
 - **`CustomTable`** (`src/components/table/`): filters, sort, pagination, selection with bulk actions, editable cells, merged cells (sticky group label), cells that expand over themselves when clipped, long text columns, icon-only headers, pinned new rows, right-click row menu, xlsx/csv export, full example on `/table`
 - **Blocks editor** (`src/app/blocks/`): scratch-style drag and drop programming: blocks with real notches and bumps that lock together, stacks snap by their corner and drag the blocks below along, parked stacks sit faded on the canvas. every block is defined once in `blocks.ts` (looks, plug rules, run, js output), runs step by step with the running block lit up
 - **Inputs**: item-aligned `Select`, `Combobox`, `MultiCombobox`, `SuggestionInput`, `EditableText`, date / range / date-time pickers, `NumberTextInput`, `FileDropZone`, `AvatarPicker` (crop + zoom), `SearchBar` (url synced)
