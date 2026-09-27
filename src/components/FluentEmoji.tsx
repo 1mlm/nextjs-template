@@ -148,8 +148,16 @@ export function FluentEmoji({
   return (
     <span
       className={cn("relative inline-block size-12 shrink-0", className)}
-      onPointerEnter={() => setIsHovered(true)}
-      onPointerLeave={() => setIsHovered(false)}
+      // a finger has no hover, so on touch a tap toggles it instead
+      onPointerEnter={(event) =>
+        event.pointerType === "mouse" && setIsHovered(true)
+      }
+      onPointerLeave={(event) =>
+        event.pointerType === "mouse" && setIsHovered(false)
+      }
+      onPointerUp={(event) =>
+        event.pointerType !== "mouse" && setIsHovered((wasOn) => !wasOn)
+      }
     >
       {theme ? (
         <ThemedEmoji {...{ entry, theme }} />

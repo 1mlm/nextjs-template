@@ -177,7 +177,7 @@ function FluentEmojiDemo() {
           animation={EmojiAnimation.Always}
           className="size-10"
         />
-        hover any of them to play it, or animation="always"
+        hover (or tap) any of them to play it, or animation="always"
       </div>
     </div>
   );
@@ -254,7 +254,7 @@ export const LOOK_ITEMS: ShowcaseItem[] = [
     name: "FluentEmoji",
     path: "src/components/FluentEmoji.tsx",
     description:
-      "microsoft's 3D emoji by name, animated on hover. a theme recolors every color inside the flat version with your tailwind colors, shading kept",
+      "microsoft's 3D emoji by name, animated on hover or tap. a theme recolors every color inside the flat version with your tailwind colors, shading kept",
     Demo: FluentEmojiDemo,
   },
   {
