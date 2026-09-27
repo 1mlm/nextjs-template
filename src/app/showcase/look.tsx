@@ -178,10 +178,13 @@ const FAKE_MAP_BACKGROUND = [
 // bulging inward to hold them
 function SquircleFuserDemo() {
   return (
-    <div
-      style={{ backgroundImage: FAKE_MAP_BACKGROUND }}
-      className="relative h-56 w-full overflow-hidden rounded-3xl bg-lime-800"
-    >
+    // the pills are siblings of the clipped frame, not inside it: inside the
+    // clip, the frame's half covered edge pixel bleeds green past the pill
+    <div className="relative h-56 w-full">
+      <div
+        style={{ backgroundImage: FAKE_MAP_BACKGROUND }}
+        className="absolute inset-0 overflow-hidden rounded-3xl rounded-tl-none bg-lime-800"
+      />
       <SquircleFuserContainer
         align="top-left"
         background="bg-card"

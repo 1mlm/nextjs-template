@@ -73,12 +73,17 @@ const LAYOUT_BY_ALIGN = {
 
 export type SquircleFuserAlign = keyof typeof LAYOUT_BY_ALIGN;
 
-// chrome rounds the fractional position and can leave a hairline gap in the
-// corner that peeks the content through, a 1px nudge further in hides it
-const CORNER_NUDGE_BY_ALIGN: Partial<Record<SquircleFuserAlign, string>> = {
+// the frame's edge usually lands on a fractional pixel, the half covered
+// pixel there shows the content through as a hairline. pushing the pill 1px
+// past the edge covers it fully. only works when the pill isn't inside the
+// frame's overflow clip, so render it next to the frame, not in it
+const EDGE_NUDGE_BY_ALIGN: Record<SquircleFuserAlign, string> = {
   "top-left": "-translate-x-px -translate-y-px",
+  "top-center": "-translate-y-px",
   "top-right": "translate-x-px -translate-y-px",
+  right: "translate-x-px",
   "bottom-left": "-translate-x-px translate-y-px",
+  "bottom-center": "translate-y-px",
   "bottom-right": "translate-x-px translate-y-px",
 };
 
@@ -96,7 +101,9 @@ function getFuserOverlapClass(at: string) {
 // a pill docked flush against the edge or corner of a framed area, squared
 // off where it touches and bridged with two concave slivers, so the frame
 // looks like it melts into the pill instead of a pill sitting on top of it.
-// `background` must be the frame's own color. ported from aui-map
+// `background` must be the frame's own color. docked in a corner, square off
+// that corner of the frame (rounded-tl-none...), a rounded clip under the
+// pill leaks a hairline arc of the content through. ported from aui-map
 export function SquircleFuserContainer({
   children,
   wrapperClassName,
@@ -123,7 +130,7 @@ export function SquircleFuserContainer({
         // w-max not w-fit, an absolute box with left 50% only gets half its
         // parent as fit-content room and wraps for no reason
         "relative w-max",
-        CORNER_NUDGE_BY_ALIGN[align],
+        EDGE_NUDGE_BY_ALIGN[align],
         wrapperClassName,
       )}
       {...{ style }}
