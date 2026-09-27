@@ -13,6 +13,7 @@ import {
   FLUENT_EMOJIS,
   FluentEmoji,
   type FluentEmojiId,
+  isThemeableEmoji,
 } from "@/components/FluentEmoji";
 import { Icon } from "@/components/Icon";
 import { ScrollRow } from "@/components/ScrollRow";
@@ -101,54 +102,62 @@ function FontsDemo() {
   );
 }
 
-const THEMES: { label: string; theme?: Color[] }[] = [
-  { label: "3D" },
-  { label: "Green", theme: ["green"] },
-  { label: "Sunset", theme: ["orange", "fuchsia"] },
-  { label: "Ocean", theme: ["indigo", "cyan"] },
-  { label: "Candy", theme: ["violet", "pink", "yellow"] },
+// undefined = microsoft's own 3D look
+const EMOJI_THEMES: (Color | undefined)[] = [
+  undefined,
+  "green",
+  "violet",
+  "sky",
+  "rose",
+  "amber",
 ];
 
 const EMOJI_IDS = Object.keys(FLUENT_EMOJIS) as FluentEmojiId[];
+const THEMEABLE_EMOJI_IDS = EMOJI_IDS.filter(isThemeableEmoji);
 
 function FluentEmojiDemo() {
-  const [themeLabel, setThemeLabel] = useState(THEMES[0]?.label);
-  const { theme } = THEMES.find(({ label }) => label === themeLabel) ?? {};
+  const [theme, setTheme] = useState<Color>();
+  const emojiClassName = "size-full transition-transform hover:scale-125";
 
   return (
     <div className="flex w-full flex-col gap-3">
       <div className="flex flex-wrap gap-1.5">
-        {THEMES.map(({ label, theme: optionTheme }) => (
+        {EMOJI_THEMES.map((option) => (
           <button
-            key={label}
+            key={option ?? "3d"}
             type="button"
-            onClick={() => setThemeLabel(label)}
+            onClick={() => setTheme(option)}
             className={cn(
-              "flex items-center gap-1.5",
-              getTogglePillClass(label === themeLabel),
+              "flex items-center gap-1.5 capitalize",
+              getTogglePillClass(option === theme),
             )}
           >
-            <span className="flex -space-x-1">
-              {optionTheme?.map((color) => (
-                <span
-                  key={color}
-                  style={{ background: getColorSwatch(color) }}
-                  className="size-3 rounded-full"
-                />
-              ))}
-            </span>
-            {label}
+            {option && (
+              <span
+                style={{ background: getColorSwatch(option) }}
+                className="size-3 rounded-full"
+              />
+            )}
+            {option ?? "3D"}
           </button>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
-        {EMOJI_IDS.map((emoji) => (
-          <FluentEmoji
-            key={emoji}
-            {...{ emoji, theme }}
-            className="size-full transition-transform hover:scale-125"
-          />
-        ))}
+        {theme
+          ? THEMEABLE_EMOJI_IDS.map((emoji) => (
+              <FluentEmoji
+                key={emoji}
+                {...{ emoji, theme }}
+                className={emojiClassName}
+              />
+            ))
+          : EMOJI_IDS.map((emoji) => (
+              <FluentEmoji
+                key={emoji}
+                {...{ emoji }}
+                className={emojiClassName}
+              />
+            ))}
       </div>
       <div className="flex items-center gap-3 text-sm text-muted-foreground">
         <FluentEmoji
@@ -236,7 +245,7 @@ export const LOOK_ITEMS: ShowcaseItem[] = [
     name: "FluentEmoji",
     path: "src/components/FluentEmoji.tsx",
     description:
-      "microsoft's 3D emoji by name, animated on hover or tap. a theme recolors every color inside the flat version with your tailwind colors, shading kept",
+      "microsoft's 3D emoji by name, animated on hover or tap. pick a color: the tool ones get redrawn in it, the colored parts move onto that tailwind ramp and the greys stay",
     Demo: FluentEmojiDemo,
   },
   {

@@ -15,21 +15,90 @@ type FluentEmojiEntry = {
   name: string;
   category: string;
   hasSkinTones?: boolean;
+  // a "tool" whose colored parts can move to any tailwind color and still
+  // look drawn that way. faces, food, hands and plants look wrong recolored
+  themeable?: boolean;
 };
 
 export const FLUENT_EMOJIS = {
-  rocket: { name: "Rocket", category: "Travel and places" },
+  compass: { name: "Compass", category: "Travel and places", themeable: true },
+  calendar: { name: "Tear-Off Calendar", category: "Objects", themeable: true },
+  spiralCalendar: {
+    name: "Spiral Calendar",
+    category: "Objects",
+    themeable: true,
+  },
+  sparkles: { name: "Sparkles", category: "Activities", themeable: true },
+  pushpin: { name: "Pushpin", category: "Objects", themeable: true },
+  roundPushpin: { name: "Round Pushpin", category: "Objects", themeable: true },
+  bell: { name: "Bell", category: "Objects", themeable: true },
+  lightBulb: { name: "Light Bulb", category: "Objects", themeable: true },
+  key: { name: "Key", category: "Objects", themeable: true },
+  locked: { name: "Locked", category: "Objects", themeable: true },
+  magnifyingGlass: {
+    name: "Magnifying Glass Tilted Left",
+    category: "Objects",
+    themeable: true,
+  },
+  rocket: { name: "Rocket", category: "Travel and places", themeable: true },
+  trophy: { name: "Trophy", category: "Activities", themeable: true },
+  gem: { name: "Gem Stone", category: "Objects", themeable: true },
+  shield: { name: "Shield", category: "Objects", themeable: true },
+  clipboard: { name: "Clipboard", category: "Objects", themeable: true },
+  bookmark: { name: "Bookmark", category: "Objects", themeable: true },
+  megaphone: { name: "Megaphone", category: "Objects", themeable: true },
+  folder: { name: "File Folder", category: "Objects", themeable: true },
+  hourglass: {
+    name: "Hourglass Done",
+    category: "Travel and places",
+    themeable: true,
+  },
+  alarmClock: {
+    name: "Alarm Clock",
+    category: "Travel and places",
+    themeable: true,
+  },
+  magnet: { name: "Magnet", category: "Objects", themeable: true },
+  crown: { name: "Crown", category: "Objects", themeable: true },
+  glowingStar: {
+    name: "Glowing Star",
+    category: "Travel and places",
+    themeable: true,
+  },
+  barChart: { name: "Bar Chart", category: "Objects", themeable: true },
+  chartIncreasing: {
+    name: "Chart Increasing",
+    category: "Objects",
+    themeable: true,
+  },
+  toolbox: { name: "Toolbox", category: "Objects", themeable: true },
+  creditCard: { name: "Credit Card", category: "Objects", themeable: true },
+  books: { name: "Books", category: "Objects", themeable: true },
+  bullseye: { name: "Bullseye", category: "Activities", themeable: true },
+  pen: { name: "Pen", category: "Objects", themeable: true },
+  memo: { name: "Memo", category: "Objects", themeable: true },
+  worldMap: {
+    name: "World Map",
+    category: "Travel and places",
+    themeable: true,
+  },
+  tickets: {
+    name: "Admission Tickets",
+    category: "Activities",
+    themeable: true,
+  },
+  videoGame: { name: "Video Game", category: "Activities", themeable: true },
+  graduationCap: {
+    name: "Graduation Cap",
+    category: "Objects",
+    themeable: true,
+  },
   fire: { name: "Fire", category: "Travel and places" },
   heart: { name: "Red Heart", category: "Smilies" },
   party: { name: "Party Popper", category: "Activities" },
-  sparkles: { name: "Sparkles", category: "Activities" },
   starStruck: { name: "Star-Struck", category: "Smilies" },
   cool: { name: "Smiling Face with Sunglasses", category: "Smilies" },
   rainbow: { name: "Rainbow", category: "Travel and places" },
-  crown: { name: "Crown", category: "Objects" },
-  gem: { name: "Gem Stone", category: "Objects" },
-  lightBulb: { name: "Light Bulb", category: "Objects" },
-  trophy: { name: "Trophy", category: "Activities" },
   hundred: { name: "Hundred Points", category: "Smilies" },
   ghost: { name: "Ghost", category: "Smilies" },
   robot: { name: "Robot", category: "Smilies" },
@@ -48,11 +117,20 @@ export const FLUENT_EMOJIS = {
   pray: { name: "Folded Hands", category: "Hand gestures", hasSkinTones: true },
   laptop: { name: "Laptop", category: "Objects" },
   moneyBag: { name: "Money Bag", category: "Objects" },
-  bell: { name: "Bell", category: "Objects" },
   check: { name: "Check Mark Button", category: "Symbols" },
 } satisfies Record<string, FluentEmojiEntry>;
 
 export type FluentEmojiId = keyof typeof FLUENT_EMOJIS;
+
+// only the tools take a theme, the type stops `<FluentEmoji emoji="pizza" theme=...>`
+export type ThemeableEmojiId = {
+  [Id in FluentEmojiId]: (typeof FLUENT_EMOJIS)[Id] extends { themeable: true }
+    ? Id
+    : never;
+}[FluentEmojiId];
+
+export const isThemeableEmoji = (id: FluentEmojiId): id is ThemeableEmojiId =>
+  "themeable" in FLUENT_EMOJIS[id];
 
 // "Red Heart" + 3D -> assets/Red heart/3D/red_heart_3d.png, the hands live
 // one folder deeper under their default (yellow) skin tone
@@ -99,16 +177,15 @@ function fetchSvg(url: string) {
 
 const IMAGE_CLASS = "size-full object-contain select-none";
 
-// every fill and gradient stop in the flat svg gets moved to the theme's
-// hue, each one keeping its own lightness and colorfulness, so the shading
-// and highlights survive. drawn through an <img> so nothing in a fetched
-// file can ever run
+// the flat svg with its colored parts moved onto the theme's tailwind ramp
+// (see recolorSvg), greys and whites untouched. drawn through an <img> so
+// nothing in a fetched file can ever run
 function ThemedEmoji({
   entry,
   theme,
 }: {
   entry: FluentEmojiEntry;
-  theme: Color[];
+  theme: Color;
 }) {
   const [svg, setSvg] = useState<string>();
   const url = getMicrosoftEmojiUrl(entry, "Color");
@@ -131,20 +208,21 @@ function ThemedEmoji({
   );
 }
 
-// `theme` swaps the 3D look for the flat one recolored with tailwind colors:
-// ["green"] is all greens, ["orange", "fuchsia"] runs the dark parts orange
-// and the light parts pink. themed ones don't animate, there's no animated svg
+// `theme="green"` swaps a tool emoji's 3D look for the flat one recolored
+// green, like it was drawn for your brand. themed ones don't animate, there's
+// no animated svg to recolor
 export function FluentEmoji({
   emoji,
   animation = EmojiAnimation.Hover,
   theme,
   className,
 }: {
-  emoji: FluentEmojiId;
   animation?: EmojiAnimation;
-  theme?: Color[];
   className?: string;
-}) {
+} & (
+  | { emoji: FluentEmojiId; theme?: undefined }
+  | { emoji: ThemeableEmojiId; theme: Color }
+)) {
   const [isHovered, setIsHovered] = useState(false);
   const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
   const entry = FLUENT_EMOJIS[emoji];

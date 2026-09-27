@@ -131,44 +131,59 @@ function oklchToHex(color: Oklch) {
     .join("")}`;
 }
 
-// "oklch(72.3% 0.219 149.579)" -> 149.579
-const getRampHue = (color: Color) =>
-  Number(/oklch\([^ ]+ [^ ]+ ([\d.]+)/.exec(colors[color][500])?.[1] ?? 0);
+// "oklch(72.3% 0.219 149.579)" -> { lightness: 0.723, chroma: 0.219, hue: 149.579 }
+function parseOklch(value: string): Oklch {
+  const [lightness = "0", chroma = "0", hue = "0"] =
+    /oklch\(([\d.]+)% ([\d.]+) ([\d.]+)/.exec(value)?.slice(1) ?? [];
+  return {
+    lightness: Number(lightness) / 100,
+    chroma: Number(chroma),
+    hue: Number(hue),
+  };
+}
 
-// greys, whites and near blacks (eyes, outlines, shines) stay as they are,
-// recoloring them turns a face into mush
-const NEUTRAL_CHROMA = 0.03;
+// a tailwind ramp (50 -> 950) sorted light to dark as oklch
+const getRamp = (color: Color) => Object.values(colors[color]).map(parseOklch);
+
+// the ramp's own chroma and hue at a given lightness, blended between the two
+// steps around it, so a recolored shade is one tailwind could have shipped
+function sampleRamp(ramp: Oklch[], lightness: number) {
+  const darkerIndex = ramp.findIndex((step) => step.lightness <= lightness);
+  const darker = ramp[darkerIndex === -1 ? ramp.length - 1 : darkerIndex];
+  const lighter = ramp[Math.max(darkerIndex - 1, 0)] ?? darker;
+  if (!darker || !lighter) return { chroma: 0, hue: 0 };
+  const span = lighter.lightness - darker.lightness;
+  const progress = span > 0 ? (lightness - darker.lightness) / span : 0;
+  const blend = (from: number, to: number) =>
+    from + (to - from) * Math.min(Math.max(progress, 0), 1);
+  return {
+    chroma: blend(darker.chroma, lighter.chroma),
+    hue: blend(darker.hue, lighter.hue),
+  };
+}
+
+// below this it's a grey, a white or a near black (paper, metal, eyes,
+// outlines, shines): those stay exactly as drawn
+const THEMED_MIN_CHROMA = 0.05;
 
 const HEX_PATTERN = /#[0-9a-f]{6}\b/gi;
 
-// every #rrggbb in the svg gets the theme's hue. with 2+ colors the hue runs
-// from the first (the emoji's darkest parts) to the last (its lightest), like
-// a gradient painted by the shading. measured per svg, most emoji are mostly
-// light so a fixed 0-100% scale would paint nearly everything the last color
-export function recolorSvg(svg: string, theme: Color[]) {
-  const hues = theme.map(getRampHue);
-  const colorfulLightnesses = (svg.match(HEX_PATTERN) ?? [])
-    .map(hexToOklch)
-    .filter(({ chroma }) => chroma >= NEUTRAL_CHROMA)
-    .map(({ lightness }) => lightness);
-  const darkest = Math.min(...colorfulLightnesses);
-  const lightnessRange = Math.max(...colorfulLightnesses) - darkest || 1;
-
-  const getHueForLightness = (lightness: number) => {
-    const progress = Math.min(
-      Math.max((lightness - darkest) / lightnessRange, 0),
-      1,
-    );
-    const position = progress * (hues.length - 1);
-    const from = hues[Math.floor(position)] ?? 0;
-    const to = hues[Math.ceil(position)] ?? from;
-    const shortestTurn = ((to - from + 540) % 360) - 180;
-    return from + shortestTurn * (position - Math.floor(position));
-  };
+// the recolor the aui-map compass and calendar got by hand: every colorful
+// shade (the "brand" parts) moves onto the tailwind ramp at the same
+// lightness, the neutrals are untouched, so it looks drawn in that color
+// from the start. a softer original stays softer (chroma scales with it)
+export function recolorSvg(svg: string, color: Color) {
+  const ramp = getRamp(color);
   return svg.replace(HEX_PATTERN, (hex) => {
-    const color = hexToOklch(hex);
-    if (color.chroma < NEUTRAL_CHROMA) return hex;
-    return oklchToHex({ ...color, hue: getHueForLightness(color.lightness) });
+    const original = hexToOklch(hex);
+    if (original.chroma < THEMED_MIN_CHROMA) return hex;
+    const { chroma, hue } = sampleRamp(ramp, original.lightness);
+    const softness = Math.min(Math.max(original.chroma / 0.14, 0.55), 1);
+    return oklchToHex({
+      lightness: original.lightness,
+      chroma: chroma * softness,
+      hue,
+    });
   });
 }
 
