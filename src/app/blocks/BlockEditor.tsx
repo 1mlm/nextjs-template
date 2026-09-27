@@ -160,7 +160,11 @@ function findDropTarget(
   y: number,
   node: BlockNode,
 ): DropTarget | undefined {
-  const elements = document.elementsFromPoint(x, y);
+  // the dragged block leaves the tree a render later than this runs, so its
+  // own body and slots are still on screen, dropping into itself would lose it
+  const elements = document
+    .elementsFromPoint(x, y)
+    .filter((element) => !element.closest(`[data-block="${node.id}"]`));
   if (elements.some((element) => element.closest("[data-palette]")))
     return { kind: DropKind.Trash };
 
@@ -253,6 +257,8 @@ export function BlockEditor() {
     const isFromPalette = pressedNode.id.startsWith("palette-");
     const rect = event.currentTarget.getBoundingClientRect();
     const start = { x: event.clientX, y: event.clientY };
+    // a second finger dragging another block gets its own listeners
+    const { pointerId } = event;
     const offset = { x: start.x - rect.left, y: start.y - rect.top };
     const state: {
       node: BlockNode;
@@ -270,6 +276,7 @@ export function BlockEditor() {
     };
 
     const handleMove = (moveEvent: globalThis.PointerEvent) => {
+      if (moveEvent.pointerId !== pointerId) return;
       const distance = Math.hypot(
         moveEvent.clientX - start.x,
         moveEvent.clientY - start.y,
@@ -296,7 +303,8 @@ export function BlockEditor() {
       });
     };
 
-    const handleUp = () => {
+    const handleUp = (upEvent: globalThis.PointerEvent) => {
+      if (upEvent.pointerId !== pointerId) return;
       window.removeEventListener("pointermove", handleMove);
       window.removeEventListener("pointerup", handleUp);
       window.removeEventListener("pointercancel", handleUp);

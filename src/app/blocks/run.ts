@@ -59,6 +59,8 @@ export async function runProgram({
       if (signal.aborted) throw new ProgramStoppedError();
       onStep(node.id);
       await new Promise((resolve) => setTimeout(resolve, stepMs));
+      // stop pressed during the pause, don't run the lit up block anyway
+      if (signal.aborted) throw new ProgramStoppedError();
       const definition = getBlockDefinition(node.type);
       if ("run" in definition) await definition.run(node, context);
     }

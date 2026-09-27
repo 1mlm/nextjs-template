@@ -85,8 +85,14 @@ export enum EmojiAnimation {
 // each svg downloads once however many emoji on the page use it
 const svgRequests = new Map<string, Promise<string>>();
 function fetchSvg(url: string) {
-  const request =
-    svgRequests.get(url) ?? fetch(url).then((response) => response.text());
+  const cached = svgRequests.get(url);
+  if (cached) return cached;
+  const request = fetch(url).then((response) => {
+    if (!response.ok) throw new Error(`emoji svg ${response.status}`);
+    return response.text();
+  });
+  // a failed download is forgotten so the next render tries again
+  request.catch(() => svgRequests.delete(url));
   svgRequests.set(url, request);
   return request;
 }
@@ -107,7 +113,9 @@ function ThemedEmoji({
   const [svg, setSvg] = useState<string>();
   const url = getMicrosoftEmojiUrl(entry, "Color");
   useEffect(() => {
-    fetchSvg(url).then(setSvg);
+    fetchSvg(url)
+      .then(setSvg)
+      .catch(() => setSvg(undefined));
   }, [url]);
   if (!svg) return null;
   const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(recolorSvg(svg, theme))}`;
