@@ -22,12 +22,12 @@ import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
 import { useCopyToClipboard } from "@/utils/clipboard";
 import { triggerConfetti } from "@/utils/confetti";
-import { triggerHaptic } from "@/utils/haptics";
+import { type HapticPreset, triggerHaptic } from "@/utils/haptics";
 import { Chime, playChime } from "@/utils/sound";
 import { runUndoableAction } from "@/utils/undoableAction";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
-const HAPTIC_PRESETS: { preset: string; icon: IconSvgElement }[] = [
+const HAPTIC_BUTTONS: { preset: HapticPreset; icon: IconSvgElement }[] = [
   { preset: "selection", icon: TouchInteraction01Icon },
   { preset: "light", icon: FeatherIcon },
   { preset: "medium", icon: Dumbbell01Icon },
@@ -106,13 +106,14 @@ export const FEEL_ITEMS: ShowcaseItem[] = [
     name: "triggerHaptic",
     path: "src/utils/haptics.ts",
     description:
-      "web-haptics presets, open this on your phone (does nothing on desktop)",
+      "buzz presets, open this on your phone. android buzzes from anywhere, iphones (ios 26.5+) only on a real tap, every button gets that automatically",
     Demo: () =>
-      HAPTIC_PRESETS.map(({ preset, icon }) => (
+      HAPTIC_BUTTONS.map(({ preset, icon }) => (
         <Button
           key={preset}
           size="sm"
           variant="outline"
+          data-haptic={preset}
           onClick={() => triggerHaptic(preset)}
         >
           <Icon {...{ icon }} />

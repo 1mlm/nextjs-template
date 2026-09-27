@@ -8,6 +8,7 @@ import type { CSSProperties, PropsWithChildren } from "react";
 import { TooltipProvider } from "@/components/Tooltip";
 import { SidebarInset, SidebarProvider } from "@/shadcn/ui/sidebar";
 import { Toaster } from "@/shadcn/ui/sonner";
+import { TapHaptics } from "@/utils/haptics";
 import { CommandPaletteProvider } from "./_command/CommandPalette";
 import { Maintenance } from "./_maintenance/Maintenance";
 import { AppSidebar } from "./_sidebar/AppSidebar";
@@ -80,6 +81,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         window (runUndoableAction) or a new deploy (NewVersionToast). everything
         else gets inline feedback right next to whatever you clicked */}
         <Toaster />
+        <TapHaptics />
         <NewVersionToast />
       </body>
     </html>
