@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  ArrowDown01Icon,
-  ArrowUp10Icon,
   Cancel01Icon,
   CheckIcon,
   FilterIcon,
   Sorting01Icon,
   SortingAZ02Icon,
+  SortingNineOneIcon,
+  SortingOneNineIcon,
   SortingZA01Icon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
@@ -439,8 +439,8 @@ const SORT_ICONS: Record<
   SortDirection,
   { numeric: IconSvgElement; text: IconSvgElement }
 > = {
-  [SortDirection.Asc]: { numeric: ArrowDown01Icon, text: SortingAZ02Icon },
-  [SortDirection.Desc]: { numeric: ArrowUp10Icon, text: SortingZA01Icon },
+  [SortDirection.Asc]: { numeric: SortingOneNineIcon, text: SortingAZ02Icon },
+  [SortDirection.Desc]: { numeric: SortingNineOneIcon, text: SortingZA01Icon },
 };
 
 const getSortIcon = (dir: SortDirection, numeric: boolean) =>

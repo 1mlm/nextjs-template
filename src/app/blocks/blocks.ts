@@ -1,5 +1,5 @@
 import {
-  AddCircleIcon,
+  Add01Icon,
   BubbleChatIcon,
   CodeIcon,
   DiceIcon,
@@ -64,7 +64,7 @@ export const CATEGORY_STYLES: Record<
     block: "bg-green-600",
     fill: "fill-green-600",
     slot: "bg-green-800",
-    icon: AddCircleIcon,
+    icon: Add01Icon,
   },
   [BlockCategory.Looks]: {
     label: "Looks",
@@ -207,7 +207,7 @@ export const BLOCK_DEFINITIONS = {
   },
   changeVariable: {
     category: BlockCategory.Variables,
-    icon: AddCircleIcon,
+    icon: Add01Icon,
     rows: [
       [
         { kind: PartKind.Text, text: "Change" },

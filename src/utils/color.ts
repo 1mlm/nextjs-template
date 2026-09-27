@@ -168,23 +168,54 @@ const THEMED_MIN_CHROMA = 0.05;
 
 const HEX_PATTERN = /#[0-9a-f]{6}\b/gi;
 
+function recolorHex(hex: string, ramp: Oklch[]) {
+  const original = hexToOklch(hex);
+  if (original.chroma < THEMED_MIN_CHROMA) return hex;
+  const { chroma, hue } = sampleRamp(ramp, original.lightness);
+  const softness = Math.min(Math.max(original.chroma / 0.14, 0.55), 1);
+  return oklchToHex({
+    lightness: original.lightness,
+    chroma: chroma * softness,
+    hue,
+  });
+}
+
+// fluent's inner shadows and glows are filters that paint one flat color,
+// written as a color matrix "0 0 0 0 r  0 0 0 0 g  0 0 0 0 b  0 0 0 a 0".
+// those hold the yellow highlights, a hex-only swap left them showing
+const FLAT_COLOR_MATRIX_PATTERN =
+  /values="0 0 0 0 ([\d.]+) 0 0 0 0 ([\d.]+) 0 0 0 0 ([\d.]+) 0 0 0 ([\d.]+) 0"/g;
+
+const channelToHexPair = (channel: string) =>
+  Math.round(Number(channel) * 255)
+    .toString(16)
+    .padStart(2, "0");
+
+const hexPairToChannel = (hex: string, start: number) =>
+  (Number.parseInt(hex.slice(start, start + 2), 16) / 255).toFixed(6);
+
+function recolorColorMatrix(ramp: Oklch[]) {
+  return (_match: string, r: string, g: string, b: string, alpha: string) => {
+    const hex = recolorHex(
+      `#${[r, g, b].map(channelToHexPair).join("")}`,
+      ramp,
+    );
+    const [red, green, blue] = [1, 3, 5].map((start) =>
+      hexPairToChannel(hex, start),
+    );
+    return `values="0 0 0 0 ${red} 0 0 0 0 ${green} 0 0 0 0 ${blue} 0 0 0 ${alpha} 0"`;
+  };
+}
+
 // the recolor the aui-map compass and calendar got by hand: every colorful
 // shade (the "brand" parts) moves onto the tailwind ramp at the same
 // lightness, the neutrals are untouched, so it looks drawn in that color
 // from the start. a softer original stays softer (chroma scales with it)
 export function recolorSvg(svg: string, color: Color) {
   const ramp = getRamp(color);
-  return svg.replace(HEX_PATTERN, (hex) => {
-    const original = hexToOklch(hex);
-    if (original.chroma < THEMED_MIN_CHROMA) return hex;
-    const { chroma, hue } = sampleRamp(ramp, original.lightness);
-    const softness = Math.min(Math.max(original.chroma / 0.14, 0.55), 1);
-    return oklchToHex({
-      lightness: original.lightness,
-      chroma: chroma * softness,
-      hue,
-    });
-  });
+  return svg
+    .replace(HEX_PATTERN, (hex) => recolorHex(hex, ramp))
+    .replace(FLAT_COLOR_MATRIX_PATTERN, recolorColorMatrix(ramp));
 }
 
 // the 500 shade as a css color, for swatches of a color picked at runtime

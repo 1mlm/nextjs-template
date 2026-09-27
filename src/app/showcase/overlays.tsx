@@ -6,7 +6,7 @@ import {
   ArrowRight01Icon,
   Calendar03Icon,
   DeliveryTruck01Icon,
-  InformationCircleIcon,
+  InformationSquareIcon,
   Invoice01Icon,
   Money03Icon,
   PackageIcon,
@@ -15,7 +15,7 @@ import {
   RefreshIcon,
   Rocket01Icon,
   Settings02Icon,
-  SparklesIcon,
+  StarIcon,
   Tick02Icon,
   UserAdd01Icon,
 } from "@hugeicons/core-free-icons";
@@ -310,7 +310,7 @@ export const OVERLAY_ITEMS: ShowcaseItem[] = [
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="outline" size="icon">
-            <Icon icon={InformationCircleIcon} />
+            <Icon icon={InformationSquareIcon} />
           </Button>
         </TooltipTrigger>
         <TooltipContent>hi, tap works too on phones</TooltipContent>
@@ -327,7 +327,7 @@ export const OVERLAY_ITEMS: ShowcaseItem[] = [
           <Button variant="outline">Open dialog</Button>
         </DialogTrigger>
         <DialogContent className="md:overflow-visible md:pt-10">
-          <DialogIconBadge icon={SparklesIcon} />
+          <DialogIconBadge icon={StarIcon} />
           <DialogHeader>
             <DialogTitle>Fancy dialog</DialogTitle>
             <DialogDescription>

@@ -2,9 +2,8 @@
 
 import {
   Alert02Icon,
-  CancelCircleIcon,
+  Cancel01Icon,
   CheckIcon,
-  CheckmarkCircle02Icon,
   Copy01Icon,
   Delete02Icon,
   Dumbbell01Icon,
@@ -12,6 +11,7 @@ import {
   Notification01Icon,
   PartyIcon,
   Target03Icon,
+  Tick02Icon,
   TouchInteraction01Icon,
   WeightScaleIcon,
 } from "@hugeicons/core-free-icons";
@@ -32,15 +32,15 @@ const HAPTIC_BUTTONS: { preset: HapticPreset; icon: IconSvgElement }[] = [
   { preset: "light", icon: FeatherIcon },
   { preset: "medium", icon: Dumbbell01Icon },
   { preset: "heavy", icon: WeightScaleIcon },
-  { preset: "success", icon: CheckmarkCircle02Icon },
+  { preset: "success", icon: Tick02Icon },
   { preset: "warning", icon: Alert02Icon },
-  { preset: "error", icon: CancelCircleIcon },
+  { preset: "error", icon: Cancel01Icon },
   { preset: "nudge", icon: Notification01Icon },
 ];
 
 const CHIME_ICONS: Record<Chime, IconSvgElement> = {
-  [Chime.Success]: CheckmarkCircle02Icon,
-  [Chime.Error]: CancelCircleIcon,
+  [Chime.Success]: Tick02Icon,
+  [Chime.Error]: Cancel01Icon,
 };
 
 function SoundCounterDemo() {

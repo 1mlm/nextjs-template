@@ -2,12 +2,12 @@
 
 import {
   ArrowUpDownIcon,
+  CrownIcon,
   GithubIcon,
   Logout01Icon,
   Search01Icon,
   Settings02Icon,
   SidebarLeftIcon,
-  SparklesIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import Link from "next/link";
@@ -190,6 +190,11 @@ const USER_MENU_ITEMS: {
   { label: "Log out", icon: Logout01Icon, isDestructive: true },
 ];
 
+// as tall as the two text lines, radius = the row's minus its padding, so
+// it sits concentric: same gap on every side, corners following the row's
+const CONCENTRIC_AVATAR_CLASS =
+  "size-9 rounded-[calc(var(--radius)-6px)] transition-[width,height] *:rounded-[inherit] after:rounded-[inherit] group-data-[collapsible=icon]:size-7 group-data-[collapsible=icon]:rounded-[calc(var(--radius)-2px)]";
+
 // you, at the bottom: avatar with an online dot, name, handle and plan. a
 // click opens your menu. collapsed it's just the avatar, name in the tooltip
 function UserFooter() {
@@ -203,15 +208,16 @@ function UserFooter() {
             onClick={() => triggerHaptic("selection")}
             className={cn(
               NAV_ROW_CLASS,
-              // px-0.5 so the 28px avatar still fits the 32px collapsed rail
-              "h-auto px-0.5 py-1.5 data-[state=open]:bg-sidebar-accent",
+              // same padding on every side so the avatar sits concentric in
+              // the row, 2px collapsed so the 28px avatar fits the 32px rail
+              "h-auto p-1.5 group-data-[collapsible=icon]:p-0.5 data-[state=open]:bg-sidebar-accent",
             )}
           >
             <span className="relative shrink-0">
               <UserAvatar
                 name={DEMO_USER.name}
                 src={DEMO_USER.avatarUrl}
-                className="size-7"
+                className={CONCENTRIC_AVATAR_CLASS}
               />
               <span className="absolute right-0 bottom-0 size-2.5 rounded-full bg-green-500 ring-2 ring-sidebar" />
             </span>
@@ -224,7 +230,7 @@ function UserFooter() {
               <span className="flex items-center gap-1.5 text-sm font-semibold">
                 {DEMO_USER.name}
                 <span className="flex items-center gap-0.5 rounded-md bg-amber-400/15 px-1 text-[0.6rem] font-bold text-amber-600 dark:text-amber-400">
-                  <Icon icon={SparklesIcon} className="size-2.5" />
+                  <Icon icon={CrownIcon} className="size-2.5" />
                   {DEMO_USER.plan}
                 </span>
               </span>

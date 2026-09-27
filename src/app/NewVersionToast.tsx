@@ -1,6 +1,6 @@
 "use client";
 
-import { RefreshIcon, SparklesIcon } from "@hugeicons/core-free-icons";
+import { RefreshIcon, StarIcon } from "@hugeicons/core-free-icons";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Icon } from "@/components/Icon";
@@ -19,7 +19,7 @@ const showNewVersionToast = () =>
     id: "new-version",
     description: "reload to get the latest stuff",
     duration: Number.POSITIVE_INFINITY,
-    icon: <Icon icon={SparklesIcon} className="size-4" />,
+    icon: <Icon icon={StarIcon} className="size-4" />,
     action: {
       label: (
         <span className="flex items-center gap-1">

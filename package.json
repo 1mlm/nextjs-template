@@ -13,8 +13,9 @@
     "verify": "pnpm check && pnpm biome && next build"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.6.0",
     "@haptics/core": "^2.1.0",
-    "@hugeicons/core-free-icons": "^4.2.0",
+    "@hugeicons/core-free-icons": "^4.3.5",
     "@hugeicons/react": "^1.1.6",
     "@number-flow/react": "^0.6.2",
     "@toolwind/corner-shape": "0.0.8-3",

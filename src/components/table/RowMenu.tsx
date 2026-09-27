@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckmarkCircle02Icon, Copy01Icon } from "@hugeicons/core-free-icons";
+import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   type ComponentProps,
@@ -66,7 +66,7 @@ export function CopyMenuItem({
   icon = Copy01Icon,
   label,
   copiedLabel,
-  copiedIcon = CheckmarkCircle02Icon,
+  copiedIcon = Tick02Icon,
 }: {
   value: string;
   icon?: IconSvgElement;

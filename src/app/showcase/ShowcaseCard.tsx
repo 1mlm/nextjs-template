@@ -1,4 +1,6 @@
+import { SourceCodeIcon } from "@hugeicons/core-free-icons";
 import type { ReactNode } from "react";
+import { LabelTag } from "@/components/LabelTag";
 import {
   Card,
   CardContent,
@@ -33,9 +35,13 @@ export function ShowcaseCard({
       <CardHeader>
         <CardTitle className="font-mono text-sm">{name}</CardTitle>
         <CardDescription>{description}</CardDescription>
-        <code className="truncate text-xs text-muted-foreground/70">
-          {path}
-        </code>
+        <span className="font-mono text-xs text-muted-foreground">
+          <LabelTag
+            icon={SourceCodeIcon}
+            label={path}
+            href={`https://github.com/1mlm/nextjs-template/blob/main/${path}`}
+          />
+        </span>
       </CardHeader>
       <CardContent className="flex flex-1 flex-wrap items-center justify-center gap-2">
         <Demo />

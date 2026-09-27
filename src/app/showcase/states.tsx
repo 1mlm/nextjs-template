@@ -1,12 +1,13 @@
 "use client";
 
 import {
-  CheckmarkCircle02Icon,
   Clock01Icon,
   File02Icon,
   InboxIcon,
   RefreshIcon,
+  SourceCodeIcon,
   Tag01Icon,
+  Tick02Icon,
   UnavailableIcon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
@@ -31,7 +32,45 @@ import { EnumBadge } from "@/components/table/CustomTableCell";
 import type { CustomTableEnumValue } from "@/components/table/columns";
 import { UserAvatar } from "@/components/UserAvatar";
 import { Button } from "@/shadcn/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/shadcn/ui/dialog";
 import type { ShowcaseItem } from "./ShowcaseCard";
+
+function LabelTagDemo() {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  return (
+    <p className="text-sm leading-7">
+      you attached{" "}
+      <LabelTag
+        icon={File02Icon}
+        label="Q3 report.pdf"
+        onOpen={() => setIsPreviewOpen(true)}
+      />{" "}
+      from{" "}
+      <LabelTag
+        icon={SourceCodeIcon}
+        label="README.md"
+        href="https://github.com/1mlm/nextjs-template/blob/main/.github/README.md"
+      />{" "}
+      to <LabelTag icon={Tag01Icon} label="finance" />
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Q3 report.pdf</DialogTitle>
+            <DialogDescription>
+              a popup tag opens something in place instead of leaving the page
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </p>
+  );
+}
 
 const PRIORITIES = [
   { id: "ship", label: "Ship the onboarding flow", emoji: "🚀" },
@@ -70,7 +109,7 @@ const FAKE_NAMES = [
   "Omar Fassi",
 ];
 const FAKE_STATUSES: CustomTableEnumValue[] = [
-  { label: "Active", icon: CheckmarkCircle02Icon, color: "green" },
+  { label: "Active", icon: Tick02Icon, color: "green" },
   { label: "Pending", icon: Clock01Icon, color: "amber" },
   { label: "Banned", icon: UnavailableIcon, color: "red" },
 ];
@@ -95,7 +134,7 @@ function FinishLoadingButton({
 }) {
   return (
     <Button variant="outline" size="sm" {...{ onClick }}>
-      <Icon icon={isLoading ? CheckmarkCircle02Icon : RefreshIcon} />
+      <Icon icon={isLoading ? Tick02Icon : RefreshIcon} />
       {isLoading ? "Finish loading" : "Load again"}
     </Button>
   );
@@ -274,11 +313,7 @@ export const STATE_ITEMS: ShowcaseItem[] = [
     name: "LabelTag",
     path: "src/components/LabelTag.tsx",
     description: "names a thing inside a sentence",
-    Demo: () => (
-      <p className="text-sm">
-        attached to <LabelTag icon={File02Icon} label="Q3 report.pdf" /> by you
-      </p>
-    ),
+    Demo: LabelTagDemo,
   },
   {
     name: "EnumBadge",
@@ -289,7 +324,7 @@ export const STATE_ITEMS: ShowcaseItem[] = [
         <EnumBadge
           value={{
             label: "Active",
-            icon: CheckmarkCircle02Icon,
+            icon: Tick02Icon,
             color: "green",
           }}
         />

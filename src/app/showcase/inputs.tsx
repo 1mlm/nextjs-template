@@ -2,14 +2,13 @@
 
 import {
   Calendar03Icon,
-  CheckmarkCircle02Icon,
   Clock01Icon,
   FileAttachmentIcon,
   Location01Icon,
   Money03Icon,
   Tag01Icon,
+  Tick02Icon,
   UnavailableIcon,
-  UserCircleIcon,
   UserIcon,
   UserSearch01Icon,
 } from "@hugeicons/core-free-icons";
@@ -59,7 +58,7 @@ enum Status {
 const STATUS_OPTIONS: Record<Status, CustomTableEnumValue> = {
   [Status.Active]: {
     label: "Active",
-    icon: CheckmarkCircle02Icon,
+    icon: Tick02Icon,
     color: "green",
   },
   [Status.Pending]: { label: "Pending", icon: Clock01Icon, color: "amber" },
@@ -126,7 +125,7 @@ function ComboboxDemo() {
       value={assignee}
       onValueChange={setAssignee}
       title="Assign someone"
-      icon={UserCircleIcon}
+      icon={UserIcon}
       placeholder="Assign someone"
       searchPlaceholder="Search by name or email..."
     />
