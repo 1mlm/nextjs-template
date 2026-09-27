@@ -229,7 +229,7 @@ async function createProject(formData: FormData) {
 }
 
 function FormDialogDemo() {
-  const { open, setOpen, error, formAction, pending } =
+  const { open, setOpen, error, failedCount, formAction, pending } =
     useFormDialogAction(createProject);
 
   return (
@@ -245,7 +245,7 @@ function FormDialogDemo() {
       description="Create a new project"
       submitIcon={Add01Icon}
       submitLabel="Create"
-      {...{ open, formAction, pending, error }}
+      {...{ open, formAction, pending, error, failedCount }}
     >
       <div className="flex flex-col gap-2">
         <FieldLabel htmlFor="project-name" required>
@@ -254,6 +254,7 @@ function FormDialogDemo() {
         <Input
           id="project-name"
           name="name"
+          required
           placeholder='type "oops" to fail'
         />
       </div>
@@ -298,7 +299,7 @@ export const OVERLAY_ITEMS: ShowcaseItem[] = [
     name: "FormDialog + useFormDialogAction",
     path: "src/components/form/",
     description:
-      "dialog form shell, spinner while pending, error buzzes + chimes, success closes with a chime. fields survive a failed submit",
+      "dialog form shell, spinner while pending. submit empty or type oops: the button and error shake, buzz + chime. success closes with a chime, fields survive a failed submit",
     Demo: FormDialogDemo,
   },
   {

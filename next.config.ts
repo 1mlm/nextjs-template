@@ -4,6 +4,8 @@ import "./src/env";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // bottom-left is where the sidebar's profile footer lives
+  devIndicators: { position: "bottom-right" },
   experimental: {
     // lets <ViewTransition> in layout.tsx animate route changes
     viewTransition: true,

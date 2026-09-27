@@ -16,8 +16,12 @@ export const APP_INFO = {
 
 // no auth in the template, a fork swaps this for the real session user
 export const DEMO_USER = {
-  name: "Jane Doe",
-  email: "jane@example.com",
+  name: "Malik",
+  handle: "@1mlm",
+  email: "malik@example.com",
+  avatarUrl: "https://github.com/1mlm.png",
+  profileUrl: "https://github.com/1mlm",
+  plan: "Pro",
 };
 
 // decoration for the menu footer, nobody is ever reading these lol

@@ -182,11 +182,11 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
             </button>
           )}
           <div className="flex items-center gap-2.5 rounded-lg p-2.5 ring-1 ring-sidebar-border">
-            <UserAvatar name={DEMO_USER.name} />
+            <UserAvatar name={DEMO_USER.name} src={DEMO_USER.avatarUrl} />
             <span className="min-w-0 flex-1 leading-tight">
               <p className="truncate text-sm font-semibold">{DEMO_USER.name}</p>
               <p className="truncate text-xs text-sidebar-foreground/60">
-                {DEMO_USER.email}
+                {DEMO_USER.handle}
               </p>
             </span>
             <button

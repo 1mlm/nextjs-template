@@ -11,8 +11,9 @@ import {
   UnavailableIcon,
   UserCircleIcon,
   UserIcon,
+  UserSearch01Icon,
 } from "@hugeicons/core-free-icons";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { AvatarPicker } from "@/components/AvatarPicker";
 import {
@@ -34,6 +35,8 @@ import { SearchBar } from "@/components/SearchBar";
 import { SuggestionInput } from "@/components/SuggestionInput";
 import type { CustomTableEnumValue } from "@/components/table/columns";
 import { SegmentedPicker } from "@/components/table/SegmentedPicker";
+import { Button } from "@/shadcn/ui/button";
+import { Input } from "@/shadcn/ui/input";
 import {
   Select,
   SelectContent,
@@ -41,6 +44,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shadcn/ui/select";
+import { cn } from "@/shadcn/utils";
+import { triggerHaptic } from "@/utils/haptics";
+import { shakeElement } from "@/utils/shake";
 import type { ShowcaseItem } from "./ShowcaseCard";
 import { wait } from "./util";
 
@@ -256,6 +262,75 @@ function DateTimePickerDemo({ hour12 }: { hour12: boolean }) {
   return <DateTimePicker value={date} onChange={setDate} {...{ hour12 }} />;
 }
 
+const TAKEN_USERNAMES = ["admin", "malik", "root"];
+
+enum CheckStatus {
+  Idle = "idle",
+  Checking = "checking",
+  Taken = "taken",
+  Free = "free",
+}
+
+const getCheckMessage = (status: CheckStatus, username: string) => {
+  if (status === CheckStatus.Taken) return `${username} is taken, try another`;
+  if (status === CheckStatus.Free) return "all yours";
+  return `taken: ${TAKEN_USERNAMES.join(", ")}`;
+};
+
+function UsernameCheckDemo() {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [username, setUsername] = useState("malik");
+  const [status, setStatus] = useState(CheckStatus.Idle);
+
+  const checkUsername = async () => {
+    setStatus(CheckStatus.Checking);
+    await wait(600);
+    const isTaken = TAKEN_USERNAMES.includes(username.trim().toLowerCase());
+    setStatus(isTaken ? CheckStatus.Taken : CheckStatus.Free);
+    if (!isTaken) return triggerHaptic("success");
+    triggerHaptic("error");
+    shakeElement(inputRef.current);
+  };
+
+  return (
+    <div className="flex w-full flex-col gap-1.5">
+      <div className="flex gap-2">
+        <Input
+          ref={inputRef}
+          value={username}
+          onChange={(event) => {
+            setUsername(event.target.value);
+            setStatus(CheckStatus.Idle);
+          }}
+          aria-invalid={status === CheckStatus.Taken}
+          aria-label="Username"
+        />
+        <Button
+          variant="outline"
+          onClick={checkUsername}
+          disabled={status === CheckStatus.Checking}
+        >
+          <Icon
+            icon={UserSearch01Icon}
+            isLoading={status === CheckStatus.Checking}
+          />
+          Check
+        </Button>
+      </div>
+      <span
+        className={cn(
+          "text-xs",
+          status === CheckStatus.Taken
+            ? "text-destructive"
+            : "text-muted-foreground",
+        )}
+      >
+        {getCheckMessage(status, username)}
+      </span>
+    </div>
+  );
+}
+
 const SEMESTERS = [
   "Spring 2026",
   "Summer Intersession 2026",
@@ -287,6 +362,13 @@ function CenteredSelectDemo() {
 }
 
 export const INPUT_ITEMS: ShowcaseItem[] = [
+  {
+    name: "shakeElement",
+    path: "src/utils/shake.ts",
+    description:
+      "the server said no: the field shakes its head. FormDialog also shakes its submit button on an invalid or failed submit",
+    Demo: UsernameCheckDemo,
+  },
   {
     name: "Select (item-aligned)",
     path: "shadcn/ui/select.tsx",

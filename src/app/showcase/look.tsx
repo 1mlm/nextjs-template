@@ -6,16 +6,7 @@ import {
   MinusSignIcon,
   PlusSignIcon,
 } from "@hugeicons/core-free-icons";
-import {
-  Bricolage_Grotesque,
-  Caveat,
-  Fraunces,
-  Geist,
-  Inter,
-  JetBrains_Mono,
-  Outfit,
-  Space_Grotesk,
-} from "next/font/google";
+import { Inter, Montserrat, Outfit, Space_Grotesk } from "next/font/google";
 import { useState } from "react";
 import {
   EmojiAnimation,
@@ -32,30 +23,18 @@ import { type Color, getColorSwatch } from "@/utils/color";
 import { triggerHaptic } from "@/utils/haptics";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
-// preload off: only this page uses them, no other route should download 8
-// fonts. next wants each loader call in its own module level const
+// the ones actually worth using. preload off: only this page shows them,
+// no other route should download them. next wants one module level const each
 const outfit = Outfit({ preload: false });
 const inter = Inter({ preload: false });
-const geist = Geist({ preload: false });
+const montserrat = Montserrat({ preload: false });
 const spaceGrotesk = Space_Grotesk({ preload: false });
-const bricolageGrotesque = Bricolage_Grotesque({ preload: false });
-const fraunces = Fraunces({ preload: false });
-const caveat = Caveat({ preload: false });
-const jetBrainsMono = JetBrains_Mono({ preload: false });
 
 const FONTS = [
   { name: "Outfit", importName: "Outfit", font: outfit },
   { name: "Inter", importName: "Inter", font: inter },
-  { name: "Geist", importName: "Geist", font: geist },
+  { name: "Montserrat", importName: "Montserrat", font: montserrat },
   { name: "Space Grotesk", importName: "Space_Grotesk", font: spaceGrotesk },
-  {
-    name: "Bricolage Grotesque",
-    importName: "Bricolage_Grotesque",
-    font: bricolageGrotesque,
-  },
-  { name: "Fraunces", importName: "Fraunces", font: fraunces },
-  { name: "Caveat", importName: "Caveat", font: caveat },
-  { name: "JetBrains Mono", importName: "JetBrains_Mono", font: jetBrainsMono },
 ];
 
 // the picked one goes solid, same pill for the font and emoji theme pickers
@@ -261,7 +240,7 @@ export const LOOK_ITEMS: ShowcaseItem[] = [
     name: "Fonts",
     path: "src/app/showcase/look.tsx",
     description:
-      "a few google fonts worth trying, tap one to preview it, tap the import to copy it",
+      "the four fonts worth using, tap one to preview it, tap the import to copy it",
     Demo: FontsDemo,
   },
 ];
