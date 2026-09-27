@@ -73,7 +73,7 @@ export function EditableText({
           event.currentTarget.blur();
         }}
         className={cn(
-          "-mx-1.5 rounded-md bg-muted px-1.5 outline-none ring-2 ring-ring/50 corner-squircle",
+          "-mx-1.5 rounded-md bg-muted px-1.5 outline-none ring-2 ring-ring/50",
           className,
         )}
       />
@@ -86,7 +86,7 @@ export function EditableText({
         onClick={() => setDraft(value)}
         disabled={isSaving}
         className={cn(
-          "group/editable -mx-1.5 inline-flex items-center gap-1.5 rounded-md px-1.5 text-left transition-colors corner-squircle hover:bg-muted disabled:opacity-60",
+          "group/editable -mx-1.5 inline-flex items-center gap-1.5 rounded-md px-1.5 text-left transition-colors hover:bg-muted disabled:opacity-60",
           !shownValue && "text-muted-foreground",
           className,
         )}

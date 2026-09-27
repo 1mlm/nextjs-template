@@ -98,7 +98,7 @@ export function Stepper({
                   aria-current={
                     state === StepState.Current ? "step" : undefined
                   }
-                  className="group/step flex items-center gap-2 rounded-lg p-1 pr-2 corner-squircle enabled:cursor-pointer enabled:hover:bg-muted"
+                  className="group/step flex items-center gap-2 rounded-lg p-1 pr-2 enabled:cursor-pointer enabled:hover:bg-muted"
                 >
                   <IconChip
                     icon={state === StepState.Done ? Tick02Icon : step.icon}

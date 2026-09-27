@@ -169,22 +169,14 @@
     background-color: var(--muted-foreground);
     }
 
-  /* Squircles everywhere without touching shadcn/ui sources. Button uses the
-     group/button class, not [data-slot="button"] — a button rendered as a
-     Dialog/Popover/etc trigger's asChild target loses its own data-slot to
-     the trigger's, but group/button is a plain class from buttonVariants'
-     base string and survives that merge */
-  [class*="group/button"],
-  [data-slot="input"],
-  [data-slot="input-group"],
-  [data-slot="badge"],
-  [data-slot="card"],
-  [data-slot="popover-content"],
-  [data-slot="skeleton"],
-  [data-slot="avatar"],
+  /* squircles everywhere, not opt in: anything with a rounded-* class
+     (ours, shadcn's, radix content, before:/after: bits) gets the squircle
+     corner, so a forgotten corner-squircle can't sneak a plain circle in.
+     the data-slots are the ones whose radius doesn't come from a class */
+  [class*="rounded"],
+  [class*="rounded"]::before,
+  [class*="rounded"]::after,
   [data-slot="avatar"]::after,
-  [data-slot="avatar-image"],
-  [data-slot="avatar-fallback"],
   [data-slot="sidebar-inner"],
   [data-slot="sidebar-inset"] {
     @apply corner-squircle;
@@ -529,4 +521,10 @@ label:has(:disabled) {
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32'><text x='2' y='26' font-size='24'>🎉</text></svg>")
       6 6,
     pointer;
+}
+
+/* react-easy-crop's round crop frame is a 50% border-radius with no class
+   to hook, squircled so it matches the avatar it produces */
+.reactEasyCrop_CropAreaRound {
+  @apply corner-squircle;
 }

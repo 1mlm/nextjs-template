@@ -50,7 +50,7 @@ export function Kbd({
       {keys.map((key) => (
         <kbd
           key={key}
-          className="inline-grid h-5 min-w-5 place-items-center rounded-md border border-b-2 border-border bg-muted px-1 font-sans text-[0.65rem] font-medium text-muted-foreground corner-squircle"
+          className="inline-grid h-5 min-w-5 place-items-center rounded-md border border-b-2 border-border bg-muted px-1 font-sans text-[0.65rem] font-medium text-muted-foreground"
         >
           {getKeyLabel(key)}
         </kbd>

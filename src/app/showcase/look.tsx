@@ -79,7 +79,7 @@ function FontsDemo() {
               }}
               className={cn(
                 font.className,
-                "shrink-0 rounded-lg px-2.5 py-1 text-sm whitespace-nowrap corner-squircle",
+                "shrink-0 rounded-lg px-2.5 py-1 text-sm whitespace-nowrap",
                 name === pickedName
                   ? "bg-foreground text-background"
                   : "bg-muted hover:bg-muted-foreground/20",
@@ -93,7 +93,7 @@ function FontsDemo() {
       <div
         className={cn(
           picked.font.className,
-          "flex flex-col gap-1 rounded-xl bg-muted p-4 corner-squircle",
+          "flex flex-col gap-1 rounded-xl bg-muted p-4",
         )}
       >
         <span className="text-4xl leading-tight font-bold">Aa Gg 0123</span>
@@ -107,7 +107,7 @@ function FontsDemo() {
       <button
         type="button"
         onClick={() => copy(snippet)}
-        className="cursor-copy truncate rounded-lg bg-muted px-3 py-2 text-left font-mono text-xs text-muted-foreground corner-squircle hover:text-foreground"
+        className="cursor-copy truncate rounded-lg bg-muted px-3 py-2 text-left font-mono text-xs text-muted-foreground hover:text-foreground"
       >
         {copied ? "copied!" : snippet}
       </button>
@@ -138,7 +138,7 @@ function FluentEmojiDemo() {
             type="button"
             onClick={() => setThemeLabel(label)}
             className={cn(
-              "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm corner-squircle",
+              "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm",
               label === themeLabel
                 ? "bg-foreground text-background"
                 : "bg-muted hover:bg-muted-foreground/20",
@@ -196,7 +196,7 @@ function SquircleFuserDemo() {
   return (
     <div
       style={{ backgroundImage: FAKE_MAP_BACKGROUND }}
-      className="relative h-56 w-full overflow-hidden rounded-3xl bg-lime-800 corner-squircle"
+      className="relative h-56 w-full overflow-hidden rounded-3xl bg-lime-800"
     >
       <SquircleFuserContainer
         align="top-left"

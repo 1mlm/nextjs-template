@@ -12,7 +12,7 @@ export function LabelTag({
   label: string;
 }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-lg corner-squircle bg-muted px-1.5 py-0.5 align-middle font-medium">
+    <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-1.5 py-0.5 align-middle font-medium">
       <Icon {...{ icon }} className="size-3.5 text-muted-foreground" />
       {label}
     </span>

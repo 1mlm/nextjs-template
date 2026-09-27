@@ -186,7 +186,7 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
                     value={`${heading} ${label}`}
                     keywords={hint ? [hint] : undefined}
                     onSelect={() => runAndClose(run)}
-                    className="cursor-pointer rounded-lg corner-squircle"
+                    className="cursor-pointer rounded-lg"
                   >
                     <Icon {...{ icon }} className="text-muted-foreground" />
                     <span className="flex-1 truncate">{label}</span>

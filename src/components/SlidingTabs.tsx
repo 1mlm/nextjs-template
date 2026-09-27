@@ -33,7 +33,7 @@ export function SlidingTabs<T extends string>({
     <div
       role="tablist"
       className={cn(
-        "inline-flex items-center gap-1 rounded-xl bg-muted p-1 corner-squircle",
+        "inline-flex items-center gap-1 rounded-xl bg-muted p-1",
         className,
       )}
     >
@@ -51,7 +51,7 @@ export function SlidingTabs<T extends string>({
               onValueChange(tab.value);
             }}
             className={cn(
-              "relative flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-colors corner-squircle",
+              "relative flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-colors",
               isActive
                 ? "text-foreground"
                 : "text-muted-foreground hover:text-foreground",
@@ -61,7 +61,7 @@ export function SlidingTabs<T extends string>({
               <motion.span
                 layoutId={pillLayoutId}
                 transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                className="absolute inset-0 rounded-lg bg-background shadow-sm corner-squircle"
+                className="absolute inset-0 rounded-lg bg-background shadow-sm"
               />
             )}
             <Icon icon={tab.icon} className="relative size-4" />

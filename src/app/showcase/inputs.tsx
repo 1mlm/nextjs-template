@@ -340,7 +340,7 @@ export const INPUT_ITEMS: ShowcaseItem[] = [
     name: "AvatarPicker + UserAvatar",
     path: "src/components/AvatarPicker.tsx",
     description:
-      "click the avatar, pick a photo, drag + zoom it into the circle. hands back a jpeg to upload",
+      "click the avatar, pick a photo, drag + zoom it into the squircle. hands back a jpeg to upload",
     Demo: AvatarPickerDemo,
   },
   {

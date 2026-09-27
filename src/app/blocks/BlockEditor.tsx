@@ -356,7 +356,7 @@ export function BlockEditor() {
         <section
           data-palette
           className={cn(
-            "relative flex flex-col gap-3 self-start rounded-2xl bg-muted p-3 corner-squircle lg:sticky lg:top-4",
+            "relative flex flex-col gap-3 self-start rounded-2xl bg-muted p-3 lg:sticky lg:top-4",
             dropTarget?.kind === DropKind.Trash && "ring-2 ring-destructive",
           )}
         >
@@ -372,7 +372,7 @@ export function BlockEditor() {
             ))}
           </div>
           {dropTarget?.kind === DropKind.Trash && (
-            <div className="absolute inset-0 grid place-items-center rounded-2xl bg-destructive/15 text-destructive backdrop-blur-sm corner-squircle">
+            <div className="absolute inset-0 grid place-items-center rounded-2xl bg-destructive/15 text-destructive backdrop-blur-sm">
               <span className="flex items-center gap-2 font-semibold">
                 <Icon icon={Delete02Icon} className="size-6" />
                 drop to delete
@@ -381,7 +381,7 @@ export function BlockEditor() {
           )}
         </section>
 
-        <section className="flex min-w-0 flex-col gap-3 overflow-x-auto rounded-2xl bg-muted/50 p-4 corner-squircle">
+        <section className="flex min-w-0 flex-col gap-3 overflow-x-auto rounded-2xl bg-muted/50 p-4">
           <div className="flex items-center gap-2">
             <Button
               onClick={() =>
@@ -419,7 +419,7 @@ export function BlockEditor() {
         </section>
 
         <section className="flex min-w-0 flex-col gap-3 self-start lg:sticky lg:top-4">
-          <div className="flex min-h-28 flex-col gap-1 rounded-2xl bg-muted p-3 font-mono text-sm corner-squircle">
+          <div className="flex min-h-28 flex-col gap-1 rounded-2xl bg-muted p-3 font-mono text-sm">
             <span className="text-xs font-sans font-medium text-muted-foreground">
               Output
             </span>
@@ -435,7 +435,7 @@ export function BlockEditor() {
               </span>
             ))}
           </div>
-          <pre className="overflow-x-auto rounded-2xl bg-muted p-3 text-xs leading-relaxed corner-squircle">
+          <pre className="overflow-x-auto rounded-2xl bg-muted p-3 text-xs leading-relaxed">
             <span className="mb-1 block font-sans font-medium text-muted-foreground">
               Same program as JavaScript
             </span>

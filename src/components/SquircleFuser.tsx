@@ -130,7 +130,7 @@ export function SquircleFuserContainer({
     >
       <div
         className={cn(
-          "flex items-center justify-center gap-2.5 corner-squircle",
+          "flex items-center justify-center gap-2.5",
           background,
           layout.pill,
           className,

@@ -47,7 +47,7 @@ function ReorderRow<T>({
       // scale only, animating boxShadow would wipe the ring (also a box-shadow)
       whileDrag={{ scale: 1.03 }}
       transition={{ type: "spring", bounce: 0.25, duration: 0.35 }}
-      className="relative flex items-center gap-2 rounded-xl bg-card p-2 ring-1 ring-border corner-squircle"
+      className="relative flex items-center gap-2 rounded-xl bg-card p-2 ring-1 ring-border"
     >
       {/* only the handle starts a drag, so text in the row stays selectable
       and scrolling a phone over the list doesn't grab rows. arrows work too */}
@@ -65,7 +65,7 @@ function ReorderRow<T>({
           triggerHaptic("selection");
           onReorder(moveItem(items, index, step));
         }}
-        className="grid size-7 shrink-0 cursor-grab touch-none place-items-center rounded-lg text-muted-foreground corner-squircle hover:bg-muted hover:text-foreground active:cursor-grabbing"
+        className="grid size-7 shrink-0 cursor-grab touch-none place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
       >
         <Icon icon={DragDropVerticalIcon} className="size-4" />
       </button>

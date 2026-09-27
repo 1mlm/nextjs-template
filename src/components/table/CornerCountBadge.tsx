@@ -11,7 +11,7 @@ export function CornerCountBadge({
     <button
       type="button"
       className={cn(
-        "absolute -right-1 -bottom-2 inline-flex items-center gap-1 rounded-full corner-squircle bg-popover px-1.5 py-0.5 text-xs shadow-sm ring-1 ring-border",
+        "absolute -right-1 -bottom-2 inline-flex items-center gap-1 rounded-full bg-popover px-1.5 py-0.5 text-xs shadow-sm ring-1 ring-border",
         className,
       )}
       {...props}

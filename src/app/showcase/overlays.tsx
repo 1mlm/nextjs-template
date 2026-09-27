@@ -62,7 +62,7 @@ function ResponsivePopoverDemo() {
         <Button variant="outline">
           <span
             style={getColorStyle(picked)}
-            className="size-4 rounded-sm ring-2 ring-current corner-squircle"
+            className="size-4 rounded-sm ring-2 ring-current"
           />
           Color: {picked}
         </Button>
@@ -79,7 +79,7 @@ function ResponsivePopoverDemo() {
               setOpen(false);
             }}
             style={getColorStyle(color)}
-            className="grid aspect-square place-items-center rounded-lg corner-squircle ring-offset-2 ring-offset-popover transition-[scale,box-shadow] duration-150 hover:scale-105 data-[picked=true]:scale-110 data-[picked=true]:shadow-[0_0_14px_2px_currentColor] data-[picked=true]:ring-2 data-[picked=true]:ring-current"
+            className="grid aspect-square place-items-center rounded-lg ring-offset-2 ring-offset-popover transition-[scale,box-shadow] duration-150 hover:scale-105 data-[picked=true]:scale-110 data-[picked=true]:shadow-[0_0_14px_2px_currentColor] data-[picked=true]:ring-2 data-[picked=true]:ring-current"
             data-picked={color === picked}
           >
             {color === picked && <Icon icon={Tick02Icon} className="size-5" />}
@@ -135,7 +135,7 @@ function StepperDemo() {
         currentIndex={stepIndex}
         onStepClick={setStepIndex}
       />
-      <div className="flex items-center gap-3 rounded-xl bg-muted p-3 corner-squircle">
+      <div className="flex items-center gap-3 rounded-xl bg-muted p-3">
         <Icon
           icon={currentStep?.icon ?? Rocket01Icon}
           className="size-5 text-muted-foreground"
@@ -206,7 +206,7 @@ function LazyDialogDemo() {
           {rows.map(({ icon, label, value }) => (
             <div
               key={label}
-              className="flex items-center gap-3 rounded-lg px-2 py-2 odd:bg-muted/50 corner-squircle"
+              className="flex items-center gap-3 rounded-lg px-2 py-2 odd:bg-muted/50"
             >
               <Icon {...{ icon }} className="size-4 text-muted-foreground" />
               <dt className="text-muted-foreground">{label}</dt>

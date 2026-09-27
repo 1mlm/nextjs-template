@@ -55,7 +55,7 @@ export function MobileTopBar() {
   return (
     <nav
       className={cn(
-        "sticky top-2 z-20 m-2 flex rounded-2xl bg-sidebar/90 px-1 text-sidebar-foreground ring-1 ring-sidebar-border backdrop-blur-sm transition-transform duration-300 ease-out corner-squircle focus-within:translate-y-0 motion-reduce:transition-none md:hidden",
+        "sticky top-2 z-20 m-2 flex rounded-2xl bg-sidebar/90 px-1 text-sidebar-foreground ring-1 ring-sidebar-border backdrop-blur-sm transition-transform duration-300 ease-out focus-within:translate-y-0 motion-reduce:transition-none md:hidden",
         isHidden && "-translate-y-[calc(100%+1rem)]",
       )}
     >

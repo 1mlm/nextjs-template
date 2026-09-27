@@ -110,7 +110,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
         aria-describedby={undefined}
         className="border-none! bg-transparent p-2 [&>div:first-child]:hidden"
       >
-        <div className="flex flex-col gap-3 rounded-2xl bg-sidebar p-3.5 pt-2 text-sidebar-foreground ring-1 ring-sidebar-border corner-squircle">
+        <div className="flex flex-col gap-3 rounded-2xl bg-sidebar p-3.5 pt-2 text-sidebar-foreground ring-1 ring-sidebar-border">
           <span className="mx-auto h-1 w-10 rounded-full bg-sidebar-foreground/20" />
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2.5">
@@ -151,7 +151,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
                 onClick={closeMenu}
                 aria-current={pathname === href ? "page" : undefined}
                 className={cn(
-                  "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors corner-squircle active:scale-[0.97]",
+                  "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors active:scale-[0.97]",
                   pathname === href
                     ? "bg-sidebar-accent font-semibold"
                     : "text-sidebar-foreground/70 ring-1 ring-sidebar-border hover:bg-sidebar-accent",
@@ -167,7 +167,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
             <button
               type="button"
               onClick={install}
-              className="flex items-center gap-2.5 rounded-lg bg-sidebar-accent p-2.5 text-left transition-colors corner-squircle active:scale-[0.98]"
+              className="flex items-center gap-2.5 rounded-lg bg-sidebar-accent p-2.5 text-left transition-colors active:scale-[0.98]"
             >
               <IconChip
                 icon={SmartPhone01Icon}
@@ -181,7 +181,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
               </span>
             </button>
           )}
-          <div className="flex items-center gap-2.5 rounded-lg p-2.5 ring-1 ring-sidebar-border corner-squircle">
+          <div className="flex items-center gap-2.5 rounded-lg p-2.5 ring-1 ring-sidebar-border">
             <UserAvatar name={DEMO_USER.name} />
             <span className="min-w-0 flex-1 leading-tight">
               <p className="truncate text-sm font-semibold">{DEMO_USER.name}</p>
@@ -192,7 +192,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
             <button
               type="button"
               onClick={closeMenu}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-destructive transition-colors corner-squircle hover:bg-destructive/10 active:scale-95"
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 active:scale-95"
             >
               <Icon icon={Logout01Icon} className="size-4" />
               Log out

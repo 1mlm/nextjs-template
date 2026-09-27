@@ -99,8 +99,8 @@ function WindowDropOverlay({
 }) {
   return createPortal(
     <div className="pointer-events-none fixed inset-0 z-100 grid place-items-center bg-background/70 p-4 backdrop-blur-sm animate-in fade-in-0">
-      <div className="flex size-full flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-foreground/30 text-center corner-squircle animate-in zoom-in-95">
-        <span className="grid size-16 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg corner-squircle motion-safe:animate-bounce">
+      <div className="flex size-full flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-foreground/30 text-center animate-in zoom-in-95">
+        <span className="grid size-16 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg motion-safe:animate-bounce">
           <Icon {...{ icon }} className="size-7" />
         </span>
         <p className="text-lg font-semibold">{label}</p>

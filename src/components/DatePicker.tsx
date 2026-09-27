@@ -304,7 +304,7 @@ export function DateTimePicker({
           <div
             aria-hidden
             style={{ height: WHEEL_ITEM_HEIGHT_PX }}
-            className="pointer-events-none absolute inset-x-1 top-1/2 -translate-y-1/2 rounded-lg bg-muted corner-squircle"
+            className="pointer-events-none absolute inset-x-1 top-1/2 -translate-y-1/2 rounded-lg bg-muted"
           />
           {timeColumns.map((column) => (
             <WheelColumn key={column.name} {...column} onSelect={onChange} />

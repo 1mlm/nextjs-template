@@ -483,7 +483,7 @@ function SortSubmenuContent({
 
 // a faint ghost-button fill so it reads as clickable before you ever hover it
 const HEADER_TRIGGER_CLASS =
-  "flex w-full justify-center rounded-md bg-foreground/4 px-3 py-1.5 text-foreground/70 transition-colors corner-squircle hover:bg-foreground/8 hover:text-foreground aria-expanded:bg-foreground/10 aria-expanded:text-foreground active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
+  "flex w-full justify-center rounded-md bg-foreground/4 px-3 py-1.5 text-foreground/70 transition-colors hover:bg-foreground/8 hover:text-foreground aria-expanded:bg-foreground/10 aria-expanded:text-foreground active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
 
 // radix menus eat arrow keys (left closes the submenu) and letters (typeahead
 // jumps focus to an item) even while you're typing in a filter input

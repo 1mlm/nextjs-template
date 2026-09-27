@@ -25,7 +25,7 @@ export function Chip({
       type="button"
       {...{ onClick, style }}
       className={cn(
-        "inline-flex items-center gap-1 rounded-lg corner-squircle px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors",
+        "inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors",
         className,
       )}
     >

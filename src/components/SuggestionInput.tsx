@@ -124,7 +124,7 @@ export function SuggestionInput({
               onClick={() => pickSuggestion(suggestion)}
               onPointerEnter={() => setHighlightedIndex(index)}
               className={cn(
-                "group/suggestion flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground corner-squircle max-md:py-2.5",
+                "group/suggestion flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground max-md:py-2.5",
                 index === highlightedIndex && "bg-muted",
               )}
             >

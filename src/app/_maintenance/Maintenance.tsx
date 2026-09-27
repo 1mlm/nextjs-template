@@ -30,8 +30,8 @@ export function Maintenance() {
 
   return (
     <main className="grid min-h-dvh place-items-center bg-muted p-4">
-      <div className="flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl bg-background p-8 text-center shadow-sm ring-1 ring-border corner-squircle">
-        <span className="grid size-16 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg corner-squircle motion-safe:animate-[wiggle_1.6s_ease-in-out_infinite]">
+      <div className="flex w-full max-w-sm flex-col items-center gap-5 rounded-3xl bg-background p-8 text-center shadow-sm ring-1 ring-border">
+        <span className="grid size-16 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg motion-safe:animate-[wiggle_1.6s_ease-in-out_infinite]">
           <Icon icon={ConstructionIcon} className="size-8" />
         </span>
         <div className="flex flex-col gap-1.5">

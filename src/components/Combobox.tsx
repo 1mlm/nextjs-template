@@ -64,7 +64,7 @@ function ComboboxPanel({
             keywords={[label, hint ?? ""]}
             data-checked={isSelected(value)}
             onSelect={() => onSelect(value)}
-            className="cursor-pointer rounded-md corner-squircle max-md:py-2.5"
+            className="cursor-pointer rounded-md max-md:py-2.5"
           >
             {icon && <Icon {...{ icon }} className="text-muted-foreground" />}
             <span className="flex-1 truncate">{label}</span>
@@ -159,7 +159,7 @@ function RemovableChip({
   removeLabel: string;
 }) {
   return (
-    <span className="flex h-6 items-center gap-1 rounded-md bg-muted pr-0.5 pl-2 text-xs corner-squircle">
+    <span className="flex h-6 items-center gap-1 rounded-md bg-muted pr-0.5 pl-2 text-xs">
       {children}
       {/* a span not a button, it lives inside the trigger button and a
       button inside a button is invalid html */}

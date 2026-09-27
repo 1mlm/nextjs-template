@@ -14,7 +14,7 @@ export function ListRow({
   trailing: ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm corner-squircle">
+    <div className="flex items-center gap-3 rounded-lg border border-border p-3 text-sm">
       <span className="grid size-8 shrink-0 place-items-center">{leading}</span>
       <span className="min-w-0 flex-1 truncate">{title}</span>
       <span className="flex h-6 shrink-0 items-center">{trailing}</span>
@@ -63,7 +63,7 @@ export function CardGridSkeleton({ count = 6 }: { count?: number }) {
 // CustomTable is mounted yet, like a page-level suspense fallback
 export function TableBlockSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border p-3 corner-squircle">
+    <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
       <Skeleton className="h-8 w-full" />
       {getSkeletonKeys(rows).map((key) => (
         <Skeleton key={key} className="h-10 w-full" />

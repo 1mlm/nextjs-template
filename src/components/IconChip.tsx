@@ -14,7 +14,7 @@ export function IconChip({
   return (
     <span
       className={cn(
-        "grid size-8 shrink-0 place-items-center rounded-lg bg-muted text-foreground corner-squircle",
+        "grid size-8 shrink-0 place-items-center rounded-lg bg-muted text-foreground",
         className,
       )}
     >

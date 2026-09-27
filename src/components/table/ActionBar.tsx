@@ -52,7 +52,7 @@ function PageJumpButton({
       trigger={
         <button
           type="button"
-          className="rounded-md px-2 py-1 text-sm whitespace-nowrap text-muted-foreground tabular-nums corner-squircle hover:bg-muted hover:text-foreground"
+          className="rounded-md px-2 py-1 text-sm whitespace-nowrap text-muted-foreground tabular-nums hover:bg-muted hover:text-foreground"
         >
           Page {currentPage} of {pageCount}
         </button>
@@ -116,11 +116,11 @@ export function ActionBar<T>({
   if (!canResetFilterAndSort && !hasSelection && pageCount <= 1) return null;
 
   return (
-    <div className="fixed inset-x-4 bottom-4 z-30 flex justify-end rounded-full border border-border bg-sidebar px-2 py-2 shadow-[0_0_16px_rgba(0,0,0,0.35)] corner-squircle sm:inset-x-auto sm:right-8 sm:bottom-8 sm:max-w-[calc(100vw-4rem)]">
+    <div className="fixed inset-x-4 bottom-4 z-30 flex justify-end rounded-full border border-border bg-sidebar px-2 py-2 shadow-[0_0_16px_rgba(0,0,0,0.35)] sm:inset-x-auto sm:right-8 sm:bottom-8 sm:max-w-[calc(100vw-4rem)]">
       <ScrollRow>
         {hasSelection && (
           <>
-            <span className="flex h-9 items-center gap-1 rounded-full bg-muted pr-1 pl-3 text-sm font-medium tabular-nums corner-squircle">
+            <span className="flex h-9 items-center gap-1 rounded-full bg-muted pr-1 pl-3 text-sm font-medium tabular-nums">
               {selectedCount} selected
               <button
                 type="button"

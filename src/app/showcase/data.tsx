@@ -124,7 +124,7 @@ export const DATA_ITEMS: ShowcaseItem[] = [
         <span
           key={color}
           style={getColorStyle(color)}
-          className="rounded-md corner-squircle px-2 py-0.5 text-xs font-medium"
+          className="rounded-md px-2 py-0.5 text-xs font-medium"
         >
           {color}
         </span>

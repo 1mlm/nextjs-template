@@ -99,7 +99,7 @@ function CropDialog({
             drag to move the photo, zoom with the slider
           </DialogDescription>
         </DialogHeader>
-        <div className="relative h-72 overflow-hidden rounded-xl bg-black corner-squircle">
+        <div className="relative h-72 overflow-hidden rounded-xl bg-black">
           <Cropper
             image={imageSrc}
             {...{ crop, zoom }}
@@ -149,7 +149,7 @@ function CropDialog({
   );
 }
 
-// avatar you click to pick a photo, crop it to a circle, done. hands back
+// avatar you click to pick a photo, crop it to a squircle, done. hands back
 // the cropped jpeg (to upload) and an object url (to show right away)
 export function AvatarPicker({
   name,
@@ -183,7 +183,7 @@ export function AvatarPicker({
             <Icon icon={Camera01Icon} className="size-3.5!" />
           </AvatarBadge>
         </UserAvatar>
-        <span className="absolute inset-0 grid place-items-center rounded-full bg-black/40 text-xs font-medium text-white opacity-0 transition-opacity group-hover/picker:opacity-100">
+        <span className="absolute inset-0 grid place-items-center rounded-full bg-black/60 text-xs backdrop-blur-sm font-medium text-white opacity-0 transition-opacity group-hover/picker:opacity-100">
           Change
         </span>
       </button>

@@ -144,7 +144,7 @@ function CardGridSkeletonDemo() {
             {cards.map(({ emoji, title, text }) => (
               <div
                 key={title}
-                className={`${CARD_HEIGHT_CLASS} flex flex-col justify-between rounded-xl bg-muted p-4 corner-squircle`}
+                className={`${CARD_HEIGHT_CLASS} flex flex-col justify-between rounded-xl bg-muted p-4`}
               >
                 <span className="text-4xl">{emoji}</span>
                 <span className="flex flex-col">
@@ -258,7 +258,7 @@ export const STATE_ITEMS: ShowcaseItem[] = [
         {LONG_FILE_NAMES.map((fileName) => (
           <li
             key={fileName}
-            className="flex items-center gap-2 rounded-lg bg-muted px-2.5 py-1.5 text-sm corner-squircle"
+            className="flex items-center gap-2 rounded-lg bg-muted px-2.5 py-1.5 text-sm"
           >
             <Icon
               icon={File02Icon}
