@@ -463,13 +463,14 @@ export function BlockEditor() {
             data-canvas
             className="relative min-h-[32rem] overflow-auto rounded-2xl bg-muted/50 bg-[radial-gradient(var(--border)_1px,transparent_0)] bg-size-[20px_20px] p-4"
           >
-            <HatBlock>
+            <HatBlock hasBlockBelow={workspace.program.length > 0}>
               <Icon icon={PlayIcon} className="size-4" />
               When Run is clicked
             </HatBlock>
             <StatementList
               listKey={ROOT_LIST}
               nodes={workspace.program}
+              isUnderHat
               className="pb-24"
             />
             {/* parked stacks: half see-through, they're not part of the run */}

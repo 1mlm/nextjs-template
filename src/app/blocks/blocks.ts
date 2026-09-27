@@ -37,29 +37,39 @@ export enum BlockCategory {
 // inset an input or a plugged expression sits in
 export const CATEGORY_STYLES: Record<
   BlockCategory,
-  { label: string; block: string; slot: string; icon: IconSvgElement }
+  {
+    label: string;
+    block: string;
+    fill: string;
+    slot: string;
+    icon: IconSvgElement;
+  }
 > = {
   [BlockCategory.Variables]: {
     label: "Variables",
-    block: "bg-orange-500 [--notch:var(--color-orange-500)]",
+    block: "bg-orange-500",
+    fill: "fill-orange-500",
     slot: "bg-orange-700",
     icon: VariableIcon,
   },
   [BlockCategory.Control]: {
     label: "Control",
-    block: "bg-blue-500 [--notch:var(--color-blue-500)]",
+    block: "bg-blue-500",
+    fill: "fill-blue-500",
     slot: "bg-blue-700",
     icon: GitBranchIcon,
   },
   [BlockCategory.Operators]: {
     label: "Operators",
-    block: "bg-green-600 [--notch:var(--color-green-600)]",
+    block: "bg-green-600",
+    fill: "fill-green-600",
     slot: "bg-green-800",
     icon: AddCircleIcon,
   },
   [BlockCategory.Looks]: {
     label: "Looks",
-    block: "bg-violet-500 [--notch:var(--color-violet-500)]",
+    block: "bg-violet-500",
+    fill: "fill-violet-500",
     slot: "bg-violet-700",
     icon: BubbleChatIcon,
   },

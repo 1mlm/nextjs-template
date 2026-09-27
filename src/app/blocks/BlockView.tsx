@@ -4,11 +4,14 @@ import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { motion } from "motion/react";
 import { Select as SelectPrimitive } from "radix-ui";
 import {
-  type CSSProperties,
   createContext,
   type PointerEvent,
   type ReactNode,
+  type RefObject,
   useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
 } from "react";
 import { Icon } from "@/components/Icon";
 import {
@@ -18,6 +21,12 @@ import {
   SelectValue,
 } from "@/shadcn/ui/select";
 import { cn } from "@/shadcn/utils";
+import {
+  type BlockSectionBox,
+  getHatPath,
+  getStatementPath,
+  SPINE_WIDTH,
+} from "./blockShape";
 import {
   type BlockNode,
   type BlockPart,
@@ -61,80 +70,78 @@ function useBlockEditor() {
   return editor;
 }
 
-// the connector: a trapezoid 16px wide at the top, 8px at the bottom, 6px
-// deep. a block's top has it cut out (a real hole, the canvas shows
-// through), the block above has the same shape sticking out of its bottom,
-// so stacked blocks lock into each other with nothing in between
-const CONNECTOR_WIDTH = 16;
-const CONNECTOR_DEPTH = 6;
-const CONNECTOR_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='6'%3E%3Cpath d='M0 0h16l-4 6H4z'/%3E%3C/svg%3E")`;
-// the left bar of a C block (repeat, if), its insides start after it
-export const SPINE_WIDTH = 16;
+type MeasuredShape = { path: string; width: number; height: number };
 
-export enum ConnectorSpot {
-  // under the block's left edge, where a block below it attaches
-  Outer = 12,
-  // past the spine of a C block, where the first block inside attaches
-  Inner = 28,
+// measures the block and its arms/mouths (fractional pixels, straight from
+// the layout) and rebuilds the outline whenever anything inside resizes
+function useMeasuredShape(
+  rootRef: RefObject<HTMLDivElement | null>,
+  getPath: (
+    width: number,
+    height: number,
+    sections: BlockSectionBox[],
+  ) => string,
+) {
+  const [shape, setShape] = useState<MeasuredShape>();
+  const getPathRef = useRef(getPath);
+  useLayoutEffect(() => {
+    getPathRef.current = getPath;
+  });
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const sectionElements = [
+      ...root.querySelectorAll<HTMLElement>(":scope > [data-section]"),
+    ];
+    const measure = () => {
+      const rootRect = root.getBoundingClientRect();
+      const sections = sectionElements.map((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          kind: element.dataset.section === "mouth" ? "mouth" : "arm",
+          top: rect.top - rootRect.top,
+          height: rect.height,
+        } satisfies BlockSectionBox;
+      });
+      setShape({
+        path: getPathRef.current(rootRect.width, rootRect.height, sections),
+        width: rootRect.width,
+        height: rootRect.height,
+      });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(root);
+    for (const element of sectionElements) observer.observe(element);
+    return () => observer.disconnect();
+  }, [rootRef]);
+
+  return shape;
 }
 
-const getNotchMask = (spot: ConnectorSpot): CSSProperties => ({
-  maskImage: `${CONNECTOR_SVG}, linear-gradient(#000 0 0)`,
-  maskPosition: `${spot}px 0, 0 0`,
-  maskSize: `${CONNECTOR_WIDTH}px ${CONNECTOR_DEPTH}px, 100% 100%`,
-  maskRepeat: "no-repeat",
-  maskComposite: "exclude",
-  WebkitMaskComposite: "xor",
-});
-
-// one colored slab of a block. a plain block is one piece, a C block is an
-// arm on top, a spine down the left, more arms between bodies and a foot
-function BlockPiece({
-  colorClassName,
-  notch,
-  bump,
-  className,
-  children,
+// the block's painted outline, behind its content. overflow visible: the
+// bump hangs below the box
+function BlockShape({
+  shape,
+  fillClassName,
 }: {
-  colorClassName: string;
-  notch?: ConnectorSpot;
-  bump?: ConnectorSpot;
-  className?: string;
-  children?: ReactNode;
+  shape: MeasuredShape | undefined;
+  fillClassName: string;
 }) {
-  // the bump lives next to the slab, not in it: the notch mask on the slab
-  // would clip anything that sticks out of its box
+  if (!shape) return null;
   return (
-    <div className="relative">
-      <div
-        style={notch === undefined ? undefined : getNotchMask(notch)}
-        className={cn(
-          // a darker bottom edge for depth. inset, so it stays inside the
-          // slab's shape instead of leaking through the next block's notch
-          "shadow-[inset_0_-2px_0_rgb(0_0_0/0.18)]",
-          colorClassName,
-          className,
-        )}
-      >
-        {children}
-      </div>
-      {bump !== undefined && (
-        <span
-          aria-hidden
-          // half a pixel bigger all round than the hole it fills, so the
-          // hole's soft antialiased edge never shows a dark outline
-          style={{
-            left: bump - 0.5,
-            width: CONNECTOR_WIDTH + 1,
-            height: CONNECTOR_DEPTH + 0.5,
-          }}
-          className={cn(
-            "absolute top-full z-10 [clip-path:polygon(0_0,100%_0,75%_100%,25%_100%)]",
-            colorClassName,
-          )}
-        />
+    <svg
+      aria-hidden="true"
+      width={shape.width}
+      height={shape.height}
+      className={cn(
+        "pointer-events-none absolute top-0 left-0 -z-10 overflow-visible",
+        fillClassName,
       )}
-    </div>
+    >
+      <path d={shape.path} fillRule="nonzero" />
+    </svg>
   );
 }
 
@@ -142,6 +149,9 @@ const SLOT_CLASS =
   "h-6 rounded-full px-2 text-sm font-semibold text-white leading-none";
 const PART_ROW_CLASS =
   "flex min-h-9 items-center gap-1.5 px-2.5 py-1.5 whitespace-nowrap";
+// true/false blocks and their slots: a pill with its ends pinched into soft
+// points, still curved everywhere (no sharp hexagon corners)
+const BOOLEAN_SHAPE = "rounded-[12px] corner-superellipse/0.5";
 
 function FieldSelect({
   value,
@@ -180,10 +190,6 @@ function FieldSelect({
     </Select>
   );
 }
-
-// the hexagon a true/false block and its slot share
-const BOOLEAN_SHAPE =
-  "[clip-path:polygon(10px_0,calc(100%-10px)_0,100%_50%,calc(100%-10px)_100%,10px_100%,0_50%)]";
 
 function InputSlot({
   node,
@@ -279,7 +285,7 @@ type BlockSection =
   | { kind: "row"; parts: InlinePartShape[]; key: string }
   | { kind: "body"; bodyId: string; key: string };
 
-// a definition's rows become the block's slabs: inline rows turn into arms,
+// a definition's rows become the block's parts: inline rows turn into arms,
 // a body row is the open mouth between them
 function getSections(rows: BlockPart[][]): BlockSection[] {
   return rows.map((row) => {
@@ -297,90 +303,71 @@ function getSections(rows: BlockPart[][]): BlockSection[] {
 function StatementBlock({
   node,
   isStatic,
+  hasBlockAbove,
+  hasBlockBelow,
 }: {
   node: BlockNode;
   isStatic: boolean;
+  hasBlockAbove: boolean;
+  hasBlockBelow: boolean;
 }) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const definition = getBlockDefinition(node.type);
   const style = CATEGORY_STYLES[definition.category];
   const sections = getSections(definition.rows);
   const isCBlock = sections.some((section) => section.kind === "body");
-
-  const renderRow = (parts: InlinePartShape[], isFirst: boolean) => (
-    <div className={PART_ROW_CLASS}>
-      {isFirst && <Icon icon={definition.icon} className="size-4 opacity-80" />}
-      {parts.map((part) => (
-        <InlinePart
-          key={getPartKey(part)}
-          slotClassName={style.slot}
-          {...{ node, part, isStatic }}
-        />
-      ))}
-    </div>
+  const shape = useMeasuredShape(rootRef, (width, _height, boxes) =>
+    getStatementPath({
+      width,
+      sections: boxes,
+      hasBlockAbove,
+      hasBlockBelow,
+    }),
   );
 
-  if (!isCBlock)
-    return (
-      <BlockPiece
-        colorClassName={style.block}
-        notch={ConnectorSpot.Outer}
-        bump={ConnectorSpot.Outer}
-        className="min-w-40 rounded-[5px]"
-      >
-        {sections.map(
-          (section) =>
-            section.kind === "row" && (
-              <div key={section.key}>{renderRow(section.parts, true)}</div>
-            ),
-        )}
-      </BlockPiece>
-    );
-
-  // each arm knows if a body sits above it (then its notch is the inner one,
-  // for that body's last block) and below it (then an inner bump for the first)
   return (
-    <div className="flex min-w-44 flex-col">
-      {sections.map((section, index) => {
-        const hasBodyAbove = sections[index - 1]?.kind === "body";
-        const hasBodyBelow = sections[index + 1]?.kind === "body";
-        if (section.kind === "body")
-          return (
-            <div key={section.key} className="flex">
-              <div
-                style={{ width: SPINE_WIDTH }}
-                className={cn("shrink-0", style.block)}
-              />
-              <StatementList
-                listKey={getBodyListKey(node.id, section.bodyId)}
-                nodes={node.bodies[section.bodyId] ?? []}
-                className="min-h-7 min-w-24"
-                {...{ isStatic }}
-              />
-            </div>
-          );
-        return (
-          <BlockPiece
+    <div
+      ref={rootRef}
+      className={cn(
+        "relative isolate flex flex-col transition-opacity duration-150",
+        isCBlock ? "min-w-44" : "min-w-40",
+        // invisible until measured, so it never flashes without its outline
+        !shape && "opacity-0",
+      )}
+    >
+      <BlockShape {...{ shape }} fillClassName={style.fill} />
+      {sections.map((section, index) =>
+        section.kind === "body" ? (
+          <div
             key={section.key}
-            colorClassName={style.block}
-            notch={index === 0 ? ConnectorSpot.Outer : ConnectorSpot.Inner}
-            bump={hasBodyBelow ? ConnectorSpot.Inner : undefined}
-            className={cn(
-              "rounded-[5px]",
-              hasBodyAbove && "rounded-tl-none",
-              hasBodyBelow && "rounded-bl-none",
-            )}
+            data-section="mouth"
+            style={{ paddingLeft: SPINE_WIDTH }}
+            className="flex"
           >
-            {renderRow(section.parts, index === 0)}
-          </BlockPiece>
-        );
-      })}
-      {/* the foot closes the C and carries the bump for the next block */}
-      <BlockPiece
-        colorClassName={style.block}
-        notch={ConnectorSpot.Inner}
-        bump={ConnectorSpot.Outer}
-        className="h-4 rounded-[5px] rounded-tl-none"
-      />
+            <StatementList
+              listKey={getBodyListKey(node.id, section.bodyId)}
+              nodes={node.bodies[section.bodyId] ?? []}
+              className="min-h-7 min-w-24"
+              {...{ isStatic }}
+            />
+          </div>
+        ) : (
+          <div key={section.key} data-section="arm" className={PART_ROW_CLASS}>
+            {index === 0 && (
+              <Icon icon={definition.icon} className="size-4 opacity-80" />
+            )}
+            {section.parts.map((part) => (
+              <InlinePart
+                key={getPartKey(part)}
+                slotClassName={style.slot}
+                {...{ node, part, isStatic }}
+              />
+            ))}
+          </div>
+        ),
+      )}
+      {/* the foot that closes a C and carries the bump for the next block */}
+      {isCBlock && <div data-section="arm" className="h-4" />}
     </div>
   );
 }
@@ -419,10 +406,14 @@ function ExpressionBlock({
 export function BlockView({
   node,
   isStatic = false,
+  hasBlockAbove = false,
+  hasBlockBelow = false,
 }: {
   node: BlockNode;
   // palette copies and the drag ghost: look the same, fields don't edit
   isStatic?: boolean;
+  hasBlockAbove?: boolean;
+  hasBlockBelow?: boolean;
 }) {
   const { startDrag, runningId } = useBlockEditor();
   const isExpression = "output" in getBlockDefinition(node.type);
@@ -442,31 +433,43 @@ export function BlockView({
       {isExpression ? (
         <ExpressionBlock {...{ node, isStatic }} />
       ) : (
-        <StatementBlock {...{ node, isStatic }} />
+        <StatementBlock {...{ node, isStatic, hasBlockAbove, hasBlockBelow }} />
       )}
     </div>
   );
 }
 
-// the hat that starts the main program: rounded cap, no notch (nothing goes
-// above it), a bump for the first block
-export function HatBlock({ children }: { children: ReactNode }) {
+// the hat that starts the main program: tall rounded cap, no hole (nothing
+// goes above it), a bump for the first block
+export function HatBlock({
+  hasBlockBelow,
+  children,
+}: {
+  hasBlockBelow: boolean;
+  children: ReactNode;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const shape = useMeasuredShape(rootRef, (width, height) =>
+    getHatPath(width, height, hasBlockBelow),
+  );
+
   return (
-    <div className="w-max">
-      <BlockPiece
-        colorClassName="bg-amber-500"
-        bump={ConnectorSpot.Outer}
-        className="rounded-t-2xl rounded-b-md"
+    <div
+      ref={rootRef}
+      className={cn(
+        "relative isolate w-max transition-opacity duration-150",
+        !shape && "opacity-0",
+      )}
+    >
+      <BlockShape {...{ shape }} fillClassName="fill-amber-500" />
+      <div
+        className={cn(
+          PART_ROW_CLASS,
+          "min-w-44 pt-3 text-sm font-semibold text-white",
+        )}
       >
-        <div
-          className={cn(
-            PART_ROW_CLASS,
-            "min-w-44 pt-3 text-sm font-semibold text-white",
-          )}
-        >
-          {children}
-        </div>
-      </BlockPiece>
+        {children}
+      </div>
     </div>
   );
 }
@@ -476,11 +479,14 @@ export function StatementList({
   nodes,
   className,
   isStatic = false,
+  isUnderHat = false,
 }: {
   listKey: ListKey;
   nodes: BlockNode[];
   className?: string;
   isStatic?: boolean;
+  // the main stack: its first block sits right under the Run hat
+  isUnderHat?: boolean;
 }) {
   const { dropTarget, dragHeight } = useBlockEditor();
   const gapIndex =
@@ -496,7 +502,7 @@ export function StatementList({
       initial={{ height: 0 }}
       animate={{ height: dragHeight }}
       transition={{ type: "spring", bounce: 0, duration: 0.2 }}
-      className="w-40 rounded-md bg-foreground/15"
+      className="w-40 rounded-[8px] bg-foreground/15"
     />
   );
 
@@ -506,7 +512,16 @@ export function StatementList({
       className={cn("flex flex-col items-start", className)}
     >
       {nodes.flatMap((node, index) => {
-        const block = <BlockView key={node.id} {...{ node, isStatic }} />;
+        const block = (
+          <BlockView
+            key={node.id}
+            {...{ node, isStatic }}
+            // a block with another right under it reaches under that one
+            // (see blockShape), an opening drop gap below counts as nothing
+            hasBlockAbove={gapIndex !== index && (index > 0 || isUnderHat)}
+            hasBlockBelow={index < nodes.length - 1 && gapIndex !== index + 1}
+          />
+        );
         return index === gapIndex ? [gap, block] : [block];
       })}
       {gapIndex === nodes.length && gap}
