@@ -582,6 +582,9 @@ label:has(:disabled) {
 .pop-rows > :nth-child(8) {
   --pop-row: 7;
 }
+.pop-rows > :nth-child(n + 9) {
+  --pop-row: 8;
+}
 .pop-items > :nth-child(2) {
   --pop-item: 1;
 }
@@ -602,6 +605,9 @@ label:has(:disabled) {
 }
 .pop-items > :nth-child(8) {
   --pop-item: 7;
+}
+.pop-items > :nth-child(n + 9) {
+  --pop-item: 8;
 }
 
 @keyframes pop-in {
@@ -627,4 +633,11 @@ label:has(:disabled) {
   flex: 1;
   justify-content: flex-start;
   text-align: left;
+}
+
+/* a modal sheet or dialog sets pointer-events: none on the body, which made
+   the undo toast unclickable while a sheet was still open on top of it. the
+   toaster opts back in */
+[data-sonner-toaster] {
+  pointer-events: auto;
 }
