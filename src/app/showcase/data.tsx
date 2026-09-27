@@ -5,7 +5,7 @@ import {
   Bug02Icon,
   PuzzleIcon,
   SidebarLeftIcon,
-  Table01Icon,
+  TablePropertiesIcon,
   UnavailableIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
@@ -26,7 +26,7 @@ import { useIsClient } from "@/utils/useIsClient";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
 const DEMO_PAGES: { href: string; label: string; icon: IconSvgElement }[] = [
-  { href: "/table", label: "CustomTable", icon: Table01Icon },
+  { href: "/table", label: "CustomTable", icon: TablePropertiesIcon },
   { href: "/blocks", label: "Blocks editor", icon: PuzzleIcon },
   {
     href: "/this-page-does-not-exist",

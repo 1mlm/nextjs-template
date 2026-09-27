@@ -1,9 +1,9 @@
 import {
   CubeIcon,
-  GridViewIcon,
+  Cursor01Icon,
   Home01Icon,
   PuzzleIcon,
-  Table01Icon,
+  TablePropertiesIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { IconChip } from "@/components/IconChip";
@@ -37,8 +37,8 @@ export const NAV_ITEMS: {
   badge?: number;
 }[] = [
   { href: "/", label: "Home", icon: Home01Icon },
-  { href: "/showcase", label: "Showcase", icon: GridViewIcon },
-  { href: "/table", label: "Table", icon: Table01Icon },
+  { href: "/showcase", label: "Showcase", icon: Cursor01Icon },
+  { href: "/table", label: "Table", icon: TablePropertiesIcon },
   { href: "/blocks", label: "Blocks", icon: PuzzleIcon },
 ];
 
