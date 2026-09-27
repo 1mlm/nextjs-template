@@ -6,11 +6,23 @@ import {
   VARIABLE_NAMES,
 } from "./blocks";
 
-// where a statement can land: the top level stack or one body of a block
+// blocks lying around the canvas that aren't under the Run hat. they're
+// dimmed and never run, a parking spot while you build
+export type LooseStack = {
+  id: string;
+  x: number;
+  y: number;
+  blocks: BlockNode[];
+};
+
+export type Workspace = { program: BlockNode[]; looseStacks: LooseStack[] };
+
+// where a statement can land: the main stack, a body of a block, or a loose stack
 export type ListKey = string;
 export const ROOT_LIST: ListKey = "root";
 export const getBodyListKey = (nodeId: string, bodyId: string): ListKey =>
   `${nodeId}:${bodyId}`;
+export const getLooseListKey = (stackId: string): ListKey => `loose:${stackId}`;
 
 // a fresh block with every slot, variable and option at its default
 export function createBlock(type: BlockType, getId: () => string): BlockNode {
@@ -25,24 +37,30 @@ export function createBlock(type: BlockType, getId: () => string): BlockNode {
       return [];
     }),
   );
-  const bodies = Object.fromEntries(
+  const bodies: Record<string, BlockNode[]> = Object.fromEntries(
     parts.flatMap((part) =>
-      part.kind === PartKind.Body ? [[part.id, [] as BlockNode[]]] : [],
+      part.kind === PartKind.Body ? [[part.id, []]] : [],
     ),
   );
   return { id: getId(), type, fields, inputs: {}, bodies };
 }
 
-// runs `update` on the node with this id wherever it's nested, returns a new
-// tree (same objects everywhere else so react only redraws that branch)
-function updateNodeInList(
-  nodes: BlockNode[],
-  nodeId: string,
-  update: (node: BlockNode) => BlockNode,
-): BlockNode[] {
-  return nodes.map((node) => updateNode(node, nodeId, update));
+// every top level list of the workspace goes through `update`, then loose
+// stacks that ended up empty are dropped
+function updateAllStacks(
+  workspace: Workspace,
+  update: (blocks: BlockNode[]) => BlockNode[],
+): Workspace {
+  return {
+    program: update(workspace.program),
+    looseStacks: workspace.looseStacks
+      .map((stack) => ({ ...stack, blocks: update(stack.blocks) }))
+      .filter((stack) => stack.blocks.length > 0),
+  };
 }
 
+// runs `update` on the node with this id wherever it's nested, returns a new
+// tree (same objects everywhere else so react only redraws that branch)
 function updateNode(
   node: BlockNode,
   nodeId: string,
@@ -58,77 +76,154 @@ function updateNode(
   const bodies = Object.fromEntries(
     Object.entries(node.bodies).map(([bodyId, children]) => [
       bodyId,
-      updateNodeInList(children, nodeId, update),
+      children.map((child) => updateNode(child, nodeId, update)),
     ]),
   );
   return { ...node, inputs, bodies };
 }
 
+const updateNodeEverywhere = (
+  workspace: Workspace,
+  nodeId: string,
+  update: (node: BlockNode) => BlockNode,
+) =>
+  updateAllStacks(workspace, (blocks) =>
+    blocks.map((block) => updateNode(block, nodeId, update)),
+  );
+
 export const setField = (
-  program: BlockNode[],
+  workspace: Workspace,
   nodeId: string,
   fieldId: string,
   value: string,
 ) =>
-  updateNodeInList(program, nodeId, (node) => ({
+  updateNodeEverywhere(workspace, nodeId, (node) => ({
     ...node,
     fields: { ...node.fields, [fieldId]: value },
   }));
 
-// takes the block out from wherever it sits (a stack or a slot), with
-// everything inside it
-export function removeBlock(nodes: BlockNode[], nodeId: string): BlockNode[] {
-  return nodes
-    .filter((node) => node.id !== nodeId)
-    .map((node) => ({
-      ...node,
-      inputs: Object.fromEntries(
-        Object.entries(node.inputs).map(([inputId, child]) => [
-          inputId,
-          child?.id === nodeId
-            ? undefined
-            : child && removeBlock([child], nodeId)[0],
-        ]),
-      ),
-      bodies: Object.fromEntries(
-        Object.entries(node.bodies).map(([bodyId, children]) => [
-          bodyId,
-          removeBlock(children, nodeId),
-        ]),
-      ),
-    }));
+// cuts the block and everything under it out of whatever list it's in (like
+// scratch, you drag the block and the rest of its stack comes along)
+function takeStackFrom(
+  nodes: BlockNode[],
+  nodeId: string,
+): { nodes: BlockNode[]; taken?: BlockNode[] } {
+  const index = nodes.findIndex((node) => node.id === nodeId);
+  if (index !== -1)
+    return { nodes: nodes.slice(0, index), taken: nodes.slice(index) };
+  const result: { taken?: BlockNode[] } = {};
+  const nextNodes = nodes.map((node) => {
+    if (result.taken) return node;
+    const bodies = Object.fromEntries(
+      Object.entries(node.bodies).map(([bodyId, children]) => {
+        if (result.taken) return [bodyId, children];
+        const found = takeStackFrom(children, nodeId);
+        result.taken = found.taken;
+        return [bodyId, found.nodes];
+      }),
+    );
+    return result.taken ? { ...node, bodies } : node;
+  });
+  return { nodes: nextNodes, taken: result.taken };
 }
 
-const insertAt = <T>(items: T[], index: number, item: T) => [
+// an expression plugged into a slot comes out alone, the slot goes back to
+// its typed literal
+function unplugFrom(nodes: BlockNode[], nodeId: string): BlockNode[] {
+  return nodes.map((node) => ({
+    ...node,
+    inputs: Object.fromEntries(
+      Object.entries(node.inputs).map(([inputId, child]) => [
+        inputId,
+        child?.id === nodeId
+          ? undefined
+          : child && unplugFrom([child], nodeId)[0],
+      ]),
+    ),
+    bodies: Object.fromEntries(
+      Object.entries(node.bodies).map(([bodyId, children]) => [
+        bodyId,
+        unplugFrom(children, nodeId),
+      ]),
+    ),
+  }));
+}
+
+// picks up a block for dragging: returns the workspace without it and what
+// came with it (its stack below it, or just itself out of a slot)
+export function pickUp(
+  workspace: Workspace,
+  node: BlockNode,
+): { workspace: Workspace; taken: BlockNode[] } {
+  const takenStacks: BlockNode[][] = [];
+  const withoutStack = updateAllStacks(workspace, (blocks) => {
+    const found = takeStackFrom(blocks, node.id);
+    if (found.taken) takenStacks.push(found.taken);
+    return found.nodes;
+  });
+  const taken = takenStacks[0];
+  if (taken) return { workspace: withoutStack, taken };
+  return {
+    workspace: updateAllStacks(workspace, (blocks) =>
+      unplugFrom(blocks, node.id),
+    ),
+    taken: [node],
+  };
+}
+
+const insertAt = <T>(items: T[], index: number, inserted: T[]) => [
   ...items.slice(0, index),
-  item,
+  ...inserted,
   ...items.slice(index),
 ];
 
-export function insertStatement(
-  program: BlockNode[],
+export function insertStack(
+  workspace: Workspace,
   listKey: ListKey,
   index: number,
-  block: BlockNode,
-): BlockNode[] {
-  if (listKey === ROOT_LIST) return insertAt(program, index, block);
+  blocks: BlockNode[],
+): Workspace {
+  if (listKey === ROOT_LIST)
+    return {
+      ...workspace,
+      program: insertAt(workspace.program, index, blocks),
+    };
+  if (listKey.startsWith("loose:")) {
+    const stackId = listKey.slice("loose:".length);
+    return {
+      ...workspace,
+      looseStacks: workspace.looseStacks.map((stack) =>
+        stack.id === stackId
+          ? { ...stack, blocks: insertAt(stack.blocks, index, blocks) }
+          : stack,
+      ),
+    };
+  }
   const [parentId = "", bodyId = ""] = listKey.split(":");
-  return updateNodeInList(program, parentId, (parent) => ({
+  return updateNodeEverywhere(workspace, parentId, (parent) => ({
     ...parent,
     bodies: {
       ...parent.bodies,
-      [bodyId]: insertAt(parent.bodies[bodyId] ?? [], index, block),
+      [bodyId]: insertAt(parent.bodies[bodyId] ?? [], index, blocks),
     },
   }));
 }
 
 export const plugExpression = (
-  program: BlockNode[],
+  workspace: Workspace,
   parentId: string,
   inputId: string,
   block: BlockNode,
 ) =>
-  updateNodeInList(program, parentId, (parent) => ({
+  updateNodeEverywhere(workspace, parentId, (parent) => ({
     ...parent,
     inputs: { ...parent.inputs, [inputId]: block },
   }));
+
+export const addLooseStack = (
+  workspace: Workspace,
+  stack: LooseStack,
+): Workspace => ({
+  ...workspace,
+  looseStacks: [...workspace.looseStacks, stack],
+});

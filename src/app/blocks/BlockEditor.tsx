@@ -17,124 +17,38 @@ import {
   BlockView,
   DropKind,
   type DropTarget,
+  HatBlock,
   StatementList,
 } from "./BlockView";
 import {
   BLOCK_TYPES,
   BlockCategory,
   type BlockNode,
-  type BlockType,
   CATEGORY_STYLES,
   canPlugInto,
   getBlockDefinition,
   ValueType,
 } from "./blocks";
 import { ProgramStoppedError, programToCode, runProgram } from "./run";
+import { makeStarterProgram } from "./starter";
 import {
+  addLooseStack,
   createBlock,
-  insertStatement,
+  getLooseListKey,
+  insertStack,
+  pickUp,
   plugExpression,
   ROOT_LIST,
-  removeBlock,
   setField,
+  type Workspace,
 } from "./tree";
 
-// counter ids, not random ones, so the server and the browser build the
-// exact same starting program and hydration doesn't trip
-function makeIdGenerator(prefix: string) {
-  const counter = { value: 0 };
-  return () => `${prefix}-${counter.value++}`;
-}
-
-// the tip calculator from the scratch screenshot, rebuilt as blocks
-function makeStarterProgram(): BlockNode[] {
-  const getId = makeIdGenerator("starter");
-  const block = (
-    type: BlockType,
-    parts: Partial<Pick<BlockNode, "fields" | "inputs" | "bodies">> = {},
-  ): BlockNode => {
-    const base = createBlock(type, getId);
-    return {
-      ...base,
-      fields: { ...base.fields, ...parts.fields },
-      inputs: { ...parts.inputs },
-      bodies: { ...base.bodies, ...parts.bodies },
-    };
-  };
-  const getVariable = (variable: string) =>
-    block("getVariable", { fields: { variable } });
-  const multiplyBill = (rate: string) =>
-    block("math", {
-      fields: { operator: "×", right: rate },
-      inputs: { left: getVariable("bill") },
-    });
-
-  return [
-    block("setVariable", { fields: { variable: "bill", value: "84" } }),
-    block("setVariable", { fields: { variable: "people", value: "3" } }),
-    block("ifElse", {
-      inputs: {
-        condition: block("compare", {
-          fields: { operator: ">", right: "50" },
-          inputs: { left: getVariable("bill") },
-        }),
-      },
-      bodies: {
-        whenTrue: [
-          block("setVariable", {
-            fields: { variable: "tip" },
-            inputs: { value: multiplyBill("0.2") },
-          }),
-        ],
-        whenFalse: [
-          block("setVariable", {
-            fields: { variable: "tip" },
-            inputs: { value: multiplyBill("0.1") },
-          }),
-        ],
-      },
-    }),
-    block("setVariable", {
-      fields: { variable: "total" },
-      inputs: {
-        value: block("math", {
-          fields: { operator: "÷" },
-          inputs: {
-            left: block("math", {
-              fields: { operator: "+" },
-              inputs: { left: getVariable("bill"), right: getVariable("tip") },
-            }),
-            right: getVariable("people"),
-          },
-        }),
-      },
-    }),
-    block("say", {
-      inputs: {
-        message: block("join", {
-          fields: { left: "each pays $" },
-          inputs: { right: getVariable("total") },
-        }),
-      },
-    }),
-    block("repeat", {
-      bodies: {
-        body: [
-          block("say", {
-            inputs: {
-              message: block("join", {
-                fields: { left: "hip hip #" },
-                inputs: { right: getVariable("i") },
-              }),
-            },
-          }),
-        ],
-      },
-    }),
-  ];
-}
-
 const createRandomId = () => crypto.randomUUID();
+
+const makeStarterWorkspace = (): Workspace => ({
+  program: makeStarterProgram(),
+  looseStacks: [],
+});
 
 // typing in a slot or opening a dropdown shouldn't pick the block up
 const isEditableTarget = (target: EventTarget) =>
@@ -144,78 +58,183 @@ const isEditableTarget = (target: EventTarget) =>
 // the pointer has to travel this far before a press becomes a drag, so a
 // click into a slot to type still just focuses it
 const DRAG_THRESHOLD_PX = 5;
+// how close the dragged block's corner has to get to a connection point (or
+// an expression to an empty slot) before it snaps there
+const SNAP_RADIUS_PX = 44;
 
-type Drag = {
-  node: BlockNode;
-  x: number;
-  y: number;
-  offsetX: number;
-  offsetY: number;
-};
+type Drag = { blocks: BlockNode[]; x: number; y: number };
 
-// what's under the pointer: the palette (drop = delete), an empty slot that
-// takes this block's type, or a spot between two statements
-function findDropTarget(
-  x: number,
-  y: number,
-  node: BlockNode,
-): DropTarget | undefined {
-  // the dragged block leaves the tree a render later than this runs, so its
-  // own body and slots are still on screen, dropping into itself would lose it
-  const elements = document
-    .elementsFromPoint(x, y)
-    .filter((element) => !element.closest(`[data-block="${node.id}"]`));
-  if (elements.some((element) => element.closest("[data-palette]")))
-    return { kind: DropKind.Trash };
+const getDistance = (ax: number, ay: number, bx: number, by: number) =>
+  Math.hypot(ax - bx, ay - by);
 
-  const { output } = getBlockDefinition(node.type);
-  if (output) {
-    const slot = elements.find(
-      (element) =>
-        element instanceof HTMLElement &&
-        element.dataset.dropInput &&
-        canPlugInto(
-          output,
-          (element.dataset.accepts as ValueType | undefined) ?? ValueType.Any,
-        ),
-    );
-    if (!(slot instanceof HTMLElement)) return undefined;
-    return {
-      kind: DropKind.Input,
-      nodeId: slot.dataset.dropNode ?? "",
-      inputId: slot.dataset.dropInput ?? "",
-    };
-  }
+const isDropGap = (element: Element) =>
+  element instanceof HTMLElement && "dropGap" in element.dataset;
 
-  // topmost list under the pointer is the most deeply nested one
-  const list = elements.find(
-    (element) => element instanceof HTMLElement && element.dataset.list,
+// every spot a stack can click into: above each block of every list and
+// under its last one. the opened gap is measured out so the spots below it
+// don't jump around while it grows
+function getConnectionPoints() {
+  return [...document.querySelectorAll<HTMLElement>("[data-list]")].flatMap(
+    (list) => {
+      const listKey = list.dataset.list ?? "";
+      const listRect = list.getBoundingClientRect();
+      const children = [...list.children];
+      const gapIndex = children.findIndex(isDropGap);
+      const gapHeight = children[gapIndex]?.getBoundingClientRect().height ?? 0;
+      const blockRects = children.flatMap((child, childIndex) => {
+        if (!(child instanceof HTMLElement) || !("block" in child.dataset))
+          return [];
+        const rect = child.getBoundingClientRect();
+        const shift = gapIndex !== -1 && childIndex > gapIndex ? gapHeight : 0;
+        return [{ top: rect.top - shift, bottom: rect.bottom - shift }];
+      });
+      const lastBottom = blockRects.at(-1)?.bottom ?? listRect.top;
+      return [
+        ...blockRects.map((rect, index) => ({ listKey, index, y: rect.top })),
+        { listKey, index: blockRects.length, y: lastBottom },
+      ].map((point) => ({ ...point, x: listRect.left }));
+    },
   );
-  if (!(list instanceof HTMLElement) || !list.dataset.list) return undefined;
-  const blocksAbovePointer = [
-    ...list.querySelectorAll(":scope > [data-block]"),
-  ].filter((block) => {
-    const rect = block.getBoundingClientRect();
-    return rect.top + rect.height / 2 < y;
+}
+
+const getNearest = <T extends { distance: number }>(candidates: T[]) =>
+  candidates
+    .filter(({ distance }) => distance < SNAP_RADIUS_PX)
+    .toSorted((a, b) => a.distance - b.distance)[0];
+
+function findNearestSlot(
+  output: ValueType,
+  left: number,
+  middleY: number,
+): DropTarget | undefined {
+  const slots = [
+    ...document.querySelectorAll<HTMLElement>("[data-drop-input]"),
+  ].flatMap((slot) => {
+    const accepts =
+      (slot.dataset.accepts as ValueType | undefined) ?? ValueType.Any;
+    if (!canPlugInto(output, accepts)) return [];
+    const rect = slot.getBoundingClientRect();
+    const slotMiddleY = rect.top + rect.height / 2;
+    return [
+      {
+        nodeId: slot.dataset.dropNode ?? "",
+        inputId: slot.dataset.dropInput ?? "",
+        distance: getDistance(left, middleY, rect.left, slotMiddleY),
+      },
+    ];
   });
+  const slot = getNearest(slots);
+  return (
+    slot && {
+      kind: DropKind.Input,
+      nodeId: slot.nodeId,
+      inputId: slot.inputId,
+    }
+  );
+}
+
+function findNearestConnection(
+  left: number,
+  top: number,
+): DropTarget | undefined {
+  const points = getConnectionPoints().map((point) => ({
+    ...point,
+    distance: getDistance(left, top, point.x, point.y),
+  }));
+  const point = getNearest(points);
+  return (
+    point && {
+      kind: DropKind.List,
+      listKey: point.listKey,
+      index: point.index,
+    }
+  );
+}
+
+function findCanvasSpot(
+  pointerElements: Element[],
+  left: number,
+  top: number,
+): DropTarget | undefined {
+  const canvas = document.querySelector<HTMLElement>("[data-canvas]");
+  const isOverCanvas =
+    canvas && pointerElements.some((element) => canvas.contains(element));
+  if (!isOverCanvas) return undefined;
+  const canvasRect = canvas.getBoundingClientRect();
   return {
-    kind: DropKind.List,
-    listKey: list.dataset.list,
-    index: blocksAbovePointer.length,
+    kind: DropKind.Canvas,
+    x: left - canvasRect.left + canvas.scrollLeft,
+    y: top - canvasRect.top + canvas.scrollTop,
   };
 }
 
+// where letting go right now would put the dragged blocks: the palette
+// (delete), a snap point or slot near the block's corner (scratch snaps by
+// the block, not the cursor), or loose on the canvas
+function findDropTarget({
+  pointerX,
+  pointerY,
+  left,
+  top,
+  height,
+  blocks,
+}: {
+  pointerX: number;
+  pointerY: number;
+  left: number;
+  top: number;
+  height: number;
+  blocks: BlockNode[];
+}): DropTarget | undefined {
+  const pointerElements = document.elementsFromPoint(pointerX, pointerY);
+  const isOverPalette = pointerElements.some((element) =>
+    element.closest("[data-palette]"),
+  );
+  if (isOverPalette) return { kind: DropKind.Trash };
+
+  const firstBlock = blocks[0];
+  const output = firstBlock && getBlockDefinition(firstBlock.type).output;
+  const snapTarget =
+    output && blocks.length === 1
+      ? findNearestSlot(output, left, top + height / 2)
+      : findNearestConnection(left, top);
+  return snapTarget ?? findCanvasSpot(pointerElements, left, top);
+}
+
 function applyDrop(
-  program: BlockNode[],
+  workspace: Workspace,
   target: DropTarget,
-  node: BlockNode,
-): BlockNode[] {
+  blocks: BlockNode[],
+): Workspace {
   if (target.kind === DropKind.List)
-    return insertStatement(program, target.listKey, target.index, node);
-  if (target.kind === DropKind.Input)
-    return plugExpression(program, target.nodeId, target.inputId, node);
-  // dropped on the palette, it's gone
-  return program;
+    return insertStack(workspace, target.listKey, target.index, blocks);
+  const firstBlock = blocks[0];
+  if (target.kind === DropKind.Input && firstBlock)
+    return plugExpression(workspace, target.nodeId, target.inputId, firstBlock);
+  if (target.kind === DropKind.Canvas)
+    return addLooseStack(workspace, {
+      id: createRandomId(),
+      x: Math.max(target.x, 0),
+      y: Math.max(target.y, 0),
+      blocks,
+    });
+  // dropped on the palette, gone
+  return workspace;
+}
+
+// the pressed block plus the blocks under it in the same list, top of the
+// first to bottom of the last, the height of the gap it'll need
+function getStackHeight(pressed: HTMLElement) {
+  const siblings = [...(pressed.parentElement?.children ?? [])];
+  const blocksFromPressed = siblings
+    .slice(siblings.indexOf(pressed))
+    .filter(
+      (element) => element instanceof HTMLElement && "block" in element.dataset,
+    );
+  const last = blocksFromPressed.at(-1) ?? pressed;
+  return (
+    last.getBoundingClientRect().bottom - pressed.getBoundingClientRect().top
+  );
 }
 
 const CATEGORY_TABS = Object.values(BlockCategory).map((category) => ({
@@ -230,21 +249,25 @@ const getPaletteBlocks = (category: BlockCategory) =>
   ).map((type) => createBlock(type, () => `palette-${type}`));
 
 export function BlockEditor() {
-  const [program, setProgram] = useState(makeStarterProgram);
+  const [workspace, setWorkspace] = useState(makeStarterWorkspace);
   const [category, setCategory] = useState(BlockCategory.Variables);
   const [drag, setDrag] = useState<Drag>();
+  const [dragHeight, setDragHeight] = useState(0);
   const [dropTarget, setDropTarget] = useState<DropTarget>();
   const [runningId, setRunningId] = useState<string>();
   const [output, setOutput] = useState<{ id: string; text: string }[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const runAbortController = useRef<AbortController>(undefined);
-  const programRef = useRef(program);
+  const workspaceRef = useRef(workspace);
   useEffect(() => {
-    programRef.current = program;
+    workspaceRef.current = workspace;
   });
 
   const paletteBlocks = useMemo(() => getPaletteBlocks(category), [category]);
-  const code = useMemo(() => programToCode(program), [program]);
+  const code = useMemo(
+    () => programToCode(workspace.program),
+    [workspace.program],
+  );
 
   const startDrag = (
     event: PointerEvent<HTMLElement>,
@@ -255,52 +278,70 @@ export function BlockEditor() {
     if (event.button !== 0 || isRunning || isEditableTarget(event.target))
       return;
     const isFromPalette = pressedNode.id.startsWith("palette-");
-    const rect = event.currentTarget.getBoundingClientRect();
+    const pressed = event.currentTarget;
+    const rect = pressed.getBoundingClientRect();
     const start = { x: event.clientX, y: event.clientY };
+    const offset = { x: start.x - rect.left, y: start.y - rect.top };
     // a second finger dragging another block gets its own listeners
     const { pointerId } = event;
-    const offset = { x: start.x - rect.left, y: start.y - rect.top };
     const state: {
-      node: BlockNode;
-      snapshot: BlockNode[];
+      blocks: BlockNode[];
+      height: number;
+      snapshot: Workspace;
       isDragging: boolean;
       target: DropTarget | undefined;
     } = {
-      // a palette block hands out a brand new copy every time
-      node: isFromPalette
-        ? createBlock(pressedNode.type, createRandomId)
-        : pressedNode,
-      snapshot: programRef.current,
+      blocks: [],
+      height: isFromPalette ? rect.height : getStackHeight(pressed),
+      snapshot: workspaceRef.current,
       isDragging: false,
       target: undefined,
     };
 
+    const beginDrag = () => {
+      state.isDragging = true;
+      triggerHaptic("selection");
+      setDragHeight(state.height);
+      // a palette block hands out a brand new copy every time
+      if (isFromPalette) {
+        state.blocks = [createBlock(pressedNode.type, createRandomId)];
+        return;
+      }
+      const picked = pickUp(workspaceRef.current, pressedNode);
+      state.blocks = picked.taken;
+      setWorkspace(picked.workspace);
+    };
+
     const handleMove = (moveEvent: globalThis.PointerEvent) => {
       if (moveEvent.pointerId !== pointerId) return;
-      const distance = Math.hypot(
-        moveEvent.clientX - start.x,
-        moveEvent.clientY - start.y,
-      );
-      if (!state.isDragging && distance < DRAG_THRESHOLD_PX) return;
-      if (!state.isDragging) {
-        state.isDragging = true;
-        triggerHaptic("selection");
-        if (!isFromPalette)
-          setProgram((current) => removeBlock(current, pressedNode.id));
-      }
-      state.target = findDropTarget(
+      const distance = getDistance(
         moveEvent.clientX,
         moveEvent.clientY,
-        state.node,
+        start.x,
+        start.y,
       );
-      setDropTarget(state.target);
-      setDrag({
-        node: state.node,
-        x: moveEvent.clientX,
-        y: moveEvent.clientY,
-        offsetX: offset.x,
-        offsetY: offset.y,
+      if (!state.isDragging && distance < DRAG_THRESHOLD_PX) return;
+      if (!state.isDragging) beginDrag();
+      const left = moveEvent.clientX - offset.x;
+      const top = moveEvent.clientY - offset.y;
+      const target = findDropTarget({
+        pointerX: moveEvent.clientX,
+        pointerY: moveEvent.clientY,
+        left,
+        top,
+        height: state.height,
+        blocks: state.blocks,
       });
+      // a little tick every time it snaps somewhere new
+      const isNewSnap =
+        target?.kind === DropKind.List &&
+        (state.target?.kind !== DropKind.List ||
+          state.target.listKey !== target.listKey ||
+          state.target.index !== target.index);
+      if (isNewSnap) triggerHaptic("selection");
+      state.target = target;
+      setDropTarget(target);
+      setDrag({ blocks: state.blocks, x: left, y: top });
     };
 
     const handleUp = (upEvent: globalThis.PointerEvent) => {
@@ -309,11 +350,11 @@ export function BlockEditor() {
       window.removeEventListener("pointerup", handleUp);
       window.removeEventListener("pointercancel", handleUp);
       if (!state.isDragging) return;
-      const { target, node, snapshot } = state;
+      const { target, blocks, snapshot } = state;
       if (target) {
         triggerHaptic(target.kind === DropKind.Trash ? "warning" : "light");
-        setProgram((current) => applyDrop(current, target, node));
-      } else if (!isFromPalette) setProgram(snapshot);
+        setWorkspace((current) => applyDrop(current, target, blocks));
+      } else if (!isFromPalette) setWorkspace(snapshot);
       setDrag(undefined);
       setDropTarget(undefined);
     };
@@ -330,7 +371,7 @@ export function BlockEditor() {
     setIsRunning(true);
     try {
       await runProgram({
-        program,
+        program: workspace.program,
         stepMs: 350,
         onStep: setRunningId,
         say: (text) =>
@@ -348,8 +389,9 @@ export function BlockEditor() {
   const editor = {
     startDrag,
     setField: (nodeId: string, fieldId: string, value: string) =>
-      setProgram((current) => setField(current, nodeId, fieldId, value)),
+      setWorkspace((current) => setField(current, nodeId, fieldId, value)),
     dropTarget,
+    dragHeight,
     runningId,
   };
 
@@ -374,7 +416,7 @@ export function BlockEditor() {
             onValueChange={setCategory}
             className="flex-wrap"
           />
-          <div className="flex flex-wrap items-start gap-2">
+          <div className="flex flex-wrap items-start gap-x-2 gap-y-3">
             {paletteBlocks.map((node) => (
               <BlockView key={node.id} {...{ node }} isStatic />
             ))}
@@ -389,14 +431,14 @@ export function BlockEditor() {
           )}
         </section>
 
-        <section className="flex min-w-0 flex-col gap-3 overflow-x-auto rounded-2xl bg-muted/50 p-4">
+        <section className="flex min-w-0 flex-col gap-3">
           <div className="flex items-center gap-2">
             <Button
               onClick={() =>
                 isRunning ? runAbortController.current?.abort() : run()
               }
               className={cn(
-                !isRunning && "bg-green-600 hover:bg-green-700 text-white",
+                !isRunning && "bg-green-600 text-white hover:bg-green-700",
               )}
             >
               <Icon icon={isRunning ? SquareIcon : PlayIcon} />
@@ -406,29 +448,49 @@ export function BlockEditor() {
               variant="ghost"
               disabled={isRunning}
               onClick={() => {
-                setProgram(makeStarterProgram());
+                setWorkspace(makeStarterWorkspace());
                 setOutput([]);
               }}
             >
               <Icon icon={Undo02Icon} />
               Reset
             </Button>
+            <span className="ml-auto text-xs text-muted-foreground max-sm:hidden">
+              drop blocks anywhere to park them, faded ones don't run
+            </span>
           </div>
-          <div className="flex w-max items-center gap-2 rounded-t-2xl rounded-b-md bg-amber-500 px-3 py-2 text-sm font-semibold text-white shadow-sm">
-            <Icon icon={PlayIcon} className="size-4" />
-            When Run is clicked
+          <div
+            data-canvas
+            className="relative min-h-[32rem] overflow-auto rounded-2xl bg-muted/50 bg-[radial-gradient(var(--border)_1px,transparent_0)] bg-size-[20px_20px] p-4"
+          >
+            <HatBlock>
+              <Icon icon={PlayIcon} className="size-4" />
+              When Run is clicked
+            </HatBlock>
+            <StatementList
+              listKey={ROOT_LIST}
+              nodes={workspace.program}
+              className="pb-24"
+            />
+            {/* parked stacks: half see-through, they're not part of the run */}
+            {workspace.looseStacks.map((stack) => (
+              <div
+                key={stack.id}
+                style={{ left: stack.x, top: stack.y }}
+                className="absolute opacity-50 transition-opacity hover:opacity-90"
+              >
+                <StatementList
+                  listKey={getLooseListKey(stack.id)}
+                  nodes={stack.blocks}
+                />
+              </div>
+            ))}
           </div>
-          <StatementList
-            listKey={ROOT_LIST}
-            nodes={program}
-            // room under the last block so there's always somewhere to drop
-            className="-mt-3 min-h-40 pb-24"
-          />
         </section>
 
         <section className="flex min-w-0 flex-col gap-3 self-start lg:sticky lg:top-4">
           <div className="flex min-h-28 flex-col gap-1 rounded-2xl bg-muted p-3 font-mono text-sm">
-            <span className="text-xs font-sans font-medium text-muted-foreground">
+            <span className="font-sans text-xs font-medium text-muted-foreground">
               Output
             </span>
             {output.length === 0 && (
@@ -455,12 +517,12 @@ export function BlockEditor() {
       {drag && (
         <div
           aria-hidden
-          className="pointer-events-none fixed top-0 left-0 z-50 rotate-2 opacity-90 drop-shadow-xl"
-          style={{
-            translate: `${drag.x - drag.offsetX}px ${drag.y - drag.offsetY}px`,
-          }}
+          className="pointer-events-none fixed top-0 left-0 z-50 flex rotate-2 flex-col items-start opacity-90 drop-shadow-xl"
+          style={{ translate: `${drag.x}px ${drag.y}px` }}
         >
-          <BlockView node={drag.node} isStatic />
+          {drag.blocks.map((node) => (
+            <BlockView key={node.id} {...{ node }} isStatic />
+          ))}
         </div>
       )}
     </BlockEditorContext.Provider>
