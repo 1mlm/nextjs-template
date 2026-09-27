@@ -135,29 +135,37 @@ export const MAX_LOOP_ITERATIONS = 200;
 
 const toNumber = (value: BlockValue) => Number(value) || 0;
 
-const MATH_OPERATIONS: Record<string, (a: number, b: number) => number> = {
-  "+": (a, b) => a + b,
-  "-": (a, b) => a - b,
-  "×": (a, b) => a * b,
-  "÷": (a, b) => (b === 0 ? 0 : a / b),
-};
-const MATH_OPERATORS_IN_JS: Record<string, string> = {
-  "+": "+",
-  "-": "-",
-  "×": "*",
-  "÷": "/",
+// one row per operator: what it does and how it's written in js
+const MATH_OPERATORS: Record<
+  string,
+  { apply: (a: number, b: number) => number; js: string }
+> = {
+  "+": { apply: (a, b) => a + b, js: "+" },
+  "-": { apply: (a, b) => a - b, js: "-" },
+  "×": { apply: (a, b) => a * b, js: "*" },
+  "÷": { apply: (a, b) => (b === 0 ? 0 : a / b), js: "/" },
 };
 
-const COMPARISONS: Record<string, (a: BlockValue, b: BlockValue) => boolean> = {
-  ">": (a, b) => toNumber(a) > toNumber(b),
-  "<": (a, b) => toNumber(a) < toNumber(b),
-  "=": (a, b) => String(a) === String(b),
+const COMPARISONS: Record<
+  string,
+  { apply: (a: BlockValue, b: BlockValue) => boolean; js: string }
+> = {
+  ">": { apply: (a, b) => toNumber(a) > toNumber(b), js: ">" },
+  "<": { apply: (a, b) => toNumber(a) < toNumber(b), js: "<" },
+  "=": { apply: (a, b) => String(a) === String(b), js: "===" },
 };
-const COMPARISONS_IN_JS: Record<string, string> = {
-  ">": ">",
-  "<": "<",
-  "=": "===",
-};
+
+// a node always holds one of the keys above, the fallback only calms the types
+const getMathOperator = (node: BlockNode) =>
+  MATH_OPERATORS[node.fields.operator ?? ""] ?? {
+    apply: (a: number, b: number) => a + b,
+    js: "+",
+  };
+const getComparison = (node: BlockNode) =>
+  COMPARISONS[node.fields.operator ?? ""] ?? {
+    apply: (a: BlockValue, b: BlockValue) => a === b,
+    js: "===",
+  };
 
 const formatForSay = (value: BlockValue) =>
   typeof value === "number"
@@ -308,7 +316,7 @@ export const BLOCK_DEFINITIONS = {
         {
           kind: PartKind.Option,
           id: "operator",
-          options: ["+", "-", "×", "÷"],
+          options: Object.keys(MATH_OPERATORS),
         },
         {
           kind: PartKind.Input,
@@ -319,12 +327,12 @@ export const BLOCK_DEFINITIONS = {
       ],
     ],
     evaluate: (node, { getValue }) =>
-      (MATH_OPERATIONS[node.fields.operator ?? "+"] ?? MATH_OPERATIONS["+"])(
+      getMathOperator(node).apply(
         toNumber(getValue(node, "left")),
         toNumber(getValue(node, "right")),
       ),
     toCode: (node, { getInputCode }) =>
-      `(${getInputCode(node, "left")} ${MATH_OPERATORS_IN_JS[node.fields.operator ?? "+"]} ${getInputCode(node, "right")})`,
+      `(${getInputCode(node, "left")} ${getMathOperator(node).js} ${getInputCode(node, "right")})`,
   },
   compare: {
     category: BlockCategory.Operators,
@@ -338,7 +346,11 @@ export const BLOCK_DEFINITIONS = {
           accepts: ValueType.Any,
           defaultValue: "1",
         },
-        { kind: PartKind.Option, id: "operator", options: [">", "<", "="] },
+        {
+          kind: PartKind.Option,
+          id: "operator",
+          options: Object.keys(COMPARISONS),
+        },
         {
           kind: PartKind.Input,
           id: "right",
@@ -348,12 +360,12 @@ export const BLOCK_DEFINITIONS = {
       ],
     ],
     evaluate: (node, { getValue }) =>
-      (COMPARISONS[node.fields.operator ?? ">"] ?? COMPARISONS[">"])(
+      getComparison(node).apply(
         getValue(node, "left"),
         getValue(node, "right"),
       ),
     toCode: (node, { getInputCode }) =>
-      `${getInputCode(node, "left")} ${COMPARISONS_IN_JS[node.fields.operator ?? ">"]} ${getInputCode(node, "right")}`,
+      `${getInputCode(node, "left")} ${getComparison(node).js} ${getInputCode(node, "right")}`,
   },
   join: {
     category: BlockCategory.Operators,

@@ -1,12 +1,21 @@
 "use client";
 
 import {
+  Alert02Icon,
+  CancelCircleIcon,
   CheckIcon,
+  CheckmarkCircle02Icon,
   Copy01Icon,
   Delete02Icon,
+  Dumbbell01Icon,
+  FeatherIcon,
+  Notification01Icon,
   PartyIcon,
   Target03Icon,
+  TouchInteraction01Icon,
+  WeightScaleIcon,
 } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
 import { useState } from "react";
 import useSound from "use-sound";
 import { Icon } from "@/components/Icon";
@@ -18,16 +27,21 @@ import { Chime, playChime } from "@/utils/sound";
 import { runUndoableAction } from "@/utils/undoableAction";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
-const HAPTIC_PRESETS = [
-  "selection",
-  "light",
-  "medium",
-  "heavy",
-  "success",
-  "warning",
-  "error",
-  "nudge",
+const HAPTIC_PRESETS: { preset: string; icon: IconSvgElement }[] = [
+  { preset: "selection", icon: TouchInteraction01Icon },
+  { preset: "light", icon: FeatherIcon },
+  { preset: "medium", icon: Dumbbell01Icon },
+  { preset: "heavy", icon: WeightScaleIcon },
+  { preset: "success", icon: CheckmarkCircle02Icon },
+  { preset: "warning", icon: Alert02Icon },
+  { preset: "error", icon: CancelCircleIcon },
+  { preset: "nudge", icon: Notification01Icon },
 ];
+
+const CHIME_ICONS: Record<Chime, IconSvgElement> = {
+  [Chime.Success]: CheckmarkCircle02Icon,
+  [Chime.Error]: CancelCircleIcon,
+};
 
 function SoundCounterDemo() {
   const [play] = useSound("/sfx/main.mp3");
@@ -94,13 +108,14 @@ export const FEEL_ITEMS: ShowcaseItem[] = [
     description:
       "web-haptics presets, open this on your phone (does nothing on desktop)",
     Demo: () =>
-      HAPTIC_PRESETS.map((preset) => (
+      HAPTIC_PRESETS.map(({ preset, icon }) => (
         <Button
           key={preset}
           size="sm"
           variant="outline"
           onClick={() => triggerHaptic(preset)}
         >
+          <Icon {...{ icon }} />
           {preset}
         </Button>
       )),
@@ -112,6 +127,7 @@ export const FEEL_ITEMS: ShowcaseItem[] = [
     Demo: () =>
       Object.values(Chime).map((type) => (
         <Button key={type} variant="outline" onClick={() => playChime(type)}>
+          <Icon icon={CHIME_ICONS[type]} />
           {type}
         </Button>
       )),

@@ -3,6 +3,7 @@
 import {
   ArrowRight01Icon,
   Bug02Icon,
+  PuzzleIcon,
   SidebarLeftIcon,
   Table01Icon,
   UnavailableIcon,
@@ -26,6 +27,7 @@ import type { ShowcaseItem } from "./ShowcaseCard";
 
 const DEMO_PAGES: { href: string; label: string; icon: IconSvgElement }[] = [
   { href: "/table", label: "CustomTable", icon: Table01Icon },
+  { href: "/blocks", label: "Blocks editor", icon: PuzzleIcon },
   {
     href: "/this-page-does-not-exist",
     label: "404 page",

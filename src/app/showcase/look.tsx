@@ -58,6 +58,15 @@ const FONTS = [
   { name: "JetBrains Mono", importName: "JetBrains_Mono", font: jetBrainsMono },
 ];
 
+// the picked one goes solid, same pill for the font and emoji theme pickers
+const getTogglePillClass = (isPicked: boolean) =>
+  cn(
+    "rounded-lg px-2.5 py-1 text-sm transition-colors",
+    isPicked
+      ? "bg-foreground text-background"
+      : "bg-muted hover:bg-muted-foreground/20",
+  );
+
 function FontsDemo() {
   const [pickedName, setPickedName] = useState(FONTS[0]?.name);
   const picked = FONTS.find(({ name }) => name === pickedName) ?? FONTS[0];
@@ -79,10 +88,8 @@ function FontsDemo() {
               }}
               className={cn(
                 font.className,
-                "shrink-0 rounded-lg px-2.5 py-1 text-sm whitespace-nowrap",
-                name === pickedName
-                  ? "bg-foreground text-background"
-                  : "bg-muted hover:bg-muted-foreground/20",
+                "shrink-0 whitespace-nowrap",
+                getTogglePillClass(name === pickedName),
               )}
             >
               {name}
@@ -138,10 +145,8 @@ function FluentEmojiDemo() {
             type="button"
             onClick={() => setThemeLabel(label)}
             className={cn(
-              "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-sm",
-              label === themeLabel
-                ? "bg-foreground text-background"
-                : "bg-muted hover:bg-muted-foreground/20",
+              "flex items-center gap-1.5",
+              getTogglePillClass(label === themeLabel),
             )}
           >
             <span className="flex -space-x-1">

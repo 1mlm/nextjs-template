@@ -528,3 +528,9 @@ label:has(:disabled) {
 .reactEasyCrop_CropAreaRound {
   @apply corner-squircle;
 }
+
+/* shadcn's skeleton is bg-muted, which on a white card in light mode is
+   basically invisible. a foreground tint shows on any surface in both themes */
+[data-slot="skeleton"] {
+  @apply bg-foreground/8;
+}
