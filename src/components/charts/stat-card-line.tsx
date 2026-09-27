@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/shadcn/ui/card";
 import { sessionsSeries, sessionsStats } from "./data/sessions-series";
+import { ChartTooltip } from "./tooltip";
 import {
   StatCardChart,
   statCardLabelClassName,
@@ -68,10 +69,12 @@ export function StatCardLine() {
             <Line
               curve={curveBasis}
               dataKey="value"
-              showHighlight
               stroke="var(--chart-3)"
               strokeWidth={2.5}
             />
+            {/* a line down to the hovered day + a dot on it, the number
+            and weekday in the corner are the readout */}
+            <ChartTooltip showBox={false} showDatePill={false} />
           </LineChart>
         </StatCardChart>
       </CardContent>

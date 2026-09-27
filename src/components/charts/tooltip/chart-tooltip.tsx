@@ -25,6 +25,8 @@ import { TooltipIndicator } from "./tooltip-indicator";
 export interface ChartTooltipProps {
   /** Whether to show the date pill at bottom. Default: true */
   showDatePill?: boolean;
+  /** Show the floating value panel. Off = just the crosshair and dots. Default: true */
+  showBox?: boolean;
   /** Whether to show the vertical crosshair line. Default: true */
   showCrosshair?: boolean;
   /** Whether to show dots on the lines. Default: true */
@@ -97,6 +99,7 @@ interface ChartTooltipInnerProps extends ChartTooltipProps {
 
 const ChartTooltipInner = memo(function ChartTooltipInner({
   showDatePill = true,
+  showBox = true,
   showCrosshair = true,
   showDots = true,
   dotVariant = "dot",
@@ -298,7 +301,9 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
                 cornerRadiusFraction={
                   dotVariant === "ring" ? dotRadiusFraction : undefined
                 }
-                key={line.dataKey}
+                // index too: a stat card's hover bridge registers the same
+                // dataKey as its line
+                key={`${line.dataKey}-${index}`}
                 size={resolvedDotSize}
                 springConfig={springConfig}
                 strokeColor={chartCssVars.background}
@@ -314,6 +319,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
       )}
 
       {/* Tooltip Box */}
+      {showBox && (
       <TooltipBox
         animate={boxMotion.animate}
         backgroundColor={backgroundColor}
@@ -339,6 +345,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
               </TooltipContent>
             )}
       </TooltipBox>
+      )}
 
       {/* Date/Category Ticker - only show for vertical charts */}
       <DatePillTracker

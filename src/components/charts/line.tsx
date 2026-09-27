@@ -61,7 +61,9 @@ export interface LineProps {
    * Default: true
    */
   fadeEdges?: FadeEdges;
-  /** Whether to show highlight segment on hover. Default: true */
+  /** Whether to show highlight segment on hover. Default: false (a lit
+   * stretch between two points read as a random "area", the crosshair +
+   * dot from ChartTooltip says what's hovered much clearer) */
   showHighlight?: boolean;
   /** Render scatter-style circle markers at each data point. Default: false */
   showMarkers?: boolean;
@@ -211,7 +213,7 @@ export function Line({
   curve = curveNatural,
   animate = true,
   fadeEdges = true,
-  showHighlight = true,
+  showHighlight = false,
   showMarkers = false,
   markers,
   dashFromIndex,
