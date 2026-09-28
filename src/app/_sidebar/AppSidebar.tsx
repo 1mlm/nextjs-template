@@ -299,7 +299,7 @@ export function AppSidebar() {
   if (isMobile) return null;
 
   return (
-    <Sidebar variant="floating" collapsible="icon">
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader className="p-3">
         <div className="relative h-8 transition-[height] duration-(--sidebar-duration) ease-(--sidebar-ease) group-data-[collapsible=icon]:h-18">
           <div className="flex items-center gap-3">

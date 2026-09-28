@@ -68,7 +68,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             <SidebarProvider defaultOpen={isSidebarOpen} style={SIDEBAR_SIZES}>
               <CommandPaletteProvider>
                 <AppSidebar />
-                <SidebarInset className="min-w-0 bg-muted md:m-2 md:ml-0 md:rounded-xl md:ring-1 md:ring-border">
+                <SidebarInset className="min-w-0 bg-muted md:ring-1 md:ring-border md:peer-data-[variant=inset]:shadow-lg">
                   <MobileTopBar />
                   {children}
                 </SidebarInset>

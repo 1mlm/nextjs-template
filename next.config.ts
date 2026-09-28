@@ -6,10 +6,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // bottom-left is where the sidebar's profile footer lives
   devIndicators: { position: "bottom-right" },
-  experimental: {
-    // lets <ViewTransition> in layout.tsx animate route changes
-    viewTransition: true,
-  },
+  // <ViewTransition> in layout.tsx no longer needs an experimental flag as of
+  // Next.js 16.3 — it's unconditional now, the config option was removed
   // opening the dev server through a tunnel on a phone, without these the
   // page loads but hot reload and server actions get blocked
   allowedDevOrigins: [

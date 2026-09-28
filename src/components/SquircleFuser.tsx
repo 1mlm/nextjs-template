@@ -73,6 +73,27 @@ const LAYOUT_BY_ALIGN = {
 
 export type SquircleFuserAlign = keyof typeof LAYOUT_BY_ALIGN;
 
+// box-shadow would draw a square behind the concave fuser corners since it
+// doesn't know about the mask. filter:drop-shadow follows the actual
+// composited alpha shape instead, pill + fusers together as one silhouette
+const DEPTH_DROP_SHADOW = "drop-shadow(0 2px 6px rgb(0 0 0 / 0.16))";
+
+// one drop-shadow at a big blur radius just smears the whole rectangle into
+// a flat opaque blob, it doesn't read as light. stacking a tight bright
+// layer with wider, fainter ones mimics how a real glow actually falls off
+function getGlowFilter(glow: string) {
+  return [
+    { blur: 4, opacity: 80 },
+    { blur: 14, opacity: 45 },
+    { blur: 32, opacity: 22 },
+  ]
+    .map(
+      ({ blur, opacity }) =>
+        `drop-shadow(0 0 ${blur}px color-mix(in srgb, ${glow} ${opacity}%, transparent))`,
+    )
+    .join(" ");
+}
+
 // the frame's edge usually lands on a fractional pixel, the half covered
 // pixel there shows the content through as a hairline. pushing the pill 1px
 // past the edge covers it fully. only works when the pill isn't inside the
@@ -112,6 +133,7 @@ export function SquircleFuserContainer({
   style,
   align = "top-center",
   background = "bg-background",
+  glow,
 }: PropsWithChildren<{
   wrapperClassName?: string;
   className?: string;
@@ -121,8 +143,15 @@ export function SquircleFuserContainer({
   align?: SquircleFuserAlign;
   style?: CSSProperties;
   background?: string;
+  // a css color the whole shape glows with (e.g. "var(--color-sky-400)").
+  // it's a drop-shadow too, so it bleeds past this container same as the
+  // depth shadow does, right out past whatever frame is wrapped around it
+  glow?: string;
 }>) {
   const layout = LAYOUT_BY_ALIGN[align];
+  const filter = [glow && getGlowFilter(glow), DEPTH_DROP_SHADOW]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
@@ -133,7 +162,7 @@ export function SquircleFuserContainer({
         EDGE_NUDGE_BY_ALIGN[align],
         wrapperClassName,
       )}
-      {...{ style }}
+      style={{ filter, ...style }}
     >
       <div
         className={cn(

@@ -555,59 +555,74 @@ label:has(:disabled) {
 /* loaded content arriving: each row pops in after the one above it
    (.pop-rows) and the pieces inside a row pop one by one (.pop-items), so a
    skeleton turning into content feels like it lands instead of just clicking
-   over. nth-child and not sibling-index() cuz safari and firefox lack it */
+   over. sibling-index() shipped in every major browser in 2026, no cap needed
+   for any number of rows/items — @supports keeps the old nth-child version
+   (capped at 8, since it can't count past what's hand-written) as a fallback */
 .pop-rows > *,
 .pop-items > * {
   animation: pop-in 460ms var(--ease-spring) both;
-  animation-delay: calc(var(--pop-row, 0) * 70ms + var(--pop-item, 0) * 50ms);
 }
-.pop-rows > :nth-child(2) {
-  --pop-row: 1;
+@supports (animation-delay: calc(sibling-index() * 1ms)) {
+  .pop-rows > * {
+    animation-delay: calc((sibling-index() - 1) * 70ms);
+  }
+  .pop-items > * {
+    animation-delay: calc((sibling-index() - 1) * 50ms);
+  }
 }
-.pop-rows > :nth-child(3) {
-  --pop-row: 2;
-}
-.pop-rows > :nth-child(4) {
-  --pop-row: 3;
-}
-.pop-rows > :nth-child(5) {
-  --pop-row: 4;
-}
-.pop-rows > :nth-child(6) {
-  --pop-row: 5;
-}
-.pop-rows > :nth-child(7) {
-  --pop-row: 6;
-}
-.pop-rows > :nth-child(8) {
-  --pop-row: 7;
-}
-.pop-rows > :nth-child(n + 9) {
-  --pop-row: 8;
-}
-.pop-items > :nth-child(2) {
-  --pop-item: 1;
-}
-.pop-items > :nth-child(3) {
-  --pop-item: 2;
-}
-.pop-items > :nth-child(4) {
-  --pop-item: 3;
-}
-.pop-items > :nth-child(5) {
-  --pop-item: 4;
-}
-.pop-items > :nth-child(6) {
-  --pop-item: 5;
-}
-.pop-items > :nth-child(7) {
-  --pop-item: 6;
-}
-.pop-items > :nth-child(8) {
-  --pop-item: 7;
-}
-.pop-items > :nth-child(n + 9) {
-  --pop-item: 8;
+@supports not (animation-delay: calc(sibling-index() * 1ms)) {
+  .pop-rows > *,
+  .pop-items > * {
+    animation-delay: calc(var(--pop-row, 0) * 70ms + var(--pop-item, 0) * 50ms);
+  }
+  .pop-rows > :nth-child(2) {
+    --pop-row: 1;
+  }
+  .pop-rows > :nth-child(3) {
+    --pop-row: 2;
+  }
+  .pop-rows > :nth-child(4) {
+    --pop-row: 3;
+  }
+  .pop-rows > :nth-child(5) {
+    --pop-row: 4;
+  }
+  .pop-rows > :nth-child(6) {
+    --pop-row: 5;
+  }
+  .pop-rows > :nth-child(7) {
+    --pop-row: 6;
+  }
+  .pop-rows > :nth-child(8) {
+    --pop-row: 7;
+  }
+  .pop-rows > :nth-child(n + 9) {
+    --pop-row: 8;
+  }
+  .pop-items > :nth-child(2) {
+    --pop-item: 1;
+  }
+  .pop-items > :nth-child(3) {
+    --pop-item: 2;
+  }
+  .pop-items > :nth-child(4) {
+    --pop-item: 3;
+  }
+  .pop-items > :nth-child(5) {
+    --pop-item: 4;
+  }
+  .pop-items > :nth-child(6) {
+    --pop-item: 5;
+  }
+  .pop-items > :nth-child(7) {
+    --pop-item: 6;
+  }
+  .pop-items > :nth-child(8) {
+    --pop-item: 7;
+  }
+  .pop-items > :nth-child(n + 9) {
+    --pop-item: 8;
+  }
 }
 
 @keyframes pop-in {

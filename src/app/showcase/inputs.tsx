@@ -354,7 +354,11 @@ function CenteredSelectDemo() {
       then the whole row lands exactly on the trigger */}
       <SelectContent position="item-aligned">
         {SEMESTERS.map((name) => (
-          <SelectItem key={name} value={name} className="h-8 pl-[calc(1px+0.625rem+1em+0.375rem)]">
+          <SelectItem
+            key={name}
+            value={name}
+            className="h-8 pl-[calc(1px+0.625rem+1em+0.375rem)]"
+          >
             {name}
           </SelectItem>
         ))}
