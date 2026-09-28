@@ -2,11 +2,9 @@ import {
   Cursor01Icon,
   Home01Icon,
   PuzzleIcon,
-  SparklesIcon,
   TablePropertiesIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
-import { IconChip } from "@/components/IconChip";
 
 // the one place a fork renames the app and edits the sidebar links
 export const APP_INFO = {
@@ -58,9 +56,7 @@ export const getNavTransitionTypes = (
 
 export function AppIcon() {
   return (
-    <IconChip
-      icon={SparklesIcon}
-      className="bg-sidebar-foreground text-sidebar"
-    />
+    // biome-ignore lint/performance/noImgElement: same icon.svg the favicon uses, so they never drift
+    <img src="/icon.svg" alt="" draggable={false} className="size-8 shrink-0" />
   );
 }

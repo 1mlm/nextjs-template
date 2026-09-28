@@ -1,36 +1,14 @@
-import { SparklesIcon } from "@hugeicons/core-free-icons";
-
-// the sidebar's sparkles, drawn as a plain full bleed square for
-// ImageResponse. no rounded corners on purpose, phones cut their own shape
-// out of it, and the icon sits well inside the middle 60% so no mask ever
-// clips it
+// microsoft's fluent emoji sparkles, straight off their cdn, no background
+// square around it. this feeds apple-icon, the og image and the pwa install
+// icons, so they never drift from each other
 export function drawAppIcon(size: number) {
   return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#0a0a0a",
-      }}
-    >
-      {/* biome-ignore lint/a11y/noSvgWithoutTitle: satori (ImageResponse) paints a <title> as visible text on the icon */}
-      <svg
-        width={size * 0.5}
-        height={size * 0.5}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#fafafa"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        {SparklesIcon.map(([, { d, key }]) => (
-          <path key={String(key)} d={String(d)} />
-        ))}
-      </svg>
-    </div>
+    // biome-ignore lint/performance/noImgElement: satori (ImageResponse) needs a plain img to fetch a remote file
+    <img
+      src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Sparkles/3D/sparkles_3d.png"
+      width={size}
+      height={size}
+      alt="Sparkles"
+    />
   );
 }
