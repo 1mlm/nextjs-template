@@ -1,8 +1,8 @@
 import {
   Cursor01Icon,
-  GiftIcon,
   Home01Icon,
   PuzzleIcon,
+  SparklesIcon,
   TablePropertiesIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
@@ -58,6 +58,9 @@ export const getNavTransitionTypes = (
 
 export function AppIcon() {
   return (
-    <IconChip icon={GiftIcon} className="bg-sidebar-foreground text-sidebar" />
+    <IconChip
+      icon={SparklesIcon}
+      className="bg-sidebar-foreground text-sidebar"
+    />
   );
 }
