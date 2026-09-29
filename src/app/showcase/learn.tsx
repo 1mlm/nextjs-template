@@ -12,6 +12,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Die3D } from "@/components/Die3D";
 import { Icon } from "@/components/Icon";
+import { ChessBoard } from "@/components/learn/ChessBoard";
 import {
   CoordinatePlane,
   type PlanePoint,
@@ -395,5 +396,13 @@ export const LEARN_ITEMS: ShowcaseItem[] = [
       "a real 3D die (three.js) with a transparent canvas, so it sits inside the text and the paragraph wraps around it. drag to spin with inertia, tap to throw. three only downloads when it is scrolled near, and it stops drawing off screen",
     wide: true,
     Demo: Die3DDemo,
+  },
+  {
+    name: "ChessBoard",
+    path: "src/components/learn/ChessBoard.tsx",
+    description:
+      "a full chess game (rules by chess.js). tap a piece for its moves, tap a square or drag the piece there. pieces slide, captures pop, promotions ask, the king glows red in check, undo and flip below. piece set is Caliente by avi, CC BY-NC-SA, see public/svgs/chess",
+    wide: true,
+    Demo: () => <ChessBoard />,
   },
 ];
