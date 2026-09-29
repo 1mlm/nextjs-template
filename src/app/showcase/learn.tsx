@@ -1,9 +1,18 @@
 "use client";
 
-import { Tick02Icon } from "@hugeicons/core-free-icons";
+import {
+  Book01Icon,
+  CubeIcon,
+  PuzzleIcon,
+  RocketIcon,
+  Target01Icon,
+  Tick02Icon,
+  TrophyIcon,
+} from "@hugeicons/core-free-icons";
 import { useEffect, useRef, useState } from "react";
 import { CoordinatePlane, type PlanePoint } from "@/components/CoordinatePlane";
 import { Icon } from "@/components/Icon";
+import { type Lesson, LessonPath } from "@/components/LessonPath";
 import { VoiceButton } from "@/components/VoiceButton";
 import { Button } from "@/shadcn/ui/button";
 import { triggerConfetti } from "@/utils/confetti";
@@ -96,6 +105,38 @@ function CoordinatePlaneDemo() {
   );
 }
 
+const LESSONS: Lesson[] = [
+  { id: "intro", title: "Hello, numbers", icon: Book01Icon },
+  { id: "axes", title: "The two axes", icon: Target01Icon },
+  { id: "points", title: "Plotting points", icon: PuzzleIcon },
+  { id: "shapes", title: "Shapes on a grid", icon: CubeIcon },
+  { id: "launch", title: "Blast off", icon: RocketIcon },
+  { id: "boss", title: "Final boss", icon: TrophyIcon },
+];
+
+function LessonPathDemo() {
+  const [completedCount, setCompletedCount] = useState(2);
+
+  return (
+    <div className="flex w-full flex-col items-center gap-4">
+      <LessonPath
+        lessons={LESSONS}
+        {...{ completedCount }}
+        currentProgress={0.4}
+        onSelect={(lesson) => {
+          if (LESSONS.indexOf(lesson) !== completedCount) return;
+          triggerConfetti();
+          playChime(Chime.Success);
+          setCompletedCount(completedCount + 1);
+        }}
+      />
+      <Button variant="outline" size="sm" onClick={() => setCompletedCount(0)}>
+        Start over
+      </Button>
+    </div>
+  );
+}
+
 export const LEARN_ITEMS: ShowcaseItem[] = [
   {
     name: "VoiceButton",
@@ -110,5 +151,12 @@ export const LEARN_ITEMS: ShowcaseItem[] = [
     description:
       "a graph with draggable points that snap to whole numbers with a spring, dashed guides to the axes, arrow keys work too. targets are ghost cells that light up green when a point lands on one",
     Demo: CoordinatePlaneDemo,
+  },
+  {
+    name: "LessonPath",
+    path: "src/components/LessonPath.tsx",
+    description:
+      "a winding road of lessons: done ones are colored, the current one bobs a START bubble with a progress ring, locked ones shake when poked. the nodes sink into their edge when pressed. tap the current one to finish it",
+    Demo: LessonPathDemo,
   },
 ];
