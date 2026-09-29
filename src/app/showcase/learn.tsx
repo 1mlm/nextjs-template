@@ -16,9 +16,12 @@ import {
   CoordinatePlane,
   type PlanePoint,
 } from "@/components/learn/CoordinatePlane";
+import { Flashcard, type SwipeDirection } from "@/components/learn/Flashcard";
 import { Hearts } from "@/components/learn/Hearts";
 import { type Lesson, LessonPath } from "@/components/learn/LessonPath";
+import { QuizQuestion } from "@/components/learn/QuizQuestion";
 import { type StreakDay, StreakFlame } from "@/components/learn/StreakFlame";
+import { WordBank } from "@/components/learn/WordBank";
 import { XpBar } from "@/components/learn/XpBar";
 import { VoiceButton } from "@/components/VoiceButton";
 import { Button } from "@/shadcn/ui/button";
@@ -244,6 +247,83 @@ function HeartsDemo() {
   );
 }
 
+const QUIZ_QUESTIONS = [
+  {
+    question: "Which point sits on the y-axis?",
+    options: ["(3, 0)", "(0, -4)", "(2, 2)", "(-1, 3)"],
+    correctIndex: 1,
+    explanation: "its x is 0, so it never leaves the y-axis.",
+  },
+  {
+    question: "In (5, -2), how far below the x-axis is the point?",
+    options: ["5 units", "2 units", "3 units", "7 units"],
+    correctIndex: 1,
+    explanation: "the second number says how far up or down.",
+  },
+  {
+    question: "Which quadrant holds (-3, 4)?",
+    options: ["I", "II", "III", "IV"],
+    correctIndex: 1,
+    explanation: "left and up is quadrant II.",
+  },
+];
+
+function QuizQuestionDemo() {
+  const [round, setRound] = useState(0);
+  const question = QUIZ_QUESTIONS[round % QUIZ_QUESTIONS.length];
+
+  return (
+    <QuizQuestion
+      key={round}
+      {...question}
+      onContinue={() => setRound(round + 1)}
+    />
+  );
+}
+
+const FLASHCARDS = [
+  { front: "What is the point (0, 0) called?", back: "The origin" },
+  { front: "Which axis is horizontal?", back: "The x-axis" },
+  { front: "What does the y in (x, y) measure?", back: "How far up or down" },
+  { front: "How many quadrants does a plane have?", back: "Four" },
+];
+
+function FlashcardDemo() {
+  const [index, setIndex] = useState(0);
+  const [grades, setGrades] = useState({ known: 0, again: 0 });
+  const card = FLASHCARDS[index % FLASHCARDS.length];
+
+  const grade = (direction: SwipeDirection) => {
+    setGrades({ ...grades, [direction]: grades[direction] + 1 });
+    setIndex(index + 1);
+  };
+
+  return (
+    <div className="flex w-full flex-col items-center gap-3">
+      <Flashcard
+        key={index}
+        front={card.front}
+        back={card.back}
+        onGrade={grade}
+      />
+      <p className="text-sm text-muted-foreground">
+        tap to flip, swipe right if you knew it. got it {grades.known}, again{" "}
+        {grades.again}
+      </p>
+    </div>
+  );
+}
+
+function WordBankDemo() {
+  return (
+    <WordBank
+      template="A point on the {} axis always has a {} of zero."
+      words={["x", "y", "x-coordinate", "y-coordinate"]}
+      answers={["x", "y-coordinate"]}
+    />
+  );
+}
+
 export const LEARN_ITEMS: ShowcaseItem[] = [
   {
     name: "StreakFlame",
@@ -265,6 +345,27 @@ export const LEARN_ITEMS: ShowcaseItem[] = [
     description:
       "lives for a lesson. a lost heart pops, wobbles and greys out, a refill bounces back",
     Demo: HeartsDemo,
+  },
+  {
+    name: "QuizQuestion",
+    path: "src/components/learn/QuizQuestion.tsx",
+    description:
+      "multiple choice in the check-then-continue style. chunky options (keys 1 to 4 pick), Check, then a bar slides up green or red with the right answer. a wrong pick shakes",
+    Demo: QuizQuestionDemo,
+  },
+  {
+    name: "Flashcard",
+    path: "src/components/learn/Flashcard.tsx",
+    description:
+      "tap to flip in real 3D, swipe or flick it away to grade it (right = got it, left = again), buttons do the same. the stamps fade in as you drag",
+    Demo: FlashcardDemo,
+  },
+  {
+    name: "WordBank",
+    path: "src/components/learn/WordBank.tsx",
+    description:
+      "fill the blanks from a word bank. tapped words fly into the next blank and back out again when tapped, Check shakes when wrong",
+    Demo: WordBankDemo,
   },
   {
     name: "VoiceButton",
