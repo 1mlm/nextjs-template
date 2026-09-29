@@ -102,7 +102,7 @@ function FontsDemo() {
   );
 }
 
-// undefined = microsoft's own 3D look
+// undefined = the emoji as microsoft drew it
 const EMOJI_THEMES: (Color | undefined)[] = [
   undefined,
   "green",
@@ -124,7 +124,7 @@ function FluentEmojiDemo() {
       <div className="flex flex-wrap gap-1.5">
         {EMOJI_THEMES.map((option) => (
           <button
-            key={option ?? "3d"}
+            key={option ?? "original"}
             type="button"
             onClick={() => setTheme(option)}
             className={cn(
@@ -138,7 +138,7 @@ function FluentEmojiDemo() {
                 className="size-3 rounded-full"
               />
             )}
-            {option ?? "3D"}
+            {option ?? "original"}
           </button>
         ))}
       </div>
@@ -165,7 +165,7 @@ function FluentEmojiDemo() {
           animation={EmojiAnimation.Always}
           className="size-10"
         />
-        hover (or tap) any of them to play it, or animation="always"
+        hover (or tap) any of them to make it dance, or animation="always"
       </div>
     </div>
   );
@@ -245,7 +245,7 @@ export const LOOK_ITEMS: ShowcaseItem[] = [
     name: "FluentEmoji",
     path: "src/components/FluentEmoji.tsx",
     description:
-      "microsoft's 3D emoji by name, animated on hover or tap. pick a color: the tool ones get redrawn in it, the colored parts move onto that tailwind ramp and the greys stay",
+      "microsoft's fluent emoji as svg by name, they dance on hover or tap and only download once you scroll near them. pick a color: the tool ones get redrawn in it, the colored parts move onto that tailwind ramp and the greys stay",
     Demo: FluentEmojiDemo,
   },
   {

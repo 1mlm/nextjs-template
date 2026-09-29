@@ -394,6 +394,20 @@
    cuz tailwind prunes a plain @keyframes that only an animate-[] uses */
 @theme {
   --animate-marquee: marquee-ping-pong 2s ease-in-out infinite alternate;
+  --animate-emoji-dance: emoji-dance 0.9s ease-in-out infinite;
+
+  @keyframes emoji-dance {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg) scale(1);
+    }
+    25% {
+      transform: translateY(-10%) rotate(-9deg) scale(1.1);
+    }
+    75% {
+      transform: translateY(-5%) rotate(9deg) scale(1.1);
+    }
+  }
 
   @keyframes marquee-ping-pong {
     0%,

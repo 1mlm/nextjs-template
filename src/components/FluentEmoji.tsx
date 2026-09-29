@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shadcn/utils";
 import { type Color, recolorSvg } from "@/utils/color";
 
-// microsoft's fluent emoji, straight from their github through jsdelivr: the
-// 3D png (~40kb), the community animated apng (~800kb so it only loads on
-// hover or when asked) and the flat "Color" svg, which is what a theme
-// recolors. adding one = adding a row: the name exactly as on
-// https://github.com/microsoft/fluentui-emoji/tree/main/assets (any casing)
-// and its folder in
-// https://github.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/tree/master/Emojis
+// microsoft's fluent emoji as their flat "Color" svgs, straight from their
+// github through jsdelivr. svg only on purpose: a 3D png is ~40kb each and a
+// page of them ate the network, an svg is a few kb and can be recolored.
+// adding one = adding a row: the name exactly as on
+// https://github.com/microsoft/fluentui-emoji/tree/main/assets (any casing),
+// and check it has a Color folder there, no svg means it doesn't go in
 type FluentEmojiEntry = {
   name: string;
-  category: string;
   hasSkinTones?: boolean;
   // a "tool" whose colored parts can move to any tailwind color and still
   // look drawn that way. faces, food, hands and plants look wrong recolored
@@ -21,162 +19,86 @@ type FluentEmojiEntry = {
 };
 
 export const FLUENT_EMOJIS = {
-  compass: { name: "Compass", category: "Travel and places", themeable: true },
-  calendar: { name: "Tear-Off Calendar", category: "Objects", themeable: true },
-  spiralCalendar: {
-    name: "Spiral Calendar",
-    category: "Objects",
-    themeable: true,
-  },
-  pushpin: { name: "Pushpin", category: "Objects", themeable: true },
-  roundPushpin: { name: "Round Pushpin", category: "Objects", themeable: true },
-  bell: { name: "Bell", category: "Objects", themeable: true },
-  lightBulb: { name: "Light Bulb", category: "Objects", themeable: true },
-  key: { name: "Key", category: "Objects", themeable: true },
-  locked: { name: "Locked", category: "Objects", themeable: true },
-  magnifyingGlass: {
-    name: "Magnifying Glass Tilted Left",
-    category: "Objects",
-    themeable: true,
-  },
-  rocket: { name: "Rocket", category: "Travel and places", themeable: true },
-  trophy: { name: "Trophy", category: "Activities", themeable: true },
-  shield: { name: "Shield", category: "Objects", themeable: true },
-  clipboard: { name: "Clipboard", category: "Objects", themeable: true },
-  bookmark: { name: "Bookmark", category: "Objects", themeable: true },
-  megaphone: { name: "Megaphone", category: "Objects", themeable: true },
-  folder: { name: "File Folder", category: "Objects", themeable: true },
-  hourglass: {
-    name: "Hourglass Done",
-    category: "Travel and places",
-    themeable: true,
-  },
-  alarmClock: {
-    name: "Alarm Clock",
-    category: "Travel and places",
-    themeable: true,
-  },
-  magnet: { name: "Magnet", category: "Objects", themeable: true },
-  crown: { name: "Crown", category: "Objects", themeable: true },
-  glowingStar: {
-    name: "Glowing Star",
-    category: "Travel and places",
-    themeable: true,
-  },
-  barChart: { name: "Bar Chart", category: "Objects", themeable: true },
-  chartIncreasing: {
-    name: "Chart Increasing",
-    category: "Objects",
-    themeable: true,
-  },
-  toolbox: { name: "Toolbox", category: "Objects", themeable: true },
-  creditCard: { name: "Credit Card", category: "Objects", themeable: true },
-  books: { name: "Books", category: "Objects", themeable: true },
-  bullseye: { name: "Bullseye", category: "Activities", themeable: true },
-  pen: { name: "Pen", category: "Objects", themeable: true },
-  memo: { name: "Memo", category: "Objects", themeable: true },
-  worldMap: {
-    name: "World Map",
-    category: "Travel and places",
-    themeable: true,
-  },
-  tickets: {
-    name: "Admission Tickets",
-    category: "Activities",
-    themeable: true,
-  },
-  graduationCap: {
-    name: "Graduation Cap",
-    category: "Objects",
-    themeable: true,
-  },
-  sun: { name: "Sun", category: "Travel and places", themeable: true },
-  moonCrescent: {
-    name: "Crescent Moon",
-    category: "Travel and places",
-    themeable: true,
-  },
-  moonFull: {
-    name: "Full Moon",
-    category: "Travel and places",
-    themeable: true,
-  },
-  moonNew: {
-    name: "New Moon",
-    category: "Travel and places",
-    themeable: true,
-  },
-  gloves: { name: "Gloves", category: "Objects", themeable: true },
-  briefcase: { name: "Briefcase", category: "Objects", themeable: true },
-  umbrella: {
-    name: "Umbrella",
-    category: "Travel and places",
-    themeable: true,
-  },
-  ring: { name: "Ring", category: "Objects", themeable: true },
-  wrench: { name: "Wrench", category: "Objects", themeable: true },
-  gear: { name: "Gear", category: "Objects", themeable: true },
-  anchor: { name: "Anchor", category: "Travel and places", themeable: true },
-  ladder: { name: "Ladder", category: "Objects", themeable: true },
-  scissors: { name: "Scissors", category: "Objects", themeable: true },
-  envelope: { name: "Envelope", category: "Objects", themeable: true },
-  package: { name: "Package", category: "Objects", themeable: true },
-  paperclip: { name: "Paperclip", category: "Objects", themeable: true },
-  speechBalloon: {
-    name: "Speech Balloon",
-    category: "Smilies",
-    themeable: true,
-  },
-  testTube: { name: "Test Tube", category: "Objects", themeable: true },
-  atomSymbol: { name: "Atom Symbol", category: "Symbols", themeable: true },
-  dna: { name: "DNA", category: "Objects", themeable: true },
-  satellite: {
-    name: "Satellite",
-    category: "Travel and places",
-    themeable: true,
-  },
-  telescope: { name: "Telescope", category: "Objects", themeable: true },
-  highVoltage: {
-    name: "High Voltage",
-    category: "Travel and places",
-    themeable: true,
-  },
-  puzzlePiece: {
-    name: "Puzzle Piece",
-    category: "Activities",
-    themeable: true,
-  },
-  chessPawn: { name: "Chess Pawn", category: "Activities", themeable: true },
-  artistPalette: {
-    name: "Artist Palette",
-    category: "Activities",
-    themeable: true,
-  },
-  fire: { name: "Fire", category: "Travel and places" },
-  heart: { name: "Red Heart", category: "Smilies" },
-  party: { name: "Party Popper", category: "Activities" },
-  starStruck: { name: "Star-Struck", category: "Smilies" },
-  cool: { name: "Smiling Face with Sunglasses", category: "Smilies" },
-  rainbow: { name: "Rainbow", category: "Travel and places" },
-  hundred: { name: "Hundred Points", category: "Smilies" },
-  ghost: { name: "Ghost", category: "Smilies" },
-  robot: { name: "Robot", category: "Smilies" },
-  unicorn: { name: "Unicorn", category: "Animals" },
-  cat: { name: "Cat Face", category: "Animals" },
-  seedling: { name: "Seedling", category: "Animals" },
-  coffee: { name: "Hot Beverage", category: "Food" },
-  pizza: { name: "Pizza", category: "Food" },
-  brain: { name: "Brain", category: "Hand gestures" },
-  wave: { name: "Waving Hand", category: "Hand gestures", hasSkinTones: true },
-  thumbsUp: {
-    name: "Thumbs Up",
-    category: "Hand gestures",
-    hasSkinTones: true,
-  },
-  pray: { name: "Folded Hands", category: "Hand gestures", hasSkinTones: true },
-  laptop: { name: "Laptop", category: "Objects" },
-  moneyBag: { name: "Money Bag", category: "Objects" },
-  check: { name: "Check Mark Button", category: "Symbols" },
+  compass: { name: "Compass", themeable: true },
+  calendar: { name: "Tear-Off Calendar", themeable: true },
+  spiralCalendar: { name: "Spiral Calendar", themeable: true },
+  pushpin: { name: "Pushpin", themeable: true },
+  roundPushpin: { name: "Round Pushpin", themeable: true },
+  bell: { name: "Bell", themeable: true },
+  lightBulb: { name: "Light Bulb", themeable: true },
+  key: { name: "Key", themeable: true },
+  locked: { name: "Locked", themeable: true },
+  magnifyingGlass: { name: "Magnifying Glass Tilted Left", themeable: true },
+  rocket: { name: "Rocket", themeable: true },
+  trophy: { name: "Trophy", themeable: true },
+  shield: { name: "Shield", themeable: true },
+  clipboard: { name: "Clipboard", themeable: true },
+  bookmark: { name: "Bookmark", themeable: true },
+  megaphone: { name: "Megaphone", themeable: true },
+  folder: { name: "File Folder", themeable: true },
+  hourglass: { name: "Hourglass Done", themeable: true },
+  alarmClock: { name: "Alarm Clock", themeable: true },
+  magnet: { name: "Magnet", themeable: true },
+  crown: { name: "Crown", themeable: true },
+  glowingStar: { name: "Glowing Star", themeable: true },
+  barChart: { name: "Bar Chart", themeable: true },
+  chartIncreasing: { name: "Chart Increasing", themeable: true },
+  toolbox: { name: "Toolbox", themeable: true },
+  creditCard: { name: "Credit Card", themeable: true },
+  books: { name: "Books", themeable: true },
+  bullseye: { name: "Bullseye", themeable: true },
+  pen: { name: "Pen", themeable: true },
+  memo: { name: "Memo", themeable: true },
+  worldMap: { name: "World Map", themeable: true },
+  tickets: { name: "Admission Tickets", themeable: true },
+  graduationCap: { name: "Graduation Cap", themeable: true },
+  sun: { name: "Sun", themeable: true },
+  moonCrescent: { name: "Crescent Moon", themeable: true },
+  moonFull: { name: "Full Moon", themeable: true },
+  moonNew: { name: "New Moon", themeable: true },
+  gloves: { name: "Gloves", themeable: true },
+  briefcase: { name: "Briefcase", themeable: true },
+  umbrella: { name: "Umbrella", themeable: true },
+  ring: { name: "Ring", themeable: true },
+  wrench: { name: "Wrench", themeable: true },
+  gear: { name: "Gear", themeable: true },
+  anchor: { name: "Anchor", themeable: true },
+  ladder: { name: "Ladder", themeable: true },
+  scissors: { name: "Scissors", themeable: true },
+  envelope: { name: "Envelope", themeable: true },
+  package: { name: "Package", themeable: true },
+  paperclip: { name: "Paperclip", themeable: true },
+  speechBalloon: { name: "Speech Balloon", themeable: true },
+  testTube: { name: "Test Tube", themeable: true },
+  atomSymbol: { name: "Atom Symbol", themeable: true },
+  dna: { name: "DNA", themeable: true },
+  satellite: { name: "Satellite", themeable: true },
+  telescope: { name: "Telescope", themeable: true },
+  highVoltage: { name: "High Voltage", themeable: true },
+  puzzlePiece: { name: "Puzzle Piece", themeable: true },
+  chessPawn: { name: "Chess Pawn", themeable: true },
+  artistPalette: { name: "Artist Palette", themeable: true },
+  fire: { name: "Fire" },
+  heart: { name: "Red Heart" },
+  party: { name: "Party Popper" },
+  starStruck: { name: "Star-Struck" },
+  cool: { name: "Smiling Face with Sunglasses" },
+  rainbow: { name: "Rainbow" },
+  hundred: { name: "Hundred Points" },
+  ghost: { name: "Ghost" },
+  robot: { name: "Robot" },
+  unicorn: { name: "Unicorn" },
+  cat: { name: "Cat Face" },
+  seedling: { name: "Seedling" },
+  coffee: { name: "Hot Beverage" },
+  pizza: { name: "Pizza" },
+  brain: { name: "Brain" },
+  wave: { name: "Waving Hand", hasSkinTones: true },
+  thumbsUp: { name: "Thumbs Up", hasSkinTones: true },
+  pray: { name: "Folded Hands", hasSkinTones: true },
+  laptop: { name: "Laptop" },
+  moneyBag: { name: "Money Bag" },
+  check: { name: "Check Mark Button" },
 } satisfies Record<string, FluentEmojiEntry>;
 
 export type FluentEmojiId = keyof typeof FLUENT_EMOJIS;
@@ -191,27 +113,18 @@ export type ThemeableEmojiId = {
 export const isThemeableEmoji = (id: FluentEmojiId): id is ThemeableEmojiId =>
   "themeable" in FLUENT_EMOJIS[id];
 
-// "Red Heart" + 3D -> assets/Red heart/3D/red_heart_3d.png, the hands live
+// "Red Heart" -> assets/Red heart/Color/red_heart_color.svg, the hands live
 // one folder deeper under their default (yellow) skin tone
-function getMicrosoftEmojiUrl(
-  { name, hasSkinTones }: FluentEmojiEntry,
-  style: "3D" | "Color",
-) {
+function getEmojiSvgUrl({ name, hasSkinTones }: FluentEmojiEntry) {
   const folder = name.charAt(0) + name.slice(1).toLowerCase();
-  const fileName = `${name.toLowerCase().replaceAll(" ", "_")}_${style.toLowerCase()}`;
-  const extension = style === "3D" ? "png" : "svg";
+  const fileName = `${name.toLowerCase().replaceAll(" ", "_")}_color`;
   const path = hasSkinTones
-    ? `${folder}/Default/${style}/${fileName}_default.${extension}`
-    : `${folder}/${style}/${fileName}.${extension}`;
+    ? `${folder}/Default/Color/${fileName}_default.svg`
+    : `${folder}/Color/${fileName}.svg`;
   return encodeURI(
     `https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/${path}`,
   );
 }
-
-const getAnimatedEmojiUrl = ({ name, category }: FluentEmojiEntry) =>
-  encodeURI(
-    `https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis@master/Emojis/${category}/${name}.png`,
-  );
 
 export enum EmojiAnimation {
   Never = "never",
@@ -236,25 +149,28 @@ function fetchSvg(url: string) {
 
 const IMAGE_CLASS = "size-full object-contain select-none";
 
-// the flat svg with its colored parts moved onto the theme's tailwind ramp
-// (see recolorSvg), greys and whites untouched. drawn through an <img> so
-// nothing in a fetched file can ever run
-function ThemedEmoji({
+// the svg with its colored parts moved onto the theme's tailwind ramp (see
+// recolorSvg), greys and whites untouched, or as drawn when there's no theme.
+// drawn through an <img> so nothing in a fetched file can ever run
+function SvgEmoji({
   entry,
   theme,
+  className,
 }: {
   entry: FluentEmojiEntry;
-  theme: Color;
+  theme?: Color;
+  className?: string;
 }) {
   const [svg, setSvg] = useState<string>();
-  const url = getMicrosoftEmojiUrl(entry, "Color");
+  const url = getEmojiSvgUrl(entry);
   useEffect(() => {
     fetchSvg(url)
       .then(setSvg)
       .catch(() => setSvg(undefined));
   }, [url]);
   if (!svg) return null;
-  const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(recolorSvg(svg, theme))}`;
+  const drawnSvg = theme ? recolorSvg(svg, theme) : svg;
+  const src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(drawnSvg)}`;
 
   return (
     // biome-ignore lint/performance/noImgElement: a data uri svg, nothing for next/image to optimize
@@ -262,14 +178,35 @@ function ThemedEmoji({
       {...{ src }}
       alt={entry.name}
       draggable={false}
-      className={IMAGE_CLASS}
+      className={cn(IMAGE_CLASS, className)}
     />
   );
 }
 
-// `theme="green"` swaps a tool emoji's 3D look for the flat one recolored
-// green, like it was drawn for your brand. themed ones don't animate, there's
-// no animated svg to recolor
+// nothing downloads until the emoji is within a screen of the viewport, so a
+// page (or a showcase card) full of them costs nothing until you scroll to it
+function useIsNearViewport() {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [isNear, setIsNear] = useState(false);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setIsNear(true);
+        observer.disconnect();
+      },
+      { rootMargin: "300px" },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return { ref, isNear };
+}
+
+// `theme="green"` redraws a tool emoji in that color, like it was drawn for
+// your brand. hover (or a tap) makes it dance
 export function FluentEmoji({
   emoji,
   animation = EmojiAnimation.Hover,
@@ -283,15 +220,14 @@ export function FluentEmoji({
   | { emoji: ThemeableEmojiId; theme: Color }
 )) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isAnimationLoaded, setIsAnimationLoaded] = useState(false);
-  const entry = FLUENT_EMOJIS[emoji];
+  const { ref, isNear } = useIsNearViewport();
   const isAnimated =
-    !theme &&
-    (animation === EmojiAnimation.Always ||
-      (animation === EmojiAnimation.Hover && isHovered));
+    animation === EmojiAnimation.Always ||
+    (animation === EmojiAnimation.Hover && isHovered);
 
   return (
     <span
+      {...{ ref }}
       className={cn("relative inline-block size-12 shrink-0", className)}
       // a finger has no hover, so on touch a tap toggles it instead
       onPointerEnter={(event) =>
@@ -304,31 +240,11 @@ export function FluentEmoji({
         event.pointerType !== "mouse" && setIsHovered((wasOn) => !wasOn)
       }
     >
-      {theme ? (
-        <ThemedEmoji {...{ entry, theme }} />
-      ) : (
-        // biome-ignore lint/performance/noImgElement: remote cdn file, next/image would need remotePatterns and re-encoding kills the apng animation
-        <img
-          src={getMicrosoftEmojiUrl(entry, "3D")}
-          alt={entry.name}
-          draggable={false}
-          className={IMAGE_CLASS}
-        />
-      )}
-      {/* the animated one loads on top and only shows once it's all there,
-      so the first hover doesn't blink to an empty box for a second */}
-      {isAnimated && (
-        // biome-ignore lint/performance/noImgElement: same as above
-        <img
-          src={getAnimatedEmojiUrl(entry)}
-          alt=""
-          draggable={false}
-          onLoad={() => setIsAnimationLoaded(true)}
-          className={cn(
-            IMAGE_CLASS,
-            "absolute inset-0",
-            !isAnimationLoaded && "opacity-0",
-          )}
+      {isNear && (
+        <SvgEmoji
+          entry={FLUENT_EMOJIS[emoji]}
+          {...{ theme }}
+          className={cn(isAnimated && "origin-bottom animate-emoji-dance")}
         />
       )}
     </span>
