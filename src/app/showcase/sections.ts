@@ -1,6 +1,7 @@
 import { BUTTON_ITEMS } from "./buttons";
 import { CHART_ITEMS } from "./charts";
 import { DATA_ITEMS } from "./data";
+import { DEVICE_ITEMS } from "./device";
 import { FEEL_ITEMS } from "./feel";
 import { INPUT_ITEMS } from "./inputs";
 import { LEARN_ITEMS } from "./learn";
@@ -17,6 +18,7 @@ export const SHOWCASE_SECTIONS = [
   { title: "Look (shapes, emoji, fonts)", items: LOOK_ITEMS },
   { title: "Charts", items: CHART_ITEMS },
   { title: "Learning & games", items: LEARN_ITEMS },
+  { title: "Device & browser APIs", items: DEVICE_ITEMS },
   { title: "Data & pages", items: DATA_ITEMS },
 ];
 

@@ -44,3 +44,10 @@ export function playChime(type: Chime) {
   if (!context) return;
   for (const tone of CHIMES[type]) playTone(context, tone);
 }
+
+// one soft bell note, what the piano keys play
+export function playNote(frequency: number) {
+  const context = getAudioContext();
+  if (!context) return;
+  playTone(context, { frequency, delay: 0, duration: 0.9 });
+}
