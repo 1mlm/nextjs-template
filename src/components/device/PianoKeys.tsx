@@ -1,6 +1,6 @@
 "use client";
 
-import { type KeyboardEvent, useState } from "react";
+import { type KeyboardEvent, type PointerEvent, useRef, useState } from "react";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { playNote } from "@/utils/sound";
@@ -54,13 +54,27 @@ export function PianoKeys({ className }: { className?: string }) {
     if (key) press(key.frequency, key.shortcut);
   };
 
+  // one key can sound per finger position, sliding onto the next plays it (a glissando)
+  const lastGlideShortcut = useRef<string>(undefined);
+  const glide = (event: PointerEvent) => {
+    if (event.buttons !== 1) return;
+    const key = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest<HTMLElement>("[data-shortcut]");
+    const { shortcut, frequency } = key?.dataset ?? {};
+    if (!shortcut || !frequency || shortcut === lastGlideShortcut.current)
+      return;
+    lastGlideShortcut.current = shortcut;
+    press(Number(frequency), shortcut);
+  };
+
   const getKeyProps = (frequency: number, shortcut: string) => ({
     tabIndex: -1,
-    onPointerDown: () => press(frequency, shortcut),
-    // dragging across the keys with the button down plays each one it crosses
-    onPointerEnter: (event: React.PointerEvent) => {
-      if (event.buttons === 1 && event.pointerType === "mouse")
-        press(frequency, shortcut);
+    "data-shortcut": shortcut,
+    "data-frequency": frequency,
+    onPointerDown: () => {
+      lastGlideShortcut.current = shortcut;
+      press(frequency, shortcut);
     },
   });
 
@@ -70,6 +84,10 @@ export function PianoKeys({ className }: { className?: string }) {
       // biome-ignore lint/a11y/noNoninteractiveTabindex: focusing the piano is what turns the keyboard shortcuts on
       tabIndex={0}
       onKeyDown={handleKeyDown}
+      onPointerMove={glide}
+      onPointerUp={() => {
+        lastGlideShortcut.current = undefined;
+      }}
       className={cn(
         "relative flex h-40 w-full max-w-sm rounded-3xl border bg-card p-2 outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         className,

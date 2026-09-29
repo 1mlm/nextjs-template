@@ -1,16 +1,11 @@
 "use client";
 
 import { motion } from "motion/react";
-import {
-  type KeyboardEvent,
-  type PointerEvent,
-  type RefObject,
-  useRef,
-  useState,
-} from "react";
+import { type KeyboardEvent, type PointerEvent, useRef, useState } from "react";
 import { cn } from "@/shadcn/utils";
 import { type Color, getColorSwatch } from "@/utils/color";
 import { triggerHaptic } from "@/utils/haptics";
+import { clamp } from "@/utils/math";
 
 export type PlanePoint = {
   x: number;
@@ -28,147 +23,94 @@ const ARROW_KEYS: Record<string, [number, number]> = {
   ArrowDown: [0, -1],
 };
 
-const clamp = (value: number, limit: number) =>
-  Math.min(limit, Math.max(-limit, value));
-
 const formatPoint = ({ x, y }: PlanePoint) => `(${x}, ${y})`;
 
-function PlaneDot({
+const getFill = ({ color }: PlanePoint) =>
+  color ? getColorSwatch(color) : "var(--primary)";
+
+// the dashed lines run from the point straight down to the x axis and across to the y axis
+const getGuideEnds = ({ x, y }: PlanePoint) => [
+  { id: "to-x-axis", x, y: 0 },
+  { id: "to-y-axis", x: 0, y: -y },
+];
+
+// drawn inside the svg, the handle below is what you actually grab
+function PlaneGuides({ point }: { point: PlanePoint }) {
+  return getGuideEnds(point).map((end) => (
+    <motion.line
+      key={end.id}
+      initial={false}
+      animate={{ x1: point.x, y1: -point.y, x2: end.x, y2: end.y }}
+      transition={DOT_SPRING}
+      stroke={getFill(point)}
+      strokeWidth={0.06}
+      strokeDasharray="0.2 0.2"
+      strokeLinecap="round"
+    />
+  ));
+}
+
+// the dot is a plain html element over the svg on purpose: touch-action only
+// works on html elements, not on things inside an svg, and without it a finger
+// drag on the dot scrolls the page instead of moving the point
+function PlaneHandle({
   point,
-  range,
-  svgRef,
-  onMove,
+  extent,
+  isDragging,
+  isActive,
+  onPointerDown,
+  onPointerMove,
+  onPointerEnd,
+  onKeyDown,
+  onFocusChange,
 }: {
   point: PlanePoint;
-  range: number;
-  svgRef: RefObject<SVGSVGElement | null>;
-  onMove: (moved: PlanePoint) => void;
+  extent: number;
+  isDragging: boolean;
+  isActive: boolean;
+  onPointerDown: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerMove: (event: PointerEvent<HTMLDivElement>) => void;
+  onPointerEnd: () => void;
+  onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
+  onFocusChange: (isFocused: boolean) => void;
 }) {
-  const [rawPosition, setRawPosition] = useState<PlanePoint>();
-  const [isFocused, setIsFocused] = useState(false);
-  const isActive = Boolean(rawPosition) || isFocused;
-  const fill = point.color ? getColorSwatch(point.color) : "var(--primary)";
-  const extent = range + 1;
-
-  // client pixels to plane units, y flipped since svg grows downward
-  const getPlanePosition = (event: PointerEvent) => {
-    const box = svgRef.current?.getBoundingClientRect();
-    if (!box) return point;
-    return {
-      x: ((event.clientX - box.left) / box.width) * extent * 2 - extent,
-      y: -(((event.clientY - box.top) / box.height) * extent * 2 - extent),
-    };
-  };
-
-  const moveTo = (x: number, y: number) => {
-    const snapped = { ...point, x: clamp(x, range), y: clamp(y, range) };
-    if (snapped.x === point.x && snapped.y === point.y) return;
-    triggerHaptic("selection");
-    onMove(snapped);
-  };
-
-  const handlePointerMove = (event: PointerEvent) => {
-    if (!rawPosition) return;
-    const raw = getPlanePosition(event);
-    setRawPosition(raw);
-    moveTo(Math.round(raw.x), Math.round(raw.y));
-  };
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    const step = ARROW_KEYS[event.key];
-    if (!step) return;
-    event.preventDefault();
-    moveTo(point.x + step[0], point.y + step[1]);
-  };
+  const left = ((point.x + extent) / (extent * 2)) * 100;
+  const top = ((extent - point.y) / (extent * 2)) * 100;
 
   return (
-    <>
+    <motion.div
+      initial={false}
+      animate={{
+        left: `${left}%`,
+        top: `${top}%`,
+        scale: isDragging ? 1.2 : 1,
+      }}
+      whileHover={{ scale: 1.12 }}
+      transition={DOT_SPRING}
+      tabIndex={0}
+      role="slider"
+      aria-label={`Point ${point.label ?? ""} at ${formatPoint(point)}`}
+      aria-valuetext={formatPoint(point)}
+      aria-valuenow={point.x}
+      style={{ touchAction: "none" }}
+      className="group absolute flex size-11 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center outline-none active:cursor-grabbing"
+      {...{ onPointerDown, onPointerMove, onKeyDown }}
+      onPointerUp={onPointerEnd}
+      onPointerCancel={onPointerEnd}
+      onFocus={() => onFocusChange(true)}
+      onBlur={() => onFocusChange(false)}
+    >
+      <span
+        style={{ background: getFill(point) }}
+        className="size-4 rounded-full border-2 border-background shadow group-focus-visible:ring-4 group-focus-visible:ring-ring/50"
+      />
       {isActive && (
-        <>
-          {/* dashed guides down to the axes, the way you'd read a point off a graph */}
-          <motion.line
-            initial={false}
-            animate={{ x1: point.x, y1: -point.y, x2: point.x, y2: 0 }}
-            transition={DOT_SPRING}
-            stroke={fill}
-            strokeWidth={0.06}
-            strokeDasharray="0.2 0.2"
-            strokeLinecap="round"
-          />
-          <motion.line
-            initial={false}
-            animate={{ x1: point.x, y1: -point.y, x2: 0, y2: -point.y }}
-            transition={DOT_SPRING}
-            stroke={fill}
-            strokeWidth={0.06}
-            strokeDasharray="0.2 0.2"
-            strokeLinecap="round"
-          />
-        </>
+        <span className="pointer-events-none absolute -top-5 rounded-lg bg-background/85 px-1.5 text-xs font-semibold whitespace-nowrap">
+          {point.label ? `${point.label} ` : ""}
+          {formatPoint(point)}
+        </span>
       )}
-      {rawPosition && (
-        <circle
-          cx={clamp(rawPosition.x, extent)}
-          cy={-clamp(rawPosition.y, extent)}
-          r={0.28}
-          {...{ fill }}
-          opacity={0.3}
-        />
-      )}
-      <motion.g
-        initial={false}
-        animate={{ x: point.x, y: -point.y, scale: rawPosition ? 1.2 : 1 }}
-        whileHover={{ scale: 1.12 }}
-        transition={DOT_SPRING}
-        tabIndex={0}
-        role="slider"
-        aria-label={`Point ${point.label ?? ""} at ${formatPoint(point)}`}
-        aria-valuetext={formatPoint(point)}
-        aria-valuenow={point.x}
-        className="cursor-grab outline-none active:cursor-grabbing"
-        style={{ touchAction: "none" }}
-        onPointerDown={(event) => {
-          event.currentTarget.setPointerCapture(event.pointerId);
-          triggerHaptic("light");
-          setRawPosition(getPlanePosition(event));
-        }}
-        onPointerMove={handlePointerMove}
-        onPointerUp={() => setRawPosition(undefined)}
-        onPointerCancel={() => setRawPosition(undefined)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-      >
-        {/* roomy invisible hit area, a fingertip is wider than a dot */}
-        <circle r={0.75} fill="transparent" />
-        {isFocused && (
-          <circle
-            r={0.6}
-            fill="none"
-            stroke={fill}
-            strokeOpacity={0.5}
-            strokeWidth={0.08}
-          />
-        )}
-        <circle
-          r={0.34}
-          {...{ fill }}
-          stroke="var(--background)"
-          strokeWidth={0.1}
-        />
-        {isActive && (
-          <text
-            y={-0.75}
-            textAnchor="middle"
-            className="fill-foreground stroke-background text-[0.42px] font-semibold [paint-order:stroke]"
-            strokeWidth={0.14}
-          >
-            {point.label ? `${point.label} ` : ""}
-            {formatPoint(point)}
-          </text>
-        )}
-      </motion.g>
-    </>
+    </motion.div>
   );
 }
 
@@ -221,7 +163,11 @@ export function CoordinatePlane({
   range?: number;
   className?: string;
 }) {
-  const svgRef = useRef<SVGSVGElement>(null);
+  const planeRef = useRef<HTMLDivElement>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number>();
+  const [focusedIndex, setFocusedIndex] = useState<number>();
+  // where the pointer really is, before it snaps, shown as a faint ghost dot
+  const [rawPosition, setRawPosition] = useState<PlanePoint>();
   const extent = range + 1;
   const ticks = Array.from(
     { length: range * 2 + 1 },
@@ -236,15 +182,42 @@ export function CoordinatePlane({
   const isPointOnTarget = (target: PlanePoint) =>
     points.some((point) => point.x === target.x && point.y === target.y);
 
+  // client pixels to plane units, y flipped since the screen grows downward
+  const getPlanePosition = (event: PointerEvent) => {
+    const box = planeRef.current?.getBoundingClientRect();
+    if (!box) return { x: 0, y: 0 };
+    return {
+      x: ((event.clientX - box.left) / box.width) * extent * 2 - extent,
+      y: -(((event.clientY - box.top) / box.height) * extent * 2 - extent),
+    };
+  };
+
+  const movePoint = (index: number, x: number, y: number) => {
+    const point = points[index];
+    const snapped = {
+      ...point,
+      x: clamp(x, -range, range),
+      y: clamp(y, -range, range),
+    };
+    if (snapped.x === point.x && snapped.y === point.y) return;
+    triggerHaptic("selection");
+    onChange(points.map((existing, at) => (at === index ? snapped : existing)));
+  };
+
+  const endDrag = () => {
+    setDraggedIndex(undefined);
+    setRawPosition(undefined);
+  };
+
   return (
     <div
+      ref={planeRef}
       className={cn(
-        "w-full max-w-sm overflow-hidden rounded-3xl border bg-card",
+        "relative w-full max-w-sm overflow-hidden rounded-3xl border bg-card",
         className,
       )}
     >
       <svg
-        ref={svgRef}
         viewBox={`${-extent} ${-extent} ${extent * 2} ${extent * 2}`}
         className="aspect-square w-full select-none"
       >
@@ -291,18 +264,51 @@ export function CoordinatePlane({
             isReached={isPointOnTarget(target)}
           />
         ))}
-        {points.map((point, index) => (
-          <PlaneDot
-            key={point.label ?? index}
-            {...{ point, range, svgRef }}
-            onMove={(moved) =>
-              onChange(
-                points.map((existing, at) => (at === index ? moved : existing)),
-              )
-            }
+        {points.map((point, index) =>
+          draggedIndex === index || focusedIndex === index ? (
+            <PlaneGuides key={point.label ?? index} {...{ point }} />
+          ) : null,
+        )}
+        {rawPosition && draggedIndex !== undefined && (
+          <circle
+            cx={clamp(rawPosition.x, -extent, extent)}
+            cy={-clamp(rawPosition.y, -extent, extent)}
+            r={0.28}
+            fill={getFill(points[draggedIndex])}
+            opacity={0.3}
           />
-        ))}
+        )}
       </svg>
+      {points.map((point, index) => (
+        <PlaneHandle
+          key={point.label ?? index}
+          {...{ point, extent }}
+          isDragging={draggedIndex === index}
+          isActive={draggedIndex === index || focusedIndex === index}
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture(event.pointerId);
+            triggerHaptic("light");
+            setDraggedIndex(index);
+            setRawPosition(getPlanePosition(event));
+          }}
+          onPointerMove={(event) => {
+            if (draggedIndex !== index) return;
+            const raw = getPlanePosition(event);
+            setRawPosition(raw);
+            movePoint(index, Math.round(raw.x), Math.round(raw.y));
+          }}
+          onPointerEnd={endDrag}
+          onKeyDown={(event) => {
+            const step = ARROW_KEYS[event.key];
+            if (!step) return;
+            event.preventDefault();
+            movePoint(index, point.x + step[0], point.y + step[1]);
+          }}
+          onFocusChange={(isFocused) =>
+            setFocusedIndex(isFocused ? index : undefined)
+          }
+        />
+      ))}
     </div>
   );
 }

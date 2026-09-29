@@ -39,6 +39,20 @@ export function Flashcard({
   const againOpacity = useTransform(x, [-120, -30], [1, 0]);
   const knownOpacity = useTransform(x, [30, 120], [0, 1]);
 
+  // the stamps that fade in as you drag toward a side
+  const stamps = [
+    {
+      label: "AGAIN",
+      opacity: againOpacity,
+      className: "right-4 rotate-12 border-rose-500 text-rose-500",
+    },
+    {
+      label: "GOT IT",
+      opacity: knownOpacity,
+      className: "left-4 -rotate-12 border-green-500 text-green-500",
+    },
+  ];
+
   const throwCard = (direction: SwipeDirection) => {
     const isKnown = direction === SwipeDirection.Known;
     triggerHaptic(isKnown ? "success" : "light");
@@ -80,18 +94,18 @@ export function Flashcard({
             {back}
           </div>
         </motion.div>
-        <motion.span
-          style={{ opacity: againOpacity }}
-          className="pointer-events-none absolute top-4 right-4 rotate-12 rounded-xl border-2 border-rose-500 px-2 py-0.5 text-sm font-bold text-rose-500"
-        >
-          AGAIN
-        </motion.span>
-        <motion.span
-          style={{ opacity: knownOpacity }}
-          className="pointer-events-none absolute top-4 left-4 -rotate-12 rounded-xl border-2 border-green-500 px-2 py-0.5 text-sm font-bold text-green-500"
-        >
-          GOT IT
-        </motion.span>
+        {stamps.map(({ label, opacity, className }) => (
+          <motion.span
+            key={label}
+            style={{ opacity }}
+            className={cn(
+              "pointer-events-none absolute top-4 rounded-xl border-2 px-2 py-0.5 text-sm font-bold",
+              className,
+            )}
+          >
+            {label}
+          </motion.span>
+        ))}
       </motion.div>
       <div className="flex gap-3">
         <Button

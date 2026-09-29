@@ -5,6 +5,7 @@ import type { IconSvgElement } from "@hugeicons/react";
 import { motion } from "motion/react";
 import { useRef } from "react";
 import { Icon } from "@/components/Icon";
+import { SquircleRing } from "@/components/SquircleRing";
 import { cn } from "@/shadcn/utils";
 import { type Color, getColorSwatch } from "@/utils/color";
 import { triggerHaptic } from "@/utils/haptics";
@@ -89,36 +90,14 @@ function LessonNode({
                 <span className="absolute -bottom-1.5 left-1/2 size-2.5 -translate-x-1/2 rotate-45 border-r-2 border-b-2 bg-card" />
               </span>
             </span>
-            <svg
-              viewBox="0 0 100 100"
+            <SquircleRing
+              {...{ progress }}
+              inset={3}
+              radius={34}
+              strokeWidth={5}
+              progressStroke={face}
               className="pointer-events-none absolute -inset-2 size-[calc(100%+1rem)] -rotate-90"
-              aria-hidden
-            >
-              <rect
-                x={3}
-                y={3}
-                width={94}
-                height={94}
-                rx={34}
-                fill="none"
-                className="stroke-border"
-                strokeWidth={5}
-              />
-              <rect
-                x={3}
-                y={3}
-                width={94}
-                height={94}
-                rx={34}
-                fill="none"
-                stroke={face}
-                strokeWidth={5}
-                strokeLinecap="round"
-                pathLength={100}
-                strokeDasharray={`${progress * 100} 100`}
-                className="transition-[stroke-dasharray] duration-500"
-              />
-            </svg>
+            />
           </>
         )}
         <motion.button

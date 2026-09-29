@@ -1,7 +1,13 @@
 "use client";
 
 import NumberFlow from "@number-flow/react";
-import { AnimatePresence, motion } from "motion/react";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useMotionValue,
+  useTransform,
+} from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shadcn/utils";
 import { triggerConfetti } from "@/utils/confetti";
@@ -9,6 +15,7 @@ import { triggerHaptic } from "@/utils/haptics";
 import { Chime, playChime } from "@/utils/sound";
 
 const GAIN_VISIBLE_MS = 1000;
+const FILL_SPRING = { type: "spring", stiffness: 140, damping: 20 } as const;
 
 // a level bar. pass the total xp and it works out the level and how full the
 // bar is. gaining xp floats a "+10 XP" over it, crossing a level throws
@@ -26,19 +33,29 @@ export function XpBar({
   const xpInLevel = xp % xpPerLevel;
   const previousXp = useRef(xp);
   const [gain, setGain] = useState<{ id: number; amount: number }>();
+  const fill = useMotionValue(xpInLevel / xpPerLevel);
+  const fillWidth = useTransform(fill, (value) => `${value * 100}%`);
 
   useEffect(() => {
     const amount = xp - previousXp.current;
     const didLevelUp =
       Math.floor(xp / xpPerLevel) > Math.floor(previousXp.current / xpPerLevel);
     previousXp.current = xp;
+    const remainder = (xp % xpPerLevel) / xpPerLevel;
+    // a level up fills the bar to the end first, then it starts over in the new level
+    if (didLevelUp)
+      animate(fill, 1, FILL_SPRING).then(() => {
+        fill.jump(0);
+        animate(fill, remainder, FILL_SPRING);
+      });
+    else animate(fill, remainder, FILL_SPRING);
     if (amount <= 0) return;
     setGain({ id: Date.now(), amount });
     if (!didLevelUp) return;
     triggerHaptic("success");
     playChime(Chime.Success);
     triggerConfetti();
-  }, [xp, xpPerLevel]);
+  }, [xp, xpPerLevel, fill]);
 
   useEffect(() => {
     if (!gain) return;
@@ -60,9 +77,7 @@ export function XpBar({
       </div>
       <div className="h-5 overflow-hidden rounded-2xl bg-muted">
         <motion.div
-          initial={false}
-          animate={{ width: `${(xpInLevel / xpPerLevel) * 100}%` }}
-          transition={{ type: "spring", stiffness: 140, damping: 20 }}
+          style={{ width: fillWidth }}
           className="relative h-full rounded-2xl bg-amber-400"
         >
           <span className="absolute inset-x-2 top-1 h-1 rounded-full bg-white/40" />

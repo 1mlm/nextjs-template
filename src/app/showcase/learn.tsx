@@ -10,21 +10,21 @@ import {
   TrophyIcon,
 } from "@hugeicons/core-free-icons";
 import { useEffect, useRef, useState } from "react";
-import { Die3D } from "@/components/Die3D";
 import { Icon } from "@/components/Icon";
 import { ChessBoard } from "@/components/learn/ChessBoard";
 import {
   CoordinatePlane,
   type PlanePoint,
 } from "@/components/learn/CoordinatePlane";
+import { Die3D } from "@/components/learn/Die3D";
 import { Flashcard, type SwipeDirection } from "@/components/learn/Flashcard";
 import { Hearts } from "@/components/learn/Hearts";
 import { type Lesson, LessonPath } from "@/components/learn/LessonPath";
 import { QuizQuestion } from "@/components/learn/QuizQuestion";
 import { type StreakDay, StreakFlame } from "@/components/learn/StreakFlame";
+import { VoiceButton } from "@/components/learn/VoiceButton";
 import { WordBank } from "@/components/learn/WordBank";
 import { XpBar } from "@/components/learn/XpBar";
-import { VoiceButton } from "@/components/VoiceButton";
 import { Button } from "@/shadcn/ui/button";
 import { triggerConfetti } from "@/utils/confetti";
 import { shakeElement } from "@/utils/shake";
@@ -370,7 +370,7 @@ export const LEARN_ITEMS: ShowcaseItem[] = [
   },
   {
     name: "VoiceButton",
-    path: "src/components/VoiceButton.tsx",
+    path: "src/components/learn/VoiceButton.tsx",
     description:
       "hold to talk or tap to keep listening. the rings ripple with your real voice (microphone level), the recording comes back through onRecorded",
     Demo: VoiceButtonDemo,
@@ -391,7 +391,7 @@ export const LEARN_ITEMS: ShowcaseItem[] = [
   },
   {
     name: "Die3D",
-    path: "src/components/Die3D.tsx",
+    path: "src/components/learn/Die3D.tsx",
     description:
       "a real 3D die (three.js) with a transparent canvas, so it sits inside the text and the paragraph wraps around it. drag to spin with inertia, tap to throw. three only downloads when it is scrolled near, and it stops drawing off screen",
     wide: true,

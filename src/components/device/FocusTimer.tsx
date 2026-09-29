@@ -10,6 +10,7 @@ import {
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Icon } from "@/components/Icon";
+import { SquircleRing } from "@/components/SquircleRing";
 import { Button } from "@/shadcn/ui/button";
 import { cn } from "@/shadcn/utils";
 import { triggerConfetti } from "@/utils/confetti";
@@ -67,31 +68,7 @@ function TimerFace({
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="relative size-40">
-        <svg viewBox="0 0 100 100" className="size-full" aria-hidden>
-          <rect
-            x={5}
-            y={5}
-            width={90}
-            height={90}
-            rx={32}
-            fill="none"
-            className="stroke-muted"
-            strokeWidth={7}
-          />
-          <rect
-            x={5}
-            y={5}
-            width={90}
-            height={90}
-            rx={32}
-            fill="none"
-            className="stroke-foreground transition-[stroke-dasharray] duration-300 ease-linear"
-            strokeWidth={7}
-            strokeLinecap="round"
-            pathLength={100}
-            strokeDasharray={`${remaining * 100} 100`}
-          />
-        </svg>
+        <SquircleRing progress={remaining} inset={5} />
         <span
           role="timer"
           className="absolute inset-0 flex items-center justify-center text-4xl font-bold tabular-nums"
@@ -227,14 +204,7 @@ export function FocusTimer({
               <Icon icon={PictureInPictureExitIcon} /> Bring it back
             </Button>
           </div>
-          {createPortal(
-            <TimerFace
-              {...{ secondsLeft, totalSeconds, isRunning }}
-              onToggle={toggle}
-              onReset={reset}
-            />,
-            floatingWindow.document.body,
-          )}
+          {createPortal(face, floatingWindow.document.body)}
         </>
       ) : (
         face

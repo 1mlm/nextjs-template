@@ -9,6 +9,7 @@ import {
 } from "motion/react";
 import { type PointerEvent, type ReactNode, useEffect } from "react";
 import { cn } from "@/shadcn/utils";
+import { clamp } from "@/utils/math";
 
 const MAX_TILT = 12;
 const SPRING = { stiffness: 180, damping: 16 };
@@ -39,10 +40,8 @@ export function TiltCard({
   useEffect(() => {
     const handleOrientation = ({ gamma, beta }: DeviceOrientationEvent) => {
       if (gamma === null || beta === null) return;
-      pointerX.set(Math.min(1, Math.max(0, 0.5 + gamma / (GYRO_RANGE * 2))));
-      pointerY.set(
-        Math.min(1, Math.max(0, 0.5 + (beta - 45) / (GYRO_RANGE * 2))),
-      );
+      pointerX.set(clamp(0.5 + gamma / (GYRO_RANGE * 2), 0, 1));
+      pointerY.set(clamp(0.5 + (beta - 45) / (GYRO_RANGE * 2), 0, 1));
     };
     window.addEventListener("deviceorientation", handleOrientation);
     return () =>
