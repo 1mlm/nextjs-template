@@ -11,6 +11,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { useEffect, useRef, useState } from "react";
 import { CoordinatePlane, type PlanePoint } from "@/components/CoordinatePlane";
+import { Die3D } from "@/components/Die3D";
 import { Icon } from "@/components/Icon";
 import { type Lesson, LessonPath } from "@/components/LessonPath";
 import { VoiceButton } from "@/components/VoiceButton";
@@ -137,6 +138,20 @@ function LessonPathDemo() {
   );
 }
 
+function Die3DDemo() {
+  return (
+    <div className="w-full text-sm leading-relaxed">
+      <Die3D className="float-right mb-1 ml-3 size-36 [shape-outside:circle(50%)]" />
+      roll a fair die and every face has the same chance, one in six. that makes
+      it the friendliest way to teach probability: nobody has to trust a formula
+      when they can just throw it a hundred times and watch the counts even out.
+      drag it to spin it, it coasts to a stop, and a tap throws it. the canvas
+      has no background at all, so the text hugs the die like it was drawn into
+      the paragraph.
+    </div>
+  );
+}
+
 export const LEARN_ITEMS: ShowcaseItem[] = [
   {
     name: "VoiceButton",
@@ -158,5 +173,13 @@ export const LEARN_ITEMS: ShowcaseItem[] = [
     description:
       "a winding road of lessons: done ones are colored, the current one bobs a START bubble with a progress ring, locked ones shake when poked. the nodes sink into their edge when pressed. tap the current one to finish it",
     Demo: LessonPathDemo,
+  },
+  {
+    name: "Die3D",
+    path: "src/components/Die3D.tsx",
+    description:
+      "a real 3D die (three.js) with a transparent canvas, so it sits inside the text and the paragraph wraps around it. drag to spin with inertia, tap to throw. three only downloads when it is scrolled near, and it stops drawing off screen",
+    wide: true,
+    Demo: Die3DDemo,
   },
 ];
