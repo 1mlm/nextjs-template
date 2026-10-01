@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
     "*.trycloudflare.com",
     "*.loca.lt",
   ],
+  async redirects() {
+    return [{ source: "/", destination: "/showcase", permanent: false }];
+  },
   async headers() {
     return [
       {
