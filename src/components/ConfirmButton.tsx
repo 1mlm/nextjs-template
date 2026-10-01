@@ -12,7 +12,8 @@ import { triggerHaptic } from "@/utils/haptics";
 // arm-then-confirm for destructive-ish stuff: the button opens a small popover
 // (bottom sheet on phones) where confirm stays locked for `holdSeconds`.
 // `confirmText` also makes you type that exact text first, for the really
-// scary ones (deleting an account). a popover so nothing around the button
+// scary ones (deleting an account), and every keystroke restarts the wait so
+// you can't type and mash confirm. a popover so nothing around the button
 // shifts, no toast or window.confirm, the friction sits right where you clicked
 export function ConfirmButton({
   icon,
@@ -102,7 +103,10 @@ export function ConfirmButton({
         {confirmText !== undefined && (
           <Input
             value={typedText}
-            onChange={(e) => setTypedText(e.target.value)}
+            onChange={(e) => {
+              setTypedText(e.target.value);
+              setSecondsLeft(holdSeconds);
+            }}
             onPaste={(e) => e.preventDefault()}
             placeholder={confirmTextPlaceholder ?? `type "${confirmText}"`}
             enterKeyHint="done"
