@@ -7,7 +7,8 @@
       "!node_modules",
       "!.next",
       "!shadcn",
-      "!src/components/charts"
+      "!src/components/charts",
+      "!public/svgs/chess"
     ]
   },
   "css": {
