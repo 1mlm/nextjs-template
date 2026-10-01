@@ -11,14 +11,18 @@ import {
 } from "chess.js";
 import {
   AnimatePresence,
+  animate,
   type MotionValue,
   motion,
+  useMotionValue,
   useSpring,
   useTransform,
 } from "motion/react";
 import {
   type ComponentProps,
+  memo,
   type PointerEvent,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -158,65 +162,87 @@ const getPieceAnimation = ({
 
 // three layers on purpose: the outer one moves and stays upright while the
 // board spins, the middle one lifts and leans with the drag speed, the inner
-// one does the shaking, so the effects stack instead of fighting over `rotate`
-function ChessPiece({
+// one does the shaking, so the effects stack instead of fighting over `rotate`.
+// positions are motion values in percent of one square (so only transforms
+// move, no layout) and the held piece follows the pointer through them without
+// a single react render per pointer move
+export const ChessPiece = memo(function ChessPiece({
   piece,
-  drag,
+  isDragged,
   isSelected,
   isInCheck,
+  dragX,
+  dragY,
   dragTilt,
   uprightRotation,
 }: {
   piece: BoardPiece;
-  drag?: { left: number; top: number };
+  isDragged: boolean;
   isSelected: boolean;
   isInCheck: boolean;
+  dragX: MotionValue<number>;
+  dragY: MotionValue<number>;
   dragTilt: MotionValue<number>;
   uprightRotation: MotionValue<number>;
 }) {
   const { file, rank } = getGridPosition(piece.square);
-  const restingLeft = `${file * SQUARE_PERCENT}%`;
-  const restingTop = `${rank * SQUARE_PERCENT}%`;
-  const isDragged = drag !== undefined;
-  const followPointer = { duration: 0 };
-  const { animate, transition } = getPieceAnimation({
+  const x = useMotionValue(file * 100);
+  const y = useMotionValue(rank * 100);
+  const translateX = useTransform(x, (percent) => `${percent}%`);
+  const translateY = useTransform(y, (percent) => `${percent}%`);
+  const pieceAnimation = getPieceAnimation({
     isDragged,
     isInCheck,
     isSelected,
   });
 
+  useEffect(() => {
+    if (!isDragged) return;
+    x.set(dragX.get());
+    y.set(dragY.get());
+    const stopFollowingX = dragX.on("change", (percent) => x.set(percent));
+    const stopFollowingY = dragY.on("change", (percent) => y.set(percent));
+    return () => {
+      stopFollowingX();
+      stopFollowingY();
+    };
+  }, [isDragged, x, y, dragX, dragY]);
+
+  // letting go (or any move, undo included) springs from wherever it is now
+  useEffect(() => {
+    if (isDragged) return;
+    const slides = [
+      animate(x, file * 100, PIECE_SPRING),
+      animate(y, rank * 100, PIECE_SPRING),
+    ];
+    return () => {
+      for (const slide of slides) slide.stop();
+    };
+  }, [isDragged, file, rank, x, y]);
+
   return (
     <motion.div
-      initial={{ left: restingLeft, top: restingTop, scale: 0, opacity: 0 }}
-      animate={{
-        left: isDragged ? `${drag.left}%` : restingLeft,
-        top: isDragged ? `${drag.top}%` : restingTop,
-        scale: 1,
-        opacity: 1,
-      }}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0, opacity: 0 }}
-      transition={{
-        default: PIECE_SPRING,
-        left: isDragged ? followPointer : PIECE_SPRING,
-        top: isDragged ? followPointer : PIECE_SPRING,
+      transition={PIECE_SPRING}
+      style={{
+        x: translateX,
+        y: translateY,
+        rotate: uprightRotation,
+        zIndex: isDragged ? 20 : 10,
       }}
-      style={{ rotate: uprightRotation, zIndex: isDragged ? 20 : 10 }}
-      className="pointer-events-none absolute size-[12.5%]"
+      className="pointer-events-none absolute top-0 left-0 size-[12.5%]"
     >
+      {/* a cheap gradient blob on the ground, an animated filter shadow was
+      repainting the whole svg every frame */}
+      <motion.span
+        initial={false}
+        animate={{ opacity: isDragged ? 1 : 0 }}
+        className="absolute inset-x-[12%] bottom-[4%] h-[16%] bg-[radial-gradient(closest-side,rgb(0_0_0/0.35),transparent)]"
+      />
       <motion.div
-        animate={
-          isDragged
-            ? {
-                scale: 1.25,
-                y: "-8%",
-                filter: "drop-shadow(0 10px 6px rgb(0 0 0 / 0.3))",
-              }
-            : {
-                scale: 1,
-                y: "0%",
-                filter: "drop-shadow(0 0 0 rgb(0 0 0 / 0))",
-              }
-        }
+        animate={isDragged ? { scale: 1.25, y: "-8%" } : { scale: 1, y: "0%" }}
         transition={{ type: "spring", stiffness: 500, damping: 22 }}
         style={{ rotate: isDragged ? dragTilt : 0 }}
         className="size-full"
@@ -227,13 +253,13 @@ function ChessPiece({
           alt={`${SIDE_NAMES[piece.color]} ${piece.type}`}
           draggable={false}
           loading="lazy"
-          {...{ animate, transition }}
+          {...pieceAnimation}
           className="size-full p-[1.5%]"
         />
       </motion.div>
     </motion.div>
   );
-}
+});
 
 // a whole chess game with the rules from chess.js. tap a piece to see where it
 // can go (dots for moves, rings for captures) and tap a square, or just drag
@@ -244,17 +270,14 @@ export function ChessBoard({ className }: { className?: string }) {
   const [pieces, setPieces] = useState(() => createPieces(chess));
   const [history, setHistory] = useState<Snapshot[]>([]);
   const [selected, setSelected] = useState<Square>();
-  const [hoveredSquare, setHoveredSquare] = useState<Square>();
   const [lastMove, setLastMove] = useState<LastMove>();
   const [isFlipped, setIsFlipped] = useState(false);
   const [undoCount, setUndoCount] = useState(0);
-  const [drag, setDrag] = useState<{
-    pieceId: string;
-    left: number;
-    top: number;
-  }>();
+  const [draggedPieceId, setDraggedPieceId] = useState<string>();
   const [pendingPromotion, setPendingPromotion] = useState<LastMove>();
   const boardRef = useRef<HTMLDivElement>(null);
+  // measured once when a press starts, reading it on every move forces a layout each frame
+  const boardBox = useRef<DOMRect>(undefined);
   const pressedAt = useRef<{ x: number; y: number }>(undefined);
   const lastPointerX = useRef(0);
   const tiltResetTimeout = useRef<number>(undefined);
@@ -268,6 +291,15 @@ export function ChessBoard({ className }: { className?: string }) {
     (degrees) => 1 - 0.06 * Math.sin((degrees * Math.PI) / 180),
   );
   const dragTilt = useSpring(0, { stiffness: 260, damping: 9 });
+  const dragX = useMotionValue(0);
+  const dragY = useMotionValue(0);
+  // the highlight under the finger is one element moved through motion values,
+  // so dragging never re-renders the board
+  const targetX = useMotionValue(0);
+  const targetY = useMotionValue(0);
+  const targetOpacity = useMotionValue(0);
+  const targetTranslateX = useTransform(targetX, (percent) => `${percent}%`);
+  const targetTranslateY = useTransform(targetY, (percent) => `${percent}%`);
 
   const legalMoves = selected
     ? chess.moves({ square: selected, verbose: true })
@@ -304,7 +336,7 @@ export function ChessBoard({ className }: { className?: string }) {
   };
 
   const getPointerSquare = (event: PointerEvent) => {
-    const box = boardRef.current?.getBoundingClientRect();
+    const box = boardBox.current;
     if (!box) return undefined;
     const file = Math.floor(((event.clientX - box.left) / box.width) * 8);
     const rank = Math.floor(((event.clientY - box.top) / box.height) * 8);
@@ -312,19 +344,27 @@ export function ChessBoard({ className }: { className?: string }) {
     return getSquareAt(file, rank, isFlipped);
   };
 
-  // the dragged piece lives inside the spinning layer, so on a flipped board
-  // the pointer's spot has to be mirrored into that layer's coordinates
-  const getDragOffset = (event: PointerEvent) => {
-    const box = boardRef.current?.getBoundingClientRect();
-    if (!box) return { left: 0, top: 0 };
-    const toLayerPercent = (pointerPercent: number) =>
-      isFlipped
-        ? 100 - pointerPercent - SQUARE_PERCENT / 2
-        : pointerPercent - SQUARE_PERCENT / 2;
-    return {
-      left: toLayerPercent(((event.clientX - box.left) / box.width) * 100),
-      top: toLayerPercent(((event.clientY - box.top) / box.height) * 100),
-    };
+  // where the held piece's top left sits in percent of one square. it lives
+  // inside the spinning layer, so on a flipped board the pointer's spot is
+  // mirrored into that layer's coordinates first
+  const followPointer = (event: PointerEvent) => {
+    const box = boardBox.current;
+    if (!box) return;
+    const toLayerPercent = (pointerSquares: number) =>
+      (isFlipped ? 8 - pointerSquares : pointerSquares) * 100 - 50;
+    dragX.set(toLayerPercent(((event.clientX - box.left) / box.width) * 8));
+    dragY.set(toLayerPercent(((event.clientY - box.top) / box.height) * 8));
+  };
+
+  const lightUpTarget = (event: PointerEvent) => {
+    const square = getPointerSquare(event);
+    const isLegalTarget =
+      square && legalMoves.some((move) => move.to === square);
+    targetOpacity.set(isLegalTarget ? 1 : 0);
+    if (!isLegalTarget) return;
+    const { file, rank } = getGridPosition(square);
+    targetX.set(file * 100);
+    targetY.set(rank * 100);
   };
 
   const leanIntoDrag = (event: PointerEvent) => {
@@ -337,6 +377,7 @@ export function ChessBoard({ className }: { className?: string }) {
 
   const handlePointerDown = (event: PointerEvent) => {
     if (isGameOver || pendingPromotion) return;
+    boardBox.current = boardRef.current?.getBoundingClientRect();
     const square = getPointerSquare(event);
     if (!square) return;
     pressedAt.current = { x: event.clientX, y: event.clientY };
@@ -349,25 +390,25 @@ export function ChessBoard({ className }: { className?: string }) {
     boardRef.current?.setPointerCapture(event.pointerId);
     triggerHaptic("selection");
     setSelected(square);
-    setHoveredSquare(square);
-    setDrag({ pieceId: piece.id, ...getDragOffset(event) });
+    followPointer(event);
+    setDraggedPieceId(piece.id);
   };
 
   const handlePointerMove = (event: PointerEvent) => {
-    if (!drag) return;
-    setDrag({ ...drag, ...getDragOffset(event) });
-    setHoveredSquare(getPointerSquare(event));
+    if (!draggedPieceId) return;
+    followPointer(event);
+    lightUpTarget(event);
     leanIntoDrag(event);
   };
 
   const stopDragging = () => {
-    setDrag(undefined);
-    setHoveredSquare(undefined);
+    setDraggedPieceId(undefined);
+    targetOpacity.set(0);
     dragTilt.set(0);
   };
 
   const handlePointerUp = (event: PointerEvent) => {
-    if (!drag || !selected) return;
+    if (!draggedPieceId || !selected) return;
     const start = pressedAt.current;
     const wasDragged = start
       ? Math.hypot(event.clientX - start.x, event.clientY - start.y) > 6
@@ -462,9 +503,6 @@ export function ChessBoard({ className }: { className?: string }) {
                   isLastMove && "bg-amber-400/40",
                   selected === square && "bg-amber-400/60",
                   checkedKingSquare === square && "bg-rose-500/45",
-                  legalMove &&
-                    hoveredSquare === square &&
-                    "bg-amber-400/50 ring-4 ring-foreground/25 ring-inset",
                 )}
               >
                 {legalMove && (
@@ -488,6 +526,14 @@ export function ChessBoard({ className }: { className?: string }) {
               </div>
             );
           })}
+          <motion.span
+            style={{
+              x: targetTranslateX,
+              y: targetTranslateY,
+              opacity: targetOpacity,
+            }}
+            className="pointer-events-none absolute top-0 left-0 z-5 size-[12.5%] bg-amber-400/50 ring-4 ring-foreground/25 ring-inset"
+          />
           {lastMove && lastMoveGrid && (
             <motion.span
               key={`${history.length}-${lastMove.to}`}
@@ -506,8 +552,8 @@ export function ChessBoard({ className }: { className?: string }) {
             {pieces.map((piece) => (
               <ChessPiece
                 key={piece.id}
-                {...{ piece, dragTilt, uprightRotation }}
-                drag={drag?.pieceId === piece.id ? drag : undefined}
+                {...{ piece, dragX, dragY, dragTilt, uprightRotation }}
+                isDragged={draggedPieceId === piece.id}
                 isSelected={selected === piece.square}
                 isInCheck={checkedKingSquare === piece.square}
               />
