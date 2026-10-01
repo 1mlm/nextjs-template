@@ -1,10 +1,5 @@
-import {
-  Cursor01Icon,
-  Home01Icon,
-  PuzzleIcon,
-  TablePropertiesIcon,
-} from "@hugeicons/core-free-icons";
-import type { IconSvgElement } from "@hugeicons/react";
+import { ANIMATED_APP_ICONS } from "@/utils/animated-icons";
+import { APP_ICONS } from "@/utils/icons";
 
 // the one place a fork renames the app and edits the sidebar links
 export const APP_INFO = {
@@ -28,17 +23,25 @@ export const LEGAL_LINKS = [
   { label: "Privacy", tooltip: "Never ever" },
 ];
 
-export const NAV_ITEMS: {
+const NAV_LINKS: {
   href: string;
   label: string;
-  icon: IconSvgElement;
+  concept: keyof typeof ANIMATED_APP_ICONS;
   badge?: number;
 }[] = [
-  { href: "/", label: "Home", icon: Home01Icon },
-  { href: "/showcase", label: "Showcase", icon: Cursor01Icon },
-  { href: "/table", label: "Table", icon: TablePropertiesIcon },
-  { href: "/blocks", label: "Blocks", icon: PuzzleIcon },
+  { href: "/showcase", label: "Showcase", concept: "showcase" },
+  { href: "/chat", label: "Chat", concept: "chat" },
+  { href: "/table", label: "Table", concept: "table" },
+  { href: "/blocks", label: "Blocks", concept: "blocks" },
 ];
+
+// a link only names its icon concept, both the static icon (palette, sheet)
+// and the animated one (sidebar, tab bar) come from the shared maps
+export const NAV_ITEMS = NAV_LINKS.map((link) => ({
+  ...link,
+  icon: APP_ICONS[link.concept],
+  animatedIcon: ANIMATED_APP_ICONS[link.concept],
+}));
 
 const getNavIndex = (path: string) =>
   NAV_ITEMS.findIndex(({ href }) => href === path);

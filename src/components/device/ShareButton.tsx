@@ -1,9 +1,10 @@
 "use client";
 
-import { Share08Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Share08Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
 import { useCopyToClipboard } from "@/utils/clipboard";
+import { APP_ICONS } from "@/utils/icons";
 
 // the phone's own share sheet where the browser has one (mobile, safari,
 // chrome on windows), and a plain "copy the link" everywhere else
@@ -32,7 +33,7 @@ export function ShareButton({
 
   return (
     <Button variant="outline" onClick={share}>
-      <Icon icon={copied ? Tick02Icon : Share08Icon} />
+      <Icon icon={copied ? APP_ICONS.confirm : Share08Icon} />
       {copied ? "Link copied" : "Share"}
     </Button>
   );

@@ -1,11 +1,11 @@
 "use client";
 
-import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { useRef, useState } from "react";
 import { ErrorTooltip } from "@/components/ErrorTooltip";
 import { Icon } from "@/components/Icon";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 
 // text you click to edit in place, like a title in linear or notion. enter or
 // clicking away saves, escape puts the old text back. onSave can throw, the
@@ -90,7 +90,7 @@ export function EditableText({
             />
           </span>
           <Icon
-            icon={PencilEdit02Icon}
+            icon={APP_ICONS.edit}
             className="size-3.5 text-muted-foreground"
           />
         </span>
@@ -111,7 +111,7 @@ export function EditableText({
       >
         {shownValue || placeholder}
         <Icon
-          icon={PencilEdit02Icon}
+          icon={APP_ICONS.edit}
           isLoading={isSaving}
           className={cn(
             "size-3.5 text-muted-foreground transition-opacity",

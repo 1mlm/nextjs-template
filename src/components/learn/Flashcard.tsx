@@ -1,12 +1,12 @@
 "use client";
 
-import { Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
 import { type ReactNode, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 
 export enum SwipeDirection {
   Again = "again",
@@ -112,10 +112,10 @@ export function Flashcard({
           variant="outline"
           onClick={() => throwCard(SwipeDirection.Again)}
         >
-          <Icon icon={Cancel01Icon} /> Again
+          <Icon icon={APP_ICONS.close} /> Again
         </Button>
         <Button onClick={() => throwCard(SwipeDirection.Known)}>
-          <Icon icon={Tick02Icon} /> Got it
+          <Icon icon={APP_ICONS.confirm} /> Got it
         </Button>
       </div>
     </div>

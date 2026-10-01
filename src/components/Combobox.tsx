@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  ArrowDown01Icon,
-  Cancel01Icon,
-  SearchRemoveIcon,
-} from "@hugeicons/core-free-icons";
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { type ReactNode, useState } from "react";
 import { Icon } from "@/components/Icon";
@@ -18,6 +14,7 @@ import {
   CommandList,
 } from "@/shadcn/ui/command";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 
 export type ComboboxOption = {
   value: string;
@@ -54,7 +51,7 @@ function ComboboxPanel({
       />
       <CommandList className="mt-1 max-md:max-h-[50dvh]">
         <CommandEmpty className="flex flex-col items-center gap-1.5 py-6 text-muted-foreground">
-          <Icon icon={SearchRemoveIcon} className="size-5" />
+          <Icon icon={APP_ICONS.searchEmpty} className="size-5" />
           nothing matches "{search}"
         </CommandEmpty>
         {options.map(({ value, label, icon, hint }) => (
@@ -181,7 +178,7 @@ function RemovableChip({
         }}
         className="grid size-5 place-items-center rounded-sm text-muted-foreground hover:bg-background hover:text-foreground"
       >
-        <Icon icon={Cancel01Icon} className="size-3" />
+        <Icon icon={APP_ICONS.close} className="size-3" />
       </span>
     </span>
   );

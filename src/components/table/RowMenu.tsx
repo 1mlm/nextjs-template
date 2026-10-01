@@ -1,6 +1,5 @@
 "use client";
 
-import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   type ComponentProps,
@@ -18,6 +17,7 @@ import {
 } from "@/shadcn/ui/dropdown-menu";
 import { cn } from "@/shadcn/utils";
 import { useCopyToClipboard } from "@/utils/clipboard";
+import { APP_ICONS } from "@/utils/icons";
 
 const COPY_FEEDBACK_MS = 650;
 
@@ -63,10 +63,10 @@ export function RowMenuItemButton({
 // acted on, this keeps the feedback right where the click happened
 export function CopyMenuItem({
   value,
-  icon = Copy01Icon,
+  icon = APP_ICONS.copy,
   label,
   copiedLabel,
-  copiedIcon = Tick02Icon,
+  copiedIcon = APP_ICONS.confirm,
 }: {
   value: string;
   icon?: IconSvgElement;

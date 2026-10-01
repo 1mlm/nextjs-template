@@ -2,17 +2,10 @@
 
 import {
   Archive02Icon,
-  Calendar03Icon,
-  Delete02Icon,
   GridViewIcon,
   LeftToRightListBulletIcon,
-  PencilEdit02Icon,
   Rocket01Icon,
-  Settings02Icon,
-  Tag01Icon,
-  Tick02Icon,
   UserRemove01Icon,
-  ViewIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { useState } from "react";
@@ -24,6 +17,7 @@ import { MiniButton, MiniButtonTone } from "@/components/MiniButton";
 import { type SlidingTab, SlidingTabs } from "@/components/SlidingTabs";
 import { toggleListItem } from "@/utils/array";
 import { getColorForKey, getColorStyle } from "@/utils/color";
+import { APP_ICONS } from "@/utils/icons";
 import type { ShowcaseItem } from "./ShowcaseCard";
 import { wait } from "./util";
 
@@ -36,7 +30,7 @@ enum ViewMode {
 const VIEW_TABS: SlidingTab<ViewMode>[] = [
   { value: ViewMode.Grid, label: "Grid", icon: GridViewIcon },
   { value: ViewMode.List, label: "List", icon: LeftToRightListBulletIcon },
-  { value: ViewMode.Calendar, label: "Calendar", icon: Calendar03Icon },
+  { value: ViewMode.Calendar, label: "Calendar", icon: APP_ICONS.calendar },
 ];
 
 function SlidingTabsDemo() {
@@ -67,11 +61,11 @@ const MINI_BUTTON_TONES: {
   label: string;
   icon: IconSvgElement;
 }[] = [
-  { tone: MiniButtonTone.Neutral, label: "Settings", icon: Settings02Icon },
-  { tone: MiniButtonTone.View, label: "View", icon: ViewIcon },
-  { tone: MiniButtonTone.Edit, label: "Edit", icon: PencilEdit02Icon },
-  { tone: MiniButtonTone.Confirm, label: "Confirm", icon: Tick02Icon },
-  { tone: MiniButtonTone.Destructive, label: "Delete", icon: Delete02Icon },
+  { tone: MiniButtonTone.Neutral, label: "Settings", icon: APP_ICONS.settings },
+  { tone: MiniButtonTone.Neutral, label: "View", icon: APP_ICONS.expand },
+  { tone: MiniButtonTone.Edit, label: "Edit", icon: APP_ICONS.edit },
+  { tone: MiniButtonTone.Confirm, label: "Confirm", icon: APP_ICONS.confirm },
+  { tone: MiniButtonTone.Destructive, label: "Delete", icon: APP_ICONS.remove },
 ];
 
 const CHIP_LABELS = ["design", "backend", "urgent", "bug", "idea"];
@@ -83,7 +77,7 @@ function ChipDemo() {
   return CHIP_LABELS.map((label) => (
     <Chip
       key={label}
-      icon={Tag01Icon}
+      icon={APP_ICONS.tag}
       {...{ label }}
       onClick={() => toggle(label)}
       style={
@@ -121,7 +115,7 @@ export const BUTTON_ITEMS: ShowcaseItem[] = [
       "icon-only row action, tone picks the tint. hover for the tooltip",
     Demo: () =>
       MINI_BUTTON_TONES.map(({ tone, label, icon }) => (
-        <MiniButton key={tone} {...{ tone, label, icon }} />
+        <MiniButton key={label} {...{ tone, label, icon }} />
       )),
   },
   {
@@ -132,7 +126,7 @@ export const BUTTON_ITEMS: ShowcaseItem[] = [
     Demo: () => (
       <>
         <ConfirmButton
-          icon={Delete02Icon}
+          icon={APP_ICONS.remove}
           label="Delete item"
           confirmLabel="Delete"
           holdSeconds={3}
@@ -144,6 +138,7 @@ export const BUTTON_ITEMS: ShowcaseItem[] = [
           label="Delete account"
           confirmLabel="Delete forever"
           holdSeconds={2}
+          tone={MiniButtonTone.Destructive}
           confirmText="delete me"
           onConfirm={() => wait(800)}
         />

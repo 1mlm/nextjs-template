@@ -1,15 +1,10 @@
 "use client";
 
 import {
-  Calendar03Icon,
-  Clock01Icon,
   FileAttachmentIcon,
   Location01Icon,
   Money03Icon,
-  Tag01Icon,
-  Tick02Icon,
   UnavailableIcon,
-  UserIcon,
   UserSearch01Icon,
 } from "@hugeicons/core-free-icons";
 import { useRef, useState } from "react";
@@ -45,6 +40,7 @@ import {
 } from "@/shadcn/ui/select";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { shakeElement } from "@/utils/shake";
 import type { ShowcaseItem } from "./ShowcaseCard";
 import { wait } from "./util";
@@ -58,10 +54,10 @@ enum Status {
 const STATUS_OPTIONS: Record<Status, CustomTableEnumValue> = {
   [Status.Active]: {
     label: "Active",
-    icon: Tick02Icon,
+    icon: APP_ICONS.confirm,
     color: "green",
   },
-  [Status.Pending]: { label: "Pending", icon: Clock01Icon, color: "amber" },
+  [Status.Pending]: { label: "Pending", icon: APP_ICONS.time, color: "amber" },
   [Status.Banned]: { label: "Banned", icon: UnavailableIcon, color: "red" },
 };
 
@@ -69,41 +65,41 @@ const PEOPLE: ComboboxOption[] = [
   {
     value: "amina",
     label: "Amina Benali",
-    icon: UserIcon,
+    icon: APP_ICONS.user,
     hint: "amina@example.com",
   },
   {
     value: "youssef",
     label: "Youssef Haddad",
-    icon: UserIcon,
+    icon: APP_ICONS.user,
     hint: "youssef@example.com",
   },
   {
     value: "sofia",
     label: "Sofia Cherkaoui",
-    icon: UserIcon,
+    icon: APP_ICONS.user,
     hint: "sofia@example.com",
   },
   {
     value: "karim",
     label: "Karim Ziani",
-    icon: UserIcon,
+    icon: APP_ICONS.user,
     hint: "karim@example.com",
   },
   {
     value: "lina",
     label: "Lina Otmani",
-    icon: UserIcon,
+    icon: APP_ICONS.user,
     hint: "lina@example.com",
   },
 ];
 
 const LABELS: ComboboxOption[] = [
-  { value: "bug", label: "bug", icon: Tag01Icon, hint: "12" },
-  { value: "design", label: "design", icon: Tag01Icon, hint: "4" },
-  { value: "backend", label: "backend", icon: Tag01Icon, hint: "9" },
-  { value: "urgent", label: "urgent", icon: Tag01Icon, hint: "2" },
-  { value: "idea", label: "idea", icon: Tag01Icon, hint: "7" },
+  { value: "bug", label: "bug", icon: APP_ICONS.tag, hint: "12" },
+  { value: "design", label: "design", icon: APP_ICONS.tag, hint: "4" },
+  { value: "backend", label: "backend", icon: APP_ICONS.tag, hint: "9" },
+  { value: "urgent", label: "urgent", icon: APP_ICONS.tag, hint: "2" },
+  { value: "idea", label: "idea", icon: APP_ICONS.tag, hint: "7" },
 ];
 
 const PAST_CITIES = [
@@ -125,7 +121,7 @@ function ComboboxDemo() {
       value={assignee}
       onValueChange={setAssignee}
       title="Assign someone"
-      icon={UserIcon}
+      icon={APP_ICONS.user}
       placeholder="Assign someone"
       searchPlaceholder="Search by name or email..."
     />
@@ -140,7 +136,7 @@ function MultiComboboxDemo() {
       values={labels}
       onValuesChange={setLabels}
       title="Labels"
-      icon={Tag01Icon}
+      icon={APP_ICONS.tag}
       placeholder="Add labels"
       searchPlaceholder="Search labels..."
     />
@@ -344,7 +340,7 @@ function CenteredSelectDemo() {
   return (
     <Select value={semester} onValueChange={setSemester}>
       <SelectTrigger className="w-60">
-        <Icon icon={Calendar03Icon} />
+        <Icon icon={APP_ICONS.calendar} />
         <SelectValue />
       </SelectTrigger>
       {/* item-aligned opens the list with the picked option sitting right

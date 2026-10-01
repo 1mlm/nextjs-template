@@ -2,7 +2,6 @@
 
 import {
   CheckmarkSquare01Icon,
-  Copy01Icon,
   Copy02Icon,
   MouseRightClick01Icon,
   TextSelectionIcon,
@@ -21,6 +20,7 @@ import {
 import { copyToClipboard } from "@/utils/clipboard";
 import { formatExactDate } from "@/utils/date";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { ColumnType, type CustomTableColumn } from "./columns";
 
 // the text a person would expect to paste: what the cell shows, not the raw
@@ -106,7 +106,7 @@ export function RowContextMenu<T>({
     },
     {
       label: `Copy ${clickedColumn?.label.toLowerCase() ?? "cell"}`,
-      icon: Copy01Icon,
+      icon: APP_ICONS.copy,
       text: clickedCellText,
     },
     {

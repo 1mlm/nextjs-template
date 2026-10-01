@@ -1,22 +1,16 @@
 "use client";
 
 import {
-  Add01Icon,
   ArrowLeft01Icon,
   ArrowRight01Icon,
-  Calendar03Icon,
   DeliveryTruck01Icon,
   InformationSquareIcon,
   Invoice01Icon,
   Money03Icon,
   PackageIcon,
   PaintBoardIcon,
-  PencilEdit01Icon,
-  RefreshIcon,
   Rocket01Icon,
-  Settings02Icon,
   StarIcon,
-  Tick02Icon,
   UserAdd01Icon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
@@ -43,6 +37,7 @@ import {
 import { Input } from "@/shadcn/ui/input";
 import { getColorStyle, TAG_COLORS } from "@/utils/color";
 import { triggerConfetti } from "@/utils/confetti";
+import { APP_ICONS } from "@/utils/icons";
 import type { ShowcaseItem } from "./ShowcaseCard";
 import { wait } from "./util";
 
@@ -82,7 +77,9 @@ function ResponsivePopoverDemo() {
             className="grid aspect-square place-items-center rounded-lg ring-offset-2 ring-offset-popover transition-[scale,box-shadow] duration-150 hover:scale-105 data-[picked=true]:scale-110 data-[picked=true]:shadow-[0_0_14px_2px_currentColor] data-[picked=true]:ring-2 data-[picked=true]:ring-current"
             data-picked={color === picked}
           >
-            {color === picked && <Icon icon={Tick02Icon} className="size-5" />}
+            {color === picked && (
+              <Icon icon={APP_ICONS.confirm} className="size-5" />
+            )}
           </button>
         ))}
       </div>
@@ -94,7 +91,7 @@ const PROJECT_STEPS: (StepperStep & { hint: string })[] = [
   {
     id: "details",
     label: "Details",
-    icon: PencilEdit01Icon,
+    icon: APP_ICONS.edit,
     hint: "name it, describe it",
   },
   {
@@ -106,7 +103,7 @@ const PROJECT_STEPS: (StepperStep & { hint: string })[] = [
   {
     id: "settings",
     label: "Settings",
-    icon: Settings02Icon,
+    icon: APP_ICONS.settings,
     hint: "privacy, labels, all that",
   },
   {
@@ -155,7 +152,7 @@ function StepperDemo() {
         </Button>
         {isFinished ? (
           <Button variant="outline" onClick={() => setStepIndex(0)}>
-            <Icon icon={RefreshIcon} />
+            <Icon icon={APP_ICONS.reload} />
             Start over
           </Button>
         ) : (
@@ -184,7 +181,7 @@ async function loadOrder() {
       label: "Shipping",
       value: "Casablanca, 2 days",
     },
-    { icon: Calendar03Icon, label: "Ordered", value: "Sep 24, 2026" },
+    { icon: APP_ICONS.calendar, label: "Ordered", value: "Sep 24, 2026" },
   ];
 }
 
@@ -237,13 +234,13 @@ function FormDialogDemo() {
       onOpenChange={setOpen}
       trigger={
         <Button>
-          <Icon icon={Add01Icon} />
+          <Icon icon={APP_ICONS.add} />
           New project
         </Button>
       }
       title="New project"
       description="Create a new project"
-      submitIcon={Add01Icon}
+      submitIcon={APP_ICONS.add}
       submitLabel="Create"
       {...{ open, formAction, pending, error, failedCount }}
     >

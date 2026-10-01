@@ -1,8 +1,8 @@
 "use client";
 
-import { Delete02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/Icon";
 import { DropdownMenuItem } from "@/shadcn/ui/dropdown-menu";
+import { APP_ICONS } from "@/utils/icons";
 import { runUndoableAction } from "@/utils/undoableAction";
 
 // pairs with useOptimisticRowRemoval: hides the row immediately and defers
@@ -30,7 +30,7 @@ export function DeleteRowMenuItem({
         runUndoableAction({ commit, onRevert, message, undoLabel });
       }}
     >
-      <Icon icon={Delete02Icon} />
+      <Icon icon={APP_ICONS.remove} />
       {label}
     </DropdownMenuItem>
   );

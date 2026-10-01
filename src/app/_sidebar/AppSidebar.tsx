@@ -4,10 +4,6 @@ import {
   ArrowUpDownIcon,
   CrownIcon,
   GithubIcon,
-  Logout01Icon,
-  Search01Icon,
-  Settings02Icon,
-  SidebarLeftIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import Link from "next/link";
@@ -35,6 +31,7 @@ import {
 } from "@/shadcn/ui/sidebar";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { useOpenCommandPalette } from "../_command/CommandPalette";
 import { NavLinkIcon } from "./NavLinkIcon";
 import {
@@ -83,7 +80,7 @@ function SidebarToggle() {
         className="text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
       >
         <Icon
-          icon={SidebarLeftIcon}
+          icon={APP_ICONS.sidebar}
           className="size-4 transition-transform duration-(--sidebar-duration) group-data-[collapsible=icon]:rotate-180"
         />
       </Button>
@@ -110,7 +107,7 @@ function SearchRow() {
             "w-full font-medium text-sidebar-foreground/70",
           )}
         >
-          <Icon icon={Search01Icon} className="size-4 shrink-0" />
+          <Icon icon={APP_ICONS.search} className="size-4 shrink-0" />
           <span className={FADE_ON_COLLAPSE}>Search</span>
           <Kbd
             keys={["mod", "k"]}
@@ -136,7 +133,7 @@ function NavLinks() {
 
   return (
     <nav className="flex flex-col gap-1">
-      {NAV_ITEMS.map(({ href, label, icon, badge }) => {
+      {NAV_ITEMS.map(({ href, label, icon, animatedIcon, badge }) => {
         const isActive = pathname === href;
         return (
           <Tooltip key={href}>
@@ -152,7 +149,7 @@ function NavLinks() {
                     : "font-medium text-sidebar-foreground/70",
                 )}
               >
-                <NavLinkIcon {...{ icon }} className="size-4 shrink-0" />
+                <NavLinkIcon {...{ icon, animatedIcon }} size={16} />
                 <span className={FADE_ON_COLLAPSE}>{label}</span>
                 {badge ? (
                   <Badge
@@ -186,8 +183,8 @@ const USER_MENU_ITEMS: {
   isDestructive?: boolean;
 }[] = [
   { label: "GitHub profile", icon: GithubIcon, href: DEMO_USER.profileUrl },
-  { label: "Settings", icon: Settings02Icon },
-  { label: "Log out", icon: Logout01Icon, isDestructive: true },
+  { label: "Settings", icon: APP_ICONS.settings },
+  { label: "Log out", icon: APP_ICONS.logout, isDestructive: true },
 ];
 
 // as tall as the two text lines, radius = the row's minus its padding, so
@@ -210,7 +207,7 @@ function UserFooter() {
               NAV_ROW_CLASS,
               // same padding on every side so the avatar sits concentric in
               // the row, 2px collapsed so the 28px avatar fits the 32px rail
-              "h-auto p-1.5 group-data-[collapsible=icon]:p-0.5 data-[state=open]:bg-sidebar-accent",
+              "group/user h-auto p-1.5 group-data-[collapsible=icon]:p-0.5 data-[state=open]:bg-sidebar-accent",
             )}
           >
             <span className="relative shrink-0">
@@ -219,7 +216,7 @@ function UserFooter() {
                 src={DEMO_USER.avatarUrl}
                 className={CONCENTRIC_AVATAR_CLASS}
               />
-              <span className="absolute right-0 bottom-0 size-2.5 rounded-full bg-green-500 ring-2 ring-sidebar" />
+              <span className="absolute right-0 bottom-0 size-2.5 rounded-full bg-green-500 ring-2 ring-sidebar corner-round" />
             </span>
             <span
               className={cn(
@@ -229,8 +226,11 @@ function UserFooter() {
             >
               <span className="flex items-center gap-1.5 text-sm font-semibold">
                 {DEMO_USER.name}
-                <span className="flex items-center gap-0.5 rounded-md bg-amber-400/15 px-1 text-[0.6rem] font-bold text-amber-600 dark:text-amber-400">
-                  <Icon icon={CrownIcon} className="size-2.5" />
+                <span className="flex -rotate-6 items-center gap-0.5 rounded-md bg-amber-400/15 px-1 text-[0.6rem] font-bold text-amber-600 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/user:rotate-3 group-hover/user:scale-110 dark:text-amber-400">
+                  <Icon
+                    icon={CrownIcon}
+                    className="size-2.5 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/user:-translate-y-px group-hover/user:-rotate-12"
+                  />
                   {DEMO_USER.plan}
                 </span>
               </span>

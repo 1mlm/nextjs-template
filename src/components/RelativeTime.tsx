@@ -1,9 +1,4 @@
-import {
-  Calendar04Icon,
-  Clock01Icon,
-  CodeIcon,
-  Forward02Icon,
-} from "@hugeicons/core-free-icons";
+import { CodeIcon, Forward02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/Icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import { cn } from "@/shadcn/utils";
@@ -12,6 +7,7 @@ import {
   formatExactDate,
   formatRelativeDate,
 } from "@/utils/date";
+import { APP_ICONS } from "@/utils/icons";
 import { useNow } from "@/utils/useNow";
 
 // relative date, a clock shows up on hover with the exact date, the elapsed
@@ -43,14 +39,14 @@ export function RelativeTime({
         >
           {formatRelativeDate(target, now)}
           <Icon
-            icon={Clock01Icon}
+            icon={APP_ICONS.time}
             className="size-3 opacity-0 transition-opacity group-hover/date:opacity-100 group-focus-visible/date:opacity-100 pointer-coarse:opacity-100"
           />
         </button>
       </TooltipTrigger>
       <TooltipContent sideOffset={6} className="flex-col items-start gap-1">
         <span className="inline-flex items-center gap-1.5">
-          <Icon icon={Calendar04Icon} />
+          <Icon icon={APP_ICONS.calendar} />
           {formatExactDate(target)}
         </span>
         <span className="inline-flex items-center gap-1.5">

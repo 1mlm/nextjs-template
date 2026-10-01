@@ -6,7 +6,6 @@ import {
   PuzzleIcon,
   RocketIcon,
   Target01Icon,
-  Tick02Icon,
   TrophyIcon,
 } from "@hugeicons/core-free-icons";
 import { useEffect, useRef, useState } from "react";
@@ -27,6 +26,7 @@ import { WordBank } from "@/components/learn/WordBank";
 import { XpBar } from "@/components/learn/XpBar";
 import { Button } from "@/shadcn/ui/button";
 import { triggerConfetti } from "@/utils/confetti";
+import { APP_ICONS } from "@/utils/icons";
 import { shakeElement } from "@/utils/shake";
 import { Chime, playChime } from "@/utils/sound";
 import type { ShowcaseItem } from "./ShowcaseCard";
@@ -107,7 +107,7 @@ function CoordinatePlaneDemo() {
       </div>
       {isSolved ? (
         <Button onClick={nextRound}>
-          <Icon icon={Tick02Icon} /> Next point
+          <Icon icon={APP_ICONS.confirm} /> Next point
         </Button>
       ) : (
         <Button onClick={check}>Check</Button>

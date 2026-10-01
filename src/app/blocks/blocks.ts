@@ -1,17 +1,15 @@
 import {
-  Add01Icon,
   BubbleChatIcon,
   CodeIcon,
   DiceIcon,
   EqualSignIcon,
   GitBranchIcon,
-  Link01Icon,
-  PencilEdit01Icon,
   RepeatIcon,
   TextIcon,
   VariableIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
+import { APP_ICONS } from "@/utils/icons";
 
 // the ONE place a block is defined: how it looks (rows of parts), what it
 // plugs into (output type), what it does (run/evaluate) and the js it stands
@@ -64,7 +62,7 @@ export const CATEGORY_STYLES: Record<
     block: "bg-green-600",
     fill: "fill-green-600",
     slot: "bg-green-800",
-    icon: Add01Icon,
+    icon: APP_ICONS.add,
   },
   [BlockCategory.Looks]: {
     label: "Looks",
@@ -185,7 +183,7 @@ const formatForSay = (value: BlockValue) =>
 export const BLOCK_DEFINITIONS = {
   setVariable: {
     category: BlockCategory.Variables,
-    icon: PencilEdit01Icon,
+    icon: APP_ICONS.edit,
     rows: [
       [
         { kind: PartKind.Text, text: "Set" },
@@ -207,7 +205,7 @@ export const BLOCK_DEFINITIONS = {
   },
   changeVariable: {
     category: BlockCategory.Variables,
-    icon: Add01Icon,
+    icon: APP_ICONS.add,
     rows: [
       [
         { kind: PartKind.Text, text: "Change" },
@@ -379,7 +377,7 @@ export const BLOCK_DEFINITIONS = {
   },
   join: {
     category: BlockCategory.Operators,
-    icon: Link01Icon,
+    icon: APP_ICONS.link,
     output: ValueType.Text,
     rows: [
       [

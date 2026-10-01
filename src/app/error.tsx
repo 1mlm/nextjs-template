@@ -1,17 +1,13 @@
 "use client";
 
-import {
-  ArrowLeft01Icon,
-  CheckIcon,
-  Copy01Icon,
-  RefreshIcon,
-} from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { useEffect, useState } from "react";
 import { ErrorState } from "@/components/ErrorState";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
 import { useCopyToClipboard } from "@/utils/clipboard";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 
 const COPIED_FEEDBACK_MS = 1500;
 
@@ -59,7 +55,7 @@ export default function ErrorPage({
             reset();
           }}
         >
-          <Icon icon={RefreshIcon} isLoading={retrying} />
+          <Icon icon={APP_ICONS.reload} isLoading={retrying} />
           Try again
         </Button>
         <Button variant="outline" onClick={() => window.history.back()}>
@@ -71,7 +67,7 @@ export default function ErrorPage({
           className="cursor-copy"
           onClick={handleCopyDetails}
         >
-          <Icon icon={copied ? CheckIcon : Copy01Icon} />
+          <Icon icon={copied ? APP_ICONS.confirm : APP_ICONS.copy} />
           {copied ? "Copied" : "Copy details"}
         </Button>
       </ErrorState>

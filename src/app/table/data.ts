@@ -1,14 +1,11 @@
-import {
-  Alert02Icon,
-  CheckmarkBadge02Icon,
-  Delete02Icon,
-} from "@hugeicons/core-free-icons";
+import { CheckmarkBadge02Icon } from "@hugeicons/core-free-icons";
 import type { CustomTableEnumValue } from "@/components/table/columns";
+import { APP_ICONS } from "@/utils/icons";
 
 export const statusOptions = {
   ACTIVE: { label: "Active", icon: CheckmarkBadge02Icon, color: "green" },
-  PENDING: { label: "Pending", icon: Alert02Icon, color: "amber" },
-  BANNED: { label: "Banned", icon: Delete02Icon, color: "rose" },
+  PENDING: { label: "Pending", icon: APP_ICONS.warning, color: "amber" },
+  BANNED: { label: "Banned", icon: APP_ICONS.remove, color: "rose" },
 } satisfies Record<string, CustomTableEnumValue>;
 
 export const LABEL_COLORS: Record<string, string> = {

@@ -1,10 +1,10 @@
 "use client";
 
-import { Tick02Icon } from "@hugeicons/core-free-icons";
 import NumberFlow from "@number-flow/react";
 import { EmojiAnimation, FluentEmoji } from "@/components/FluentEmoji";
 import { Icon } from "@/components/Icon";
 import { cn } from "@/shadcn/utils";
+import { APP_ICONS } from "@/utils/icons";
 
 export type StreakDay = { date: string; label: string; isDone: boolean };
 
@@ -60,7 +60,9 @@ export function StreakFlame({
                   isToday && !day.isDone && "ring-2 ring-orange-500/50",
                 )}
               >
-                {day.isDone && <Icon icon={Tick02Icon} strokeWidth={3} />}
+                {day.isDone && (
+                  <Icon icon={APP_ICONS.confirm} strokeWidth={3} />
+                )}
               </span>
               <span className="text-xs text-muted-foreground">{day.label}</span>
             </div>

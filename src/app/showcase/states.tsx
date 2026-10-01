@@ -1,13 +1,9 @@
 "use client";
 
 import {
-  Clock01Icon,
   File02Icon,
   InboxIcon,
-  RefreshIcon,
   SourceCodeIcon,
-  Tag01Icon,
-  Tick02Icon,
   UnavailableIcon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
@@ -40,6 +36,7 @@ import {
   DialogTitle,
 } from "@/shadcn/ui/dialog";
 import { cn } from "@/shadcn/utils";
+import { APP_ICONS } from "@/utils/icons";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
 function LabelTagDemo() {
@@ -58,7 +55,7 @@ function LabelTagDemo() {
         label="README.md"
         href="https://github.com/1mlm/nextjs-template/blob/main/.github/README.md"
       />{" "}
-      to <LabelTag icon={Tag01Icon} label="finance" />
+      to <LabelTag icon={APP_ICONS.tag} label="finance" />
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent>
           <DialogHeader>
@@ -110,8 +107,8 @@ const FAKE_NAMES = [
   "Omar Fassi",
 ];
 const FAKE_STATUSES: CustomTableEnumValue[] = [
-  { label: "Active", icon: Tick02Icon, color: "green" },
-  { label: "Pending", icon: Clock01Icon, color: "amber" },
+  { label: "Active", icon: APP_ICONS.confirm, color: "green" },
+  { label: "Pending", icon: APP_ICONS.time, color: "amber" },
   { label: "Banned", icon: UnavailableIcon, color: "red" },
 ];
 const FAKE_CARDS = [
@@ -135,7 +132,7 @@ function FinishLoadingButton({
 }) {
   return (
     <Button variant="outline" size="sm" {...{ onClick }}>
-      <Icon icon={isLoading ? Tick02Icon : RefreshIcon} />
+      <Icon icon={isLoading ? APP_ICONS.confirm : APP_ICONS.reload} />
       {isLoading ? "Finish loading" : "Load again"}
     </Button>
   );
@@ -329,12 +326,12 @@ export const STATE_ITEMS: ShowcaseItem[] = [
         <EnumBadge
           value={{
             label: "Active",
-            icon: Tick02Icon,
+            icon: APP_ICONS.confirm,
             color: "green",
           }}
         />
         <EnumBadge
-          value={{ label: "founder", icon: Tag01Icon, color: "violet" }}
+          value={{ label: "founder", icon: APP_ICONS.tag, color: "violet" }}
         />
       </>
     ),
@@ -360,7 +357,7 @@ export const STATE_ITEMS: ShowcaseItem[] = [
       <div className="relative rounded-lg border px-4 py-3 text-sm">
         3 tags
         <CornerCountBadge>
-          +2 <Icon icon={Tag01Icon} />
+          +2 <Icon icon={APP_ICONS.tag} />
         </CornerCountBadge>
       </div>
     ),

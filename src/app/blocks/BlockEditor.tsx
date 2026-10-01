@@ -1,17 +1,13 @@
 "use client";
 
-import {
-  Delete02Icon,
-  PlayIcon,
-  SquareIcon,
-  Undo02Icon,
-} from "@hugeicons/core-free-icons";
+import { PlayIcon, SquareIcon } from "@hugeicons/core-free-icons";
 import { type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { SlidingTabs } from "@/components/SlidingTabs";
 import { Button } from "@/shadcn/ui/button";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import {
   BlockEditorContext,
   BlockView,
@@ -424,7 +420,7 @@ export function BlockEditor() {
           {dropTarget?.kind === DropKind.Trash && (
             <div className="absolute inset-0 grid place-items-center rounded-2xl bg-destructive/15 text-destructive backdrop-blur-sm">
               <span className="flex items-center gap-2 font-semibold">
-                <Icon icon={Delete02Icon} className="size-6" />
+                <Icon icon={APP_ICONS.remove} className="size-6" />
                 drop to delete
               </span>
             </div>
@@ -452,7 +448,7 @@ export function BlockEditor() {
                 setOutput([]);
               }}
             >
-              <Icon icon={Undo02Icon} />
+              <Icon icon={APP_ICONS.undo} />
               Reset
             </Button>
             <span className="ml-auto text-xs text-muted-foreground max-sm:hidden">

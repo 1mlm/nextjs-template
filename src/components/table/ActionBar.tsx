@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  BrushCleaningIcon,
-  Cancel01Icon,
-  Delete02Icon,
-  HashtagIcon,
-} from "@hugeicons/core-free-icons";
+import { BrushCleaningIcon, HashtagIcon } from "@hugeicons/core-free-icons";
 import { type ReactNode, useState } from "react";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { Icon } from "@/components/Icon";
@@ -20,6 +15,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/shadcn/ui/pagination";
+import { APP_ICONS } from "@/utils/icons";
 import type { CustomTableColumn } from "./columns";
 import { ExtractButton } from "./ExtractButton";
 
@@ -128,13 +124,13 @@ export function ActionBar<T>({
                 onClick={clearSelection}
                 className="grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-background hover:text-foreground"
               >
-                <Icon icon={Cancel01Icon} className="size-3.5" />
+                <Icon icon={APP_ICONS.close} className="size-3.5" />
               </button>
             </span>
             {selectionActions?.(selectedItems)}
             {onDeleteSelected && (
               <ConfirmButton
-                icon={Delete02Icon}
+                icon={APP_ICONS.remove}
                 label={`Delete ${selectedCount} ${selectedCount === 1 ? "row" : "rows"}`}
                 confirmLabel="Delete"
                 holdSeconds={2}
@@ -144,7 +140,7 @@ export function ActionBar<T>({
                 }}
                 trigger={
                   <Button variant="destructive" className="shadow-lg">
-                    <Icon icon={Delete02Icon} />
+                    <Icon icon={APP_ICONS.remove} />
                     Delete {selectedCount}
                   </Button>
                 }

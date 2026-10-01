@@ -1,17 +1,11 @@
 "use client";
 
 import {
-  Alert02Icon,
-  Cancel01Icon,
-  CheckIcon,
-  Copy01Icon,
-  Delete02Icon,
   Dumbbell01Icon,
   FeatherIcon,
   Notification01Icon,
   PartyIcon,
   Target03Icon,
-  Tick02Icon,
   TouchInteraction01Icon,
   WeightScaleIcon,
 } from "@hugeicons/core-free-icons";
@@ -23,6 +17,7 @@ import { Button } from "@/shadcn/ui/button";
 import { useCopyToClipboard } from "@/utils/clipboard";
 import { triggerConfetti } from "@/utils/confetti";
 import { type HapticPreset, triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { Chime, playChime } from "@/utils/sound";
 import { runUndoableAction } from "@/utils/undoableAction";
 import type { ShowcaseItem } from "./ShowcaseCard";
@@ -32,15 +27,15 @@ const HAPTIC_BUTTONS: { preset: HapticPreset; icon: IconSvgElement }[] = [
   { preset: "light", icon: FeatherIcon },
   { preset: "medium", icon: Dumbbell01Icon },
   { preset: "heavy", icon: WeightScaleIcon },
-  { preset: "success", icon: Tick02Icon },
-  { preset: "warning", icon: Alert02Icon },
-  { preset: "error", icon: Cancel01Icon },
+  { preset: "success", icon: APP_ICONS.confirm },
+  { preset: "warning", icon: APP_ICONS.warning },
+  { preset: "error", icon: APP_ICONS.close },
   { preset: "nudge", icon: Notification01Icon },
 ];
 
 const CHIME_ICONS: Record<Chime, IconSvgElement> = {
-  [Chime.Success]: Tick02Icon,
-  [Chime.Error]: Cancel01Icon,
+  [Chime.Success]: APP_ICONS.confirm,
+  [Chime.Error]: APP_ICONS.close,
 };
 
 function SoundCounterDemo() {
@@ -80,7 +75,7 @@ function UndoableDeleteDemo() {
         });
       }}
     >
-      <Icon icon={Delete02Icon} />
+      <Icon icon={APP_ICONS.remove} />
       {deleted ? "Deleted (undo in the toast)" : "Delete invoice"}
     </Button>
   );
@@ -95,7 +90,7 @@ function CopyDemo() {
       className="cursor-copy"
       onClick={() => copy("hello from the template")}
     >
-      <Icon icon={copied ? CheckIcon : Copy01Icon} />
+      <Icon icon={copied ? APP_ICONS.confirm : APP_ICONS.copy} />
       {copied ? "Copied" : "Copy some text"}
     </Button>
   );

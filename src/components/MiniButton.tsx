@@ -9,14 +9,12 @@ import { getColorStyle } from "@/utils/color";
 
 export enum MiniButtonTone {
   Neutral = "neutral",
-  View = "view",
   Edit = "edit",
   Confirm = "confirm",
   Destructive = "destructive",
 }
 
 const TONE_COLOR: Partial<Record<MiniButtonTone, Color>> = {
-  [MiniButtonTone.View]: "sky",
   [MiniButtonTone.Edit]: "amber",
   [MiniButtonTone.Confirm]: "green",
 };

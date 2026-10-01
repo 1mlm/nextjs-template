@@ -13,6 +13,7 @@
     "verify": "pnpm check && pnpm biome && next build"
   },
   "dependencies": {
+    "@animateicons/react": "^0.9.0",
     "@faker-js/faker": "^10.6.0",
     "@haptics/core": "^2.1.0",
     "@hugeicons/core-free-icons": "^4.3.5",

@@ -1,22 +1,16 @@
 "use client";
 
 import {
-  Add01Icon,
-  Calendar04Icon,
   CheckmarkBadge02Icon,
   Coins01Icon,
-  Copy01Icon,
   Image01Icon,
   Key01Icon,
-  Link01Icon,
   Mail01Icon,
   MoreVerticalIcon,
   Note01Icon,
   QuotesIcon,
   StarIcon,
-  Tag01Icon,
   UserGroupIcon,
-  UserIcon,
 } from "@hugeicons/core-free-icons";
 import { useMemo, useState } from "react";
 import { ErrorTooltip } from "@/components/ErrorTooltip";
@@ -40,6 +34,7 @@ import { Button } from "@/shadcn/ui/button";
 import { ContextMenuItem } from "@/shadcn/ui/context-menu";
 import { Input } from "@/shadcn/ui/input";
 import { useCopyToClipboard } from "@/utils/clipboard";
+import { APP_ICONS } from "@/utils/icons";
 import { LABEL_COLORS, type Row, statusOptions } from "./data";
 
 const NOTE_MAX_LENGTH = 20;
@@ -66,7 +61,7 @@ const getSpareRow = (spareRows: Row[], createdCount: number) => {
 
 const toLabelTag = (label: string): CustomTableEnumValue => ({
   label,
-  icon: Tag01Icon,
+  icon: APP_ICONS.tag,
   color: LABEL_COLORS[label] ?? "gray",
   keywords: [`${label}-team`],
 });
@@ -99,7 +94,7 @@ const columns: CustomTableColumn<Row>[] = [
   {
     id: "name",
     label: "Name",
-    icon: UserIcon,
+    icon: APP_ICONS.user,
     type: ColumnType.String,
     getString: (row) => row.name,
     onClick: (row) => alert(`Clicked ${row.name}`),
@@ -153,7 +148,7 @@ const columns: CustomTableColumn<Row>[] = [
   {
     id: "labels",
     label: "Labels",
-    icon: Tag01Icon,
+    icon: APP_ICONS.tag,
     type: ColumnType.Tags,
     getTags: (row) => row.labels.map(toLabelTag),
   },
@@ -167,14 +162,14 @@ const columns: CustomTableColumn<Row>[] = [
   {
     id: "joinedAt",
     label: "Joined",
-    icon: Calendar04Icon,
+    icon: APP_ICONS.calendar,
     type: ColumnType.Date,
     getDate: (row) => row.joinedAt,
   },
   {
     id: "url",
     label: "Link",
-    icon: Link01Icon,
+    icon: APP_ICONS.link,
     type: ColumnType.Copy,
     searchable: false,
     getString: (row) => row.url,
@@ -191,7 +186,7 @@ function CopyEmailsButton({ rows }: { rows: Row[] }) {
       className="cursor-copy shadow-lg"
       onClick={() => copy(rows.map((row) => row.email).join(", "))}
     >
-      <Icon icon={Copy01Icon} />
+      <Icon icon={APP_ICONS.copy} />
       {copied ? "Copied!" : "Copy emails"}
     </Button>
   );
@@ -293,7 +288,7 @@ export function TableDemo({
           trailing={`${resultCount} ${resultCount === 1 ? "person" : "people"}`}
         />
         <Button onClick={addPerson}>
-          <Icon icon={Add01Icon} />
+          <Icon icon={APP_ICONS.add} />
           <span className="max-sm:sr-only">Add person</span>
         </Button>
       </div>

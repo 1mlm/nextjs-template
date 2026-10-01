@@ -1,16 +1,13 @@
 "use client";
 
-import {
-  ColorPickerIcon,
-  Copy01Icon,
-  Tick02Icon,
-} from "@hugeicons/core-free-icons";
+import { ColorPickerIcon } from "@hugeicons/core-free-icons";
 import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
 import { cn } from "@/shadcn/utils";
 import { useCopyToClipboard } from "@/utils/clipboard";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { useIsClient } from "@/utils/useIsClient";
 
 // pick any color on your screen, even outside the browser window, with the
@@ -56,7 +53,7 @@ export function EyeDropperButton({
               className="size-4 rounded-md border"
             />
             {color}
-            <Icon icon={copied ? Tick02Icon : Copy01Icon} />
+            <Icon icon={copied ? APP_ICONS.confirm : APP_ICONS.copy} />
           </Button>
         )}
       </div>

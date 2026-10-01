@@ -1,10 +1,10 @@
 "use client";
 
-import { RefreshIcon } from "@hugeicons/core-free-icons";
 import "@/shadcn/styles/globals.css";
 import { ErrorState } from "@/components/ErrorState";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
+import { APP_ICONS } from "@/utils/icons";
 
 // only shows when the root layout itself blows up, so it replaces the whole
 // document (own html/body, no providers, no fonts). error.tsx handles
@@ -21,7 +21,7 @@ export default function GlobalError({
       <body className="flex min-h-dvh items-center justify-center p-4 antialiased">
         <ErrorState message={error.message}>
           <Button onClick={reset}>
-            <Icon icon={RefreshIcon} />
+            <Icon icon={APP_ICONS.reload} />
             Try again
           </Button>
         </ErrorState>

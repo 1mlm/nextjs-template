@@ -1,10 +1,7 @@
 "use client";
 
 import {
-  Cancel01Icon,
-  Logout01Icon,
   MoreHorizontalIcon,
-  Search01Icon,
   SmartPhone01Icon,
 } from "@hugeicons/core-free-icons";
 import Link from "next/link";
@@ -23,8 +20,10 @@ import {
 } from "@/shadcn/ui/drawer";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { version } from "../../../package.json";
 import { useOpenCommandPalette } from "../_command/CommandPalette";
+import { NavLinkIcon } from "./NavLinkIcon";
 import {
   APP_INFO,
   AppIcon,
@@ -92,6 +91,16 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
     setOpen(false);
   };
 
+  // nav links keep the sheet open until the new page lands, so their
+  // spinner has something to show while the page loads
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is the trigger, not a value the effect reads
+  useEffect(() => setOpen(false), [pathname]);
+
+  const handleNavLinkClick = (href: string) => {
+    if (href === pathname) return closeMenu();
+    triggerHaptic("selection");
+  };
+
   return (
     <Drawer {...{ open }} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
@@ -131,24 +140,24 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
                 onClick={openSearch}
                 className={HEADER_BUTTON_CLASS}
               >
-                <Icon icon={Search01Icon} className="size-3.5" />
+                <Icon icon={APP_ICONS.search} className="size-3.5" />
               </button>
               <DrawerClose
                 aria-label="Close menu"
                 className={HEADER_BUTTON_CLASS}
               >
-                <Icon icon={Cancel01Icon} className="size-3.5" />
+                <Icon icon={APP_ICONS.close} className="size-3.5" />
               </DrawerClose>
             </span>
           </div>
 
           <nav className="grid grid-cols-2 gap-1.5 [&>*:last-child:nth-child(odd)]:col-span-2">
-            {NAV_ITEMS.map(({ href, label, icon }) => (
+            {NAV_ITEMS.map(({ href, label, icon, animatedIcon }) => (
               <Link
                 key={href}
                 {...{ href }}
                 transitionTypes={getNavTransitionTypes(pathname, href)}
-                onClick={closeMenu}
+                onClick={() => handleNavLinkClick(href)}
                 aria-current={pathname === href ? "page" : undefined}
                 className={cn(
                   "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors active:scale-[0.97]",
@@ -157,7 +166,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
                     : "text-sidebar-foreground/70 ring-1 ring-sidebar-border hover:bg-sidebar-accent",
                 )}
               >
-                <Icon {...{ icon }} className="size-4" />
+                <NavLinkIcon {...{ icon, animatedIcon }} size={16} />
                 {label}
               </Link>
             ))}
@@ -194,7 +203,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
               onClick={closeMenu}
               className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 active:scale-95"
             >
-              <Icon icon={Logout01Icon} className="size-4" />
+              <Icon icon={APP_ICONS.logout} className="size-4" />
               Log out
             </button>
           </div>

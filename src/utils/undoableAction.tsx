@@ -1,14 +1,10 @@
-import {
-  Alert02Icon,
-  Delete02Icon,
-  UndoIcon,
-} from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { toast } from "sonner";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 
 const UNDO_WINDOW_MS = 5000;
 
@@ -47,7 +43,7 @@ function AppToast({
           onClick={action.onClick}
           className="h-9 rounded-xl px-3"
         >
-          <Icon icon={UndoIcon} />
+          <Icon icon={APP_ICONS.undo} />
           {action.label}
         </Button>
       )}
@@ -65,7 +61,7 @@ const showErrorToast = (message: string) =>
   toast.custom(
     () => (
       <AppToast
-        icon={Alert02Icon}
+        icon={APP_ICONS.warning}
         isError
         durationMs={ERROR_TOAST_MS}
         {...{ message }}
@@ -114,7 +110,7 @@ export function runUndoableAction({
   const toastId = toast.custom(
     () => (
       <AppToast
-        icon={Delete02Icon}
+        icon={APP_ICONS.remove}
         durationMs={UNDO_WINDOW_MS}
         action={{ label: undoLabel, onClick: undo }}
         {...{ message }}

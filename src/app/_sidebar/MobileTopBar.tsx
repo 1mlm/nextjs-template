@@ -59,7 +59,7 @@ export function MobileTopBar() {
         isHidden && "-translate-y-[calc(100%+1rem)]",
       )}
     >
-      {tabItems.map(({ href, label, icon, badge }) => (
+      {tabItems.map(({ href, label, icon, animatedIcon, badge }) => (
         <Link
           key={href}
           {...{ href }}
@@ -72,7 +72,7 @@ export function MobileTopBar() {
           )}
         >
           <span className="relative">
-            <NavLinkIcon {...{ icon }} className="size-5" />
+            <NavLinkIcon {...{ icon, animatedIcon }} size={20} />
             {badge ? (
               <span className="absolute -top-1.5 -right-2.5 grid h-4 min-w-4 place-items-center rounded-full bg-sidebar-accent px-1 text-[0.6rem] text-sidebar-accent-foreground">
                 {badge}

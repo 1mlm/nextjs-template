@@ -182,6 +182,16 @@
     @apply corner-squircle;
     }
 
+  /* avatars and their status dots are real circles, the one exception to the
+     squircles. after the rule above so it wins on equal specificity */
+  [data-slot="avatar"],
+  [data-slot="avatar"]::after,
+  [data-slot="avatar-image"],
+  [data-slot="avatar-fallback"],
+  [data-slot="avatar-badge"] {
+    @apply corner-round;
+    }
+
   /* Chrome autofill tints only the input; tint the whole group to match */
   [data-slot="input-group"]:has(input:autofill) {
     background-color: #e8f0fe;

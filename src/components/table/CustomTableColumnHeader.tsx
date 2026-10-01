@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  Cancel01Icon,
-  CheckIcon,
   FilterIcon,
   Sorting01Icon,
   SortingAZ02Icon,
@@ -51,6 +49,7 @@ import {
 import { cn } from "@/shadcn/utils";
 import { toggleListItem } from "@/utils/array";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { EnumBadge } from "./CustomTableCell";
 import {
   ColumnType,
@@ -179,7 +178,7 @@ const getEnumFilterOptions = <T,>(
   {
     key: ENUM_FILTER_NONE_KEY,
     label: (
-      <IconLabel icon={Cancel01Icon} className="opacity-50">
+      <IconLabel icon={APP_ICONS.close} className="opacity-50">
         No value
       </IconLabel>
     ),
@@ -190,7 +189,7 @@ const BOOLEAN_FILTER_OPTIONS: ExcludedFilterOption[] = [
   {
     key: "true",
     label: (
-      <IconLabel icon={CheckIcon} className="text-green-500">
+      <IconLabel icon={APP_ICONS.confirm} className="text-green-500">
         Yes
       </IconLabel>
     ),
@@ -198,7 +197,7 @@ const BOOLEAN_FILTER_OPTIONS: ExcludedFilterOption[] = [
   {
     key: "false",
     label: (
-      <IconLabel icon={Cancel01Icon} className="opacity-50">
+      <IconLabel icon={APP_ICONS.close} className="opacity-50">
         No
       </IconLabel>
     ),
@@ -326,7 +325,7 @@ function DateRangeFilterContent({
             setField(ColumnFilterField.To, "");
           }}
         >
-          <Icon icon={Cancel01Icon} />
+          <Icon icon={APP_ICONS.close} />
           Clear
         </Button>
       )}
@@ -473,7 +472,7 @@ function SortSubmenuContent({
       ))}
       {sort && (
         <DropdownMenuItem onClick={() => onSortChange(null)}>
-          <Icon icon={Cancel01Icon} />
+          <Icon icon={APP_ICONS.close} />
           Clear sort
         </DropdownMenuItem>
       )}
@@ -673,7 +672,7 @@ export function CustomTableColumnHeader<T>({
                 </h3>
                 {hasActiveFilter && (
                   <Button variant="ghost" size="sm" onClick={clearFilter}>
-                    <Icon icon={Cancel01Icon} />
+                    <Icon icon={APP_ICONS.close} />
                     Clear
                   </Button>
                 )}

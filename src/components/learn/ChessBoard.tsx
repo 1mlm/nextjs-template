@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  FlipVerticalIcon,
-  RefreshIcon,
-  UndoIcon,
-} from "@hugeicons/core-free-icons";
+import { FlipVerticalIcon } from "@hugeicons/core-free-icons";
 import {
   Chess,
   type Color as ChessColor,
@@ -20,6 +16,7 @@ import { Button } from "@/shadcn/ui/button";
 import { cn } from "@/shadcn/utils";
 import { triggerConfetti } from "@/utils/confetti";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { Chime, playChime } from "@/utils/sound";
 
 type BoardPiece = {
@@ -361,7 +358,7 @@ export function ChessBoard({ className }: { className?: string }) {
       </div>
       <div className="flex gap-2">
         <Button variant="outline" size="sm" onClick={undo}>
-          <Icon icon={UndoIcon} /> Undo
+          <Icon icon={APP_ICONS.undo} /> Undo
         </Button>
         <Button
           variant="outline"
@@ -371,7 +368,7 @@ export function ChessBoard({ className }: { className?: string }) {
           <Icon icon={FlipVerticalIcon} /> Flip
         </Button>
         <Button variant="ghost" size="sm" onClick={reset}>
-          <Icon icon={RefreshIcon} /> New game
+          <Icon icon={APP_ICONS.reload} /> New game
         </Button>
       </div>
     </div>

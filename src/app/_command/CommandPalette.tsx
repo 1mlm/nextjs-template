@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  ComponentIcon,
-  Link01Icon,
-  RefreshIcon,
-  SidebarLeftIcon,
-} from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
+import { useCommandState } from "cmdk";
 import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
@@ -30,6 +25,7 @@ import {
 import { useSidebar } from "@/shadcn/ui/sidebar";
 import { copyToClipboard } from "@/utils/clipboard";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { NAV_ITEMS } from "../_sidebar/nav";
 
 const OPEN_SHORTCUT_KEY = "k";
@@ -70,6 +66,23 @@ async function loadShowcaseEntries(): Promise<ShowcaseEntry[]> {
   );
 }
 
+// cmdk's default fuzzy match lets random letters hit long labels like
+// "Copy link to this page", so gibberish never came back empty
+function matchesEveryWord(value: string, search: string, keywords?: string[]) {
+  const searchableText = [value, ...(keywords ?? [])].join(" ").toLowerCase();
+  const words = search.toLowerCase().split(/\s+/).filter(Boolean);
+  return words.every((word) => searchableText.includes(word)) ? 1 : 0;
+}
+
+function NoMatchTitle() {
+  const search = useCommandState((state) => state.search);
+  return (
+    <span className="max-w-full truncate px-4 text-sm font-medium">
+      nothing matches "{search}"
+    </span>
+  );
+}
+
 const FOOTER_HINTS = [
   { keys: ["up", "down"], label: "move" },
   { keys: ["enter"], label: "open" },
@@ -83,7 +96,7 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
   const [showcaseEntries, setShowcaseEntries] = useState<ShowcaseEntry[]>([]);
   const router = useRouter();
   const pathname = usePathname();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, isMobile } = useSidebar();
 
   useEffect(() => {
     const toggleOnShortcut = (event: KeyboardEvent) => {
@@ -125,25 +138,30 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
     }),
   );
 
-  const actionCommands: PaletteCommand[] = [
+  // phones have no sidebar to toggle and pull down to reload
+  const desktopOnlyActionCommands: PaletteCommand[] = [
     {
       id: "toggle-sidebar",
       label: "Toggle sidebar",
-      icon: SidebarLeftIcon,
+      icon: APP_ICONS.sidebar,
       shortcut: ["mod", "b"],
       run: toggleSidebar,
     },
     {
-      id: "copy-link",
-      label: "Copy link to this page",
-      icon: Link01Icon,
-      run: () => copyToClipboard(window.location.href),
-    },
-    {
       id: "reload",
       label: "Reload the page",
-      icon: RefreshIcon,
+      icon: APP_ICONS.reload,
       run: () => window.location.reload(),
+    },
+  ];
+
+  const actionCommands: PaletteCommand[] = [
+    ...(isMobile ? [] : desktopOnlyActionCommands),
+    {
+      id: "copy-link",
+      label: "Copy link to this page",
+      icon: APP_ICONS.link,
+      run: () => copyToClipboard(window.location.href),
     },
   ];
 
@@ -151,7 +169,7 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
     ({ name, section, slug }) => ({
       id: slug,
       label: name,
-      icon: ComponentIcon,
+      icon: APP_ICONS.showcaseCard,
       hint: section,
       run: () => jumpToShowcaseCard(slug),
     }),
@@ -174,10 +192,19 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
         className="sm:max-w-lg"
       >
         {/* CommandDialog doesn't bring its own cmdk root, the items need one */}
-        <Command className="bg-transparent">
+        <Command className="bg-transparent" filter={matchesEveryWord}>
           <CommandInput placeholder="Search pages, actions, components..." />
           <CommandList className="max-h-[min(24rem,60dvh)]">
-            <CommandEmpty>nothing matches that, try fewer letters</CommandEmpty>
+            <CommandEmpty className="flex flex-col items-center gap-1 py-8">
+              <Icon
+                icon={APP_ICONS.searchEmpty}
+                className="mb-1 size-7 text-muted-foreground"
+              />
+              <NoMatchTitle />
+              <span className="text-xs text-muted-foreground">
+                try a page name, an action or a component
+              </span>
+            </CommandEmpty>
             {commandGroups.map(({ heading, commands }) => (
               <CommandGroup key={heading} {...{ heading }}>
                 {commands.map(({ id, label, icon, hint, shortcut, run }) => (

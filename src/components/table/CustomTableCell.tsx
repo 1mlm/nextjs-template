@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  CheckIcon,
-  Copy01Icon,
-  FullScreenIcon,
-} from "@hugeicons/core-free-icons";
+import { FullScreenIcon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { type ReactNode, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
@@ -16,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover";
 import { cn } from "@/shadcn/utils";
 import { useCopyToClipboard } from "@/utils/clipboard";
 import { getColorStyle } from "@/utils/color";
+import { APP_ICONS } from "@/utils/icons";
 import { useResizeObserver } from "@/utils/useResizeObserver";
 import { CornerCountBadge } from "./CornerCountBadge";
 import { CustomTableEmptyValue } from "./CustomTableEmptyValue";
@@ -56,7 +53,7 @@ function CopyButton({ value }: { value: string }) {
       className="size-6 cursor-copy"
       onClick={() => copy(value)}
     >
-      <Icon icon={copied ? CheckIcon : Copy01Icon} />
+      <Icon icon={copied ? APP_ICONS.confirm : APP_ICONS.copy} />
       <span className="sr-only">Copy</span>
     </Button>
   );
@@ -224,7 +221,10 @@ export function CustomTableCell<T>({
   if (column.type === ColumnType.Boolean)
     return column.getBoolean(item) ? (
       <div className="flex justify-center">
-        <Icon icon={column.trueIcon ?? CheckIcon} className="text-green-500" />
+        <Icon
+          icon={column.trueIcon ?? APP_ICONS.confirm}
+          className="text-green-500"
+        />
       </div>
     ) : (
       <CustomTableEmptyValue />

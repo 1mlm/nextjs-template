@@ -1,10 +1,10 @@
 "use client";
 
-import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { type ReactNode, useEffect } from "react";
 import { Icon } from "@/components/Icon";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { Chime, playChime } from "@/utils/sound";
 
 // buzzes + plays the error chime the moment an error shows up, not on every re-render while it stays
@@ -33,7 +33,7 @@ export function FormError({
         className,
       )}
     >
-      <Icon icon={Alert02Icon} />
+      <Icon icon={APP_ICONS.warning} />
       {children}
     </span>
   );

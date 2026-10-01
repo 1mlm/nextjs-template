@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Calendar03Icon,
   CalendarClockIcon,
   CalendarRangeIcon,
 } from "@hugeicons/core-free-icons";
@@ -16,6 +15,7 @@ import { Button } from "@/shadcn/ui/button";
 import { Calendar } from "@/shadcn/ui/calendar";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 
 // bigger cells in the phone sheet, thumbs aren't cursors
 const CALENDAR_CLASS =
@@ -83,7 +83,7 @@ export function DatePicker({
   return (
     <PickerPopover
       title="Pick a date"
-      icon={Calendar03Icon}
+      icon={APP_ICONS.calendar}
       onOpenChange={setOpen}
       {...{ label, placeholder, open }}
     >

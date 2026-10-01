@@ -3,9 +3,6 @@
 import {
   ArrowRight01Icon,
   Bug02Icon,
-  PuzzleIcon,
-  SidebarLeftIcon,
-  TablePropertiesIcon,
   UnavailableIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
@@ -21,13 +18,14 @@ import {
   formatExactDate,
   formatRelativeDate,
 } from "@/utils/date";
+import { APP_ICONS } from "@/utils/icons";
 import { safeLocalStorage } from "@/utils/storage";
 import { useIsClient } from "@/utils/useIsClient";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
 const DEMO_PAGES: { href: string; label: string; icon: IconSvgElement }[] = [
-  { href: "/table", label: "CustomTable", icon: TablePropertiesIcon },
-  { href: "/blocks", label: "Blocks editor", icon: PuzzleIcon },
+  { href: "/table", label: "CustomTable", icon: APP_ICONS.table },
+  { href: "/blocks", label: "Blocks editor", icon: APP_ICONS.blocks },
   {
     href: "/this-page-does-not-exist",
     label: "404 page",
@@ -102,7 +100,7 @@ function SidebarDemo() {
     );
   return (
     <Button variant="outline" onClick={toggleSidebar}>
-      <Icon icon={SidebarLeftIcon} />
+      <Icon icon={APP_ICONS.sidebar} />
       Toggle sidebar (or ctrl+b)
     </Button>
   );

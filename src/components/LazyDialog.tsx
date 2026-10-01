@@ -1,6 +1,5 @@
 "use client";
 
-import { RefreshIcon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { type ReactNode, useRef, useState } from "react";
 import { ErrorState } from "@/components/ErrorState";
@@ -16,6 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shadcn/ui/dialog";
+import { APP_ICONS } from "@/utils/icons";
 
 enum LoadStatus {
   Idle = "idle",
@@ -86,7 +86,7 @@ export function LazyDialog<T>({
           {state.status === LoadStatus.Failed && (
             <ErrorState>
               <Button variant="outline" onClick={loadOnce}>
-                <Icon icon={RefreshIcon} />
+                <Icon icon={APP_ICONS.reload} />
                 Try again
               </Button>
             </ErrorState>

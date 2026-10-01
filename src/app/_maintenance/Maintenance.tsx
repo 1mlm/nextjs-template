@@ -1,9 +1,10 @@
 "use client";
 
-import { ConstructionIcon, RefreshIcon } from "@hugeicons/core-free-icons";
+import { ConstructionIcon } from "@hugeicons/core-free-icons";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Button } from "@/shadcn/ui/button";
+import { APP_ICONS } from "@/utils/icons";
 import { APP_INFO } from "../_sidebar/nav";
 
 const RETRY_EVERY_SECONDS = 30;
@@ -53,7 +54,7 @@ export function Maintenance() {
           </p>
         </div>
         <Button variant="outline" onClick={() => window.location.reload()}>
-          <Icon icon={RefreshIcon} />
+          <Icon icon={APP_ICONS.reload} />
           Try now
         </Button>
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">

@@ -1,6 +1,6 @@
 "use client";
 
-import { LockIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { LockIcon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { motion } from "motion/react";
 import { useRef } from "react";
@@ -9,6 +9,7 @@ import { SquircleRing } from "@/components/SquircleRing";
 import { cn } from "@/shadcn/utils";
 import { type Color, getColorSwatch } from "@/utils/color";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { shakeElement } from "@/utils/shake";
 
 export type Lesson = {
@@ -118,7 +119,11 @@ function LessonNode({
           <Icon icon={isLocked ? LockIcon : lesson.icon} className="size-7" />
           {status === LessonStatus.Done && (
             <span className="absolute -right-1.5 -bottom-1.5 flex size-6 items-center justify-center rounded-xl border-2 border-background bg-amber-400 text-white">
-              <Icon icon={Tick02Icon} className="size-3.5" strokeWidth={3} />
+              <Icon
+                icon={APP_ICONS.confirm}
+                className="size-3.5"
+                strokeWidth={3}
+              />
             </span>
           )}
         </motion.button>

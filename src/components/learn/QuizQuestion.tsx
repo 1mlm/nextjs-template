@@ -1,6 +1,5 @@
 "use client";
 
-import { Cancel01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { AnimatePresence, motion } from "motion/react";
 import { type KeyboardEvent, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
@@ -8,6 +7,7 @@ import { Button } from "@/shadcn/ui/button";
 import { cn } from "@/shadcn/utils";
 import { triggerConfetti } from "@/utils/confetti";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 import { shakeElement } from "@/utils/shake";
 import { Chime, playChime } from "@/utils/sound";
 
@@ -34,13 +34,13 @@ const OPTION_CLASSES: Record<OptionState, string> = {
 const FEEDBACK = {
   correct: {
     title: "Nice work!",
-    icon: Tick02Icon,
+    icon: APP_ICONS.confirm,
     barClass: "bg-green-500/15 text-green-600",
     chipClass: "bg-green-500",
   },
   wrong: {
     title: "Not quite",
-    icon: Cancel01Icon,
+    icon: APP_ICONS.close,
     barClass: "bg-rose-500/15 text-rose-600",
     chipClass: "bg-rose-500",
   },

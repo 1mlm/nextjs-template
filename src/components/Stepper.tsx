@@ -1,11 +1,11 @@
 "use client";
 
-import { Tick02Icon } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import { Fragment } from "react";
 import { Icon } from "@/components/Icon";
 import { IconChip } from "@/components/IconChip";
 import { cn } from "@/shadcn/utils";
+import { APP_ICONS } from "@/utils/icons";
 
 export type StepperStep = {
   id: string;
@@ -53,7 +53,10 @@ export function Stepper({
     <div className={className}>
       <div className="flex flex-col gap-2 sm:hidden">
         <div className="flex items-center gap-2 text-sm">
-          <Icon icon={currentStep?.icon ?? Tick02Icon} className="size-4" />
+          <Icon
+            icon={currentStep?.icon ?? APP_ICONS.confirm}
+            className="size-4"
+          />
           <span className="truncate font-semibold">
             {currentStep?.label ?? "All done"}
           </span>
@@ -101,7 +104,9 @@ export function Stepper({
                   className="group/step flex items-center gap-2 rounded-lg p-1 pr-2 enabled:cursor-pointer enabled:hover:bg-muted"
                 >
                   <IconChip
-                    icon={state === StepState.Done ? Tick02Icon : step.icon}
+                    icon={
+                      state === StepState.Done ? APP_ICONS.confirm : step.icon
+                    }
                     className={cn(
                       "transition-all duration-300",
                       STEP_CHIP_CLASS[state],

@@ -3,7 +3,6 @@
 import {
   Camera01Icon,
   CropIcon,
-  Tick02Icon,
   ZoomInAreaIcon,
   ZoomOutAreaIcon,
 } from "@hugeicons/core-free-icons";
@@ -24,6 +23,7 @@ import {
 } from "@/shadcn/ui/dialog";
 import { Slider } from "@/shadcn/ui/slider";
 import { triggerHaptic } from "@/utils/haptics";
+import { APP_ICONS } from "@/utils/icons";
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
@@ -140,7 +140,7 @@ function CropDialog({
             Cancel
           </Button>
           <Button onClick={applyCrop} disabled={isApplying || !croppedArea}>
-            <Icon icon={Tick02Icon} isLoading={isApplying} />
+            <Icon icon={APP_ICONS.confirm} isLoading={isApplying} />
             Use this photo
           </Button>
         </DialogFooter>

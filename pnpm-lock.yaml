@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@animateicons/react':
+        specifier: ^0.9.0
+        version: 0.9.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@faker-js/faker':
         specifier: ^10.6.0
         version: 10.6.0
@@ -162,6 +165,13 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@animateicons/react@0.9.0':
+    resolution: {integrity: sha512-twzB0UpGXreBzq2FnveCti8eO3CofAYF08e7py8sf42cHLo7va9aJ8ZSuaCppyVUpqOClcvbIo/L5xv9SHmp/Q==}
+    engines: {node: '>=18.17.0'}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -3453,6 +3463,11 @@ packages:
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@animateicons/react@0.9.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
 
   '@babel/code-frame@7.29.7':
     dependencies:

@@ -1,6 +1,6 @@
-import { Alert02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/Icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
+import { APP_ICONS } from "@/utils/icons";
 
 // tiny error marker that sits right next to whatever failed, instead of a
 // toast or a paragraph of red text shoving the layout around. it's the inline
@@ -10,7 +10,7 @@ export function ErrorTooltip({ message }: { message: string }) {
   return (
     <Tooltip>
       <TooltipTrigger className="flex items-center text-destructive">
-        <Icon icon={Alert02Icon} className="size-4" />
+        <Icon icon={APP_ICONS.warning} className="size-4" />
       </TooltipTrigger>
       <TooltipContent sideOffset={6} className="max-w-56 text-center">
         {message}
