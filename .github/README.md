@@ -41,7 +41,7 @@ Everything lives on `/showcase`, one card per component, so run `pnpm dev` and p
 - `pnpm dev`
 - `pnpm check`: route types + typescript
 - `pnpm biome` / `pnpm biome:fix`
-- `pnpm verify`: all of the above plus a production build, same thing CI runs on every push
+- `pnpm verify`: all of the above plus a production build
 
 ## Philosophy
 
