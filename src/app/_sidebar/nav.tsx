@@ -3,7 +3,7 @@ import { APP_ICONS } from "@/utils/icons";
 
 // the one place a fork renames the app and edits the sidebar links
 export const APP_INFO = {
-  name: "nextjs-template",
+  name: "Malik Kit",
   description: "starter kit",
 };
 

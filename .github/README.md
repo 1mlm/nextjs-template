@@ -1,4 +1,4 @@
-# nextjs-template
+# malik-kit
 
 - [`Next.js`](https://nextjs.org/) 16 with Turbopack
 - [`TypeScript`](https://www.typescriptlang.org/) 5

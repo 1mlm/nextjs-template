@@ -62,7 +62,7 @@ export const DEVICE_ITEMS: ShowcaseItem[] = [
       "opens the system share sheet where the browser has one, copies the link everywhere else",
     Demo: () => (
       <ShareButton
-        title="nextjs-template"
+        title="Malik Kit"
         text="a component kit with playful bits"
         url="https://github.com/1mlm/nextjs-template"
       />

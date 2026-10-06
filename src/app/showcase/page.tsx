@@ -16,7 +16,7 @@ export default function Page() {
     <Suspense>
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10">
         <header className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold">nextjs-template</h1>
+          <h1 className="text-2xl font-semibold">Malik Kit</h1>
           <p className="text-sm text-muted-foreground">
             every component and util in this template, poke at them
           </p>
