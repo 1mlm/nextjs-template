@@ -26,9 +26,6 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/showcase",
     scope: "/",
     display: "standalone",
-    // opening the app again (icon, shortcut, a link) reuses the window
-    // that's already open instead of stacking a second one
-    launch_handler: { client_mode: ["navigate-existing", "auto"] },
     background_color: "#0a0a0a",
     theme_color: "#0a0a0a",
     icons: [

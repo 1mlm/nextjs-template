@@ -4,12 +4,16 @@ import {
   ArrowUpDownIcon,
   CrownIcon,
   GithubIcon,
+  SmartPhone01Icon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { InstallSteps } from "@/components/device/InstallSteps";
+import { useInstallPrompt } from "@/components/device/useInstallPrompt";
 import { Icon } from "@/components/Icon";
 import { Kbd } from "@/components/Kbd";
+import { ResponsivePopover } from "@/components/ResponsivePopover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
 import { UserAvatar } from "@/components/UserAvatar";
 import { Badge } from "@/shadcn/ui/badge";
@@ -124,6 +128,41 @@ function SearchRow() {
         <Kbd keys={["mod", "k"]} />
       </TooltipContent>
     </Tooltip>
+  );
+}
+
+// chrome's install prompt in one click, or on mac safari a popover with the
+// add to dock steps. renders nothing once installed or when neither applies
+function InstallRow() {
+  const { install, manualInstallPlatform } = useInstallPrompt();
+  if (!install && !manualInstallPlatform) return null;
+
+  const row = (
+    <button
+      type="button"
+      onClick={install}
+      className={cn(
+        NAV_ROW_CLASS,
+        "w-full font-medium text-sidebar-foreground/70",
+      )}
+    >
+      <Icon icon={SmartPhone01Icon} className="size-4 shrink-0" />
+      <span className={FADE_ON_COLLAPSE}>Install the app</span>
+    </button>
+  );
+
+  if (!manualInstallPlatform) return row;
+  return (
+    <ResponsivePopover
+      trigger={row}
+      title="Install the app"
+      icon={SmartPhone01Icon}
+      side="right"
+      align="end"
+      className="w-64"
+    >
+      <InstallSteps platform={manualInstallPlatform} />
+    </ResponsivePopover>
   );
 }
 
@@ -325,6 +364,7 @@ export function AppSidebar() {
         <NavLinks />
       </SidebarContent>
       <SidebarFooter className="p-3">
+        <InstallRow />
         <UserFooter />
       </SidebarFooter>
     </Sidebar>
