@@ -15,6 +15,7 @@ import { AppSidebar } from "./_sidebar/AppSidebar";
 import { MobileTopBar } from "./_sidebar/MobileTopBar";
 import { APP_INFO } from "./_sidebar/nav";
 import { KeyboardInset } from "./KeyboardInset";
+import { ServiceWorkerRegistration } from "./ServiceWorkerRegistration";
 
 const outfit = Outfit();
 
@@ -39,6 +40,13 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: { default: APP_INFO.name, template: `%s · ${APP_INFO.name}` },
   description: APP_INFO.description,
+  // ios reads its home screen title and status bar from these, not the
+  // manifest. default keeps the page below the status bar
+  appleWebApp: {
+    capable: true,
+    title: APP_INFO.name,
+    statusBarStyle: "default",
+  },
 };
 
 export default async function RootLayout({ children }: PropsWithChildren) {
@@ -83,6 +91,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         <Toaster />
         <TapHaptics />
         <KeyboardInset />
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Offline</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --background: light-dark(#ffffff, #0a0a0a);
+        --foreground: light-dark(#0a0a0a, #fafafa);
+        --muted: light-dark(#737373, #a3a3a3);
+        --border: light-dark(#e5e5e5, #ffffff1a);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        text-align: center;
+      }
+      main { display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 320px; }
+      img { width: 72px; height: 72px; margin-bottom: 8px; filter: grayscale(0.4); animation: float 3s ease-in-out infinite; }
+      h1 { margin: 0; font-size: 20px; font-weight: 600; }
+      p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+      button {
+        margin-top: 12px;
+        padding: 10px 20px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--foreground);
+        color: var(--background);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      button:active { scale: 0.97; }
+      @keyframes float { 50% { translate: 0 -6px; } }
+      @media (prefers-reduced-motion: reduce) { img { animation: none; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icon.svg" alt="" />
+      <h1>You're offline</h1>
+      <p>This page needs the internet. It reloads by itself as soon as you're back online.</p>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+    <script>
+      addEventListener("online", () => location.reload());
+    </script>
+  </body>
+</html>

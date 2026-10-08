@@ -12,3 +12,23 @@ export function drawAppIcon(size: number) {
     />
   );
 }
+
+// the sparkles on a solid square, for the places that won't take a
+// transparent icon: ios paints transparency black and android crops
+// maskable icons into its own shape, so logoScale keeps them in the safe zone
+export function drawPaddedAppIcon(size: number, logoScale: number) {
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#0a0a0a",
+      }}
+    >
+      {drawAppIcon(size * logoScale)}
+    </div>
+  );
+}
