@@ -1,11 +1,21 @@
 "use client";
 
+import {
+  AppleIcon,
+  Globe02Icon,
+  SmartPhone01Icon,
+  Tablet01Icon,
+} from "@hugeicons/core-free-icons";
+import { useState } from "react";
 import { EyeDropperButton } from "@/components/device/EyeDropperButton";
 import { FocusTimer } from "@/components/device/FocusTimer";
+import { InstallSteps } from "@/components/device/InstallSteps";
 import { PianoKeys } from "@/components/device/PianoKeys";
 import { ShareButton } from "@/components/device/ShareButton";
 import { TiltCard } from "@/components/device/TiltCard";
+import type { ManualInstallPlatform } from "@/components/device/useInstallPrompt";
 import { EmojiAnimation, FluentEmoji } from "@/components/FluentEmoji";
+import { type SlidingTab, SlidingTabs } from "@/components/SlidingTabs";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
 function TiltCardDemo() {
@@ -23,6 +33,27 @@ function TiltCardDemo() {
         </span>
       </div>
     </TiltCard>
+  );
+}
+
+const PLATFORM_TABS: SlidingTab<ManualInstallPlatform>[] = [
+  { value: "iphone", label: "iPhone", icon: SmartPhone01Icon },
+  { value: "ipad", label: "iPad", icon: Tablet01Icon },
+  { value: "iosBrowser", label: "Other", icon: Globe02Icon },
+  { value: "mac", label: "Mac", icon: AppleIcon },
+];
+
+function InstallStepsDemo() {
+  const [platform, setPlatform] = useState<ManualInstallPlatform>("iphone");
+  return (
+    <div className="flex flex-col gap-4">
+      <SlidingTabs
+        tabs={PLATFORM_TABS}
+        value={platform}
+        onValueChange={setPlatform}
+      />
+      <InstallSteps {...{ platform }} />
+    </div>
   );
 }
 
@@ -54,6 +85,14 @@ export const DEVICE_ITEMS: ShowcaseItem[] = [
     description:
       "the native eyedropper: pick any color on your screen, even outside the browser. chrome and edge only, other browsers get a disabled button that says why",
     Demo: () => <EyeDropperButton />,
+  },
+  {
+    name: "InstallSteps",
+    path: "src/components/device/InstallSteps.tsx",
+    wide: true,
+    description:
+      "safari has no install prompt, so the menu's install row unfolds these on iphone, ipad, other ios browsers and mac safari (useInstallPrompt picks which, and hides it once running as the installed app). chrome and edge get their real install popup instead",
+    Demo: InstallStepsDemo,
   },
   {
     name: "ShareButton",

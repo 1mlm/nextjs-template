@@ -7,6 +7,8 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { InstallSteps } from "@/components/device/InstallSteps";
+import { useInstallPrompt } from "@/components/device/useInstallPrompt";
 import { Icon } from "@/components/Icon";
 import { IconChip } from "@/components/IconChip";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
@@ -36,49 +38,14 @@ import {
 const HEADER_BUTTON_CLASS =
   "grid size-7 place-items-center rounded-full text-sidebar-foreground/60 ring-1 ring-sidebar-border transition-colors hover:text-sidebar-foreground active:scale-95";
 
-// chrome's "add to home screen" prompt, which it only offers once the
-// manifest checks out. safari never fires it, the button just never shows
-type InstallPromptEvent = Event & { prompt: () => Promise<void> };
-
-const isInstallPromptEvent = (event: Event): event is InstallPromptEvent =>
-  "prompt" in event;
-
-function useInstallPrompt() {
-  const [installEvent, setInstallEvent] = useState<InstallPromptEvent>();
-
-  useEffect(() => {
-    const keepPrompt = (event: Event) => {
-      if (!isInstallPromptEvent(event)) return;
-      event.preventDefault();
-      setInstallEvent(event);
-    };
-    const forgetPrompt = () => setInstallEvent(undefined);
-    window.addEventListener("beforeinstallprompt", keepPrompt);
-    window.addEventListener("appinstalled", forgetPrompt);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", keepPrompt);
-      window.removeEventListener("appinstalled", forgetPrompt);
-    };
-  }, []);
-
-  // chrome only lets one event prompt once, so the row goes away after
-  const install = installEvent
-    ? async () => {
-        await installEvent.prompt();
-        setInstallEvent(undefined);
-      }
-    : undefined;
-
-  return install;
-}
-
 // a vaul drawer (drag it down to close, like ios sheets) that's itself
 // transparent, the visible part is a card inset from the screen edges so it
 // floats instead of being glued to the bottom
 export function MenuSheet({ tabClassName }: { tabClassName: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const install = useInstallPrompt();
+  const { install, manualInstallPlatform } = useInstallPrompt();
+  const [showInstallSteps, setShowInstallSteps] = useState(false);
   const openCommandPalette = useOpenCommandPalette();
 
   const openSearch = () => {
@@ -172,23 +139,30 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
             ))}
           </nav>
 
-          {install && (
-            <button
-              type="button"
-              onClick={install}
-              className="flex items-center gap-2.5 rounded-lg bg-sidebar-accent p-2.5 text-left transition-colors active:scale-[0.98]"
-            >
-              <IconChip
-                icon={SmartPhone01Icon}
-                className="bg-sidebar-foreground text-sidebar"
-              />
-              <span className="leading-tight">
-                <p className="text-sm font-semibold">Install the app</p>
-                <p className="text-xs text-sidebar-foreground/60">
-                  opens from your home screen, no browser bars
-                </p>
-              </span>
-            </button>
+          {(install || manualInstallPlatform) && (
+            <div className="flex flex-col gap-3 rounded-lg bg-sidebar-accent p-2.5">
+              <button
+                type="button"
+                onClick={
+                  install ?? (() => setShowInstallSteps(!showInstallSteps))
+                }
+                className="flex items-center gap-2.5 text-left transition-transform active:scale-[0.98]"
+              >
+                <IconChip
+                  icon={SmartPhone01Icon}
+                  className="bg-sidebar-foreground text-sidebar"
+                />
+                <span className="leading-tight">
+                  <p className="text-sm font-semibold">Install the app</p>
+                  <p className="text-xs text-sidebar-foreground/60">
+                    opens from your home screen, no browser bars
+                  </p>
+                </span>
+              </button>
+              {showInstallSteps && manualInstallPlatform && (
+                <InstallSteps platform={manualInstallPlatform} />
+              )}
+            </div>
           )}
           <div className="flex items-center gap-2.5 rounded-lg p-2.5 ring-1 ring-sidebar-border">
             <UserAvatar name={DEMO_USER.name} src={DEMO_USER.avatarUrl} />
