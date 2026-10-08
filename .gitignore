@@ -38,3 +38,6 @@ next-env.d.ts
 
 # playwright mcp screenshots/snapshots
 .playwright-mcp
+
+# stray screenshots dropped in the repo root
+/*.png

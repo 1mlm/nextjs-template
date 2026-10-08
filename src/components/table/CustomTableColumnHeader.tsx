@@ -722,6 +722,19 @@ export function CustomTableColumnHeader<T>({
             </DropdownMenuPortal>
           </DropdownMenuSub>
         )}
+        {(hasActiveFilter || sort) && <DropdownMenuSeparator />}
+        {hasActiveFilter && (
+          <DropdownMenuItem onClick={clearFilter}>
+            <Icon icon={APP_ICONS.close} />
+            Clear filter
+          </DropdownMenuItem>
+        )}
+        {sort && (
+          <DropdownMenuItem onClick={() => onSortChange(null)}>
+            <Icon icon={APP_ICONS.close} />
+            Clear sort
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
