@@ -10,12 +10,12 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { Icon } from "@/components/Icon";
 import { ResponsivePopover } from "@/components/ResponsivePopover";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { Button } from "@/shadcn/ui/button";
 import { Calendar } from "@/shadcn/ui/calendar";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { APP_ICONS } from "@/utils/icons";
+import { useIsMobile } from "@/utils/useIsMobile";
 
 // bigger cells in the phone sheet, thumbs aren't cursors
 const CALENDAR_CLASS =

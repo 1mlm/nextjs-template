@@ -26,6 +26,7 @@ import {
 } from "@/components/table/columns";
 import { DeleteRowMenuItem } from "@/components/table/DeleteRowMenuItem";
 import { SortDirection } from "@/components/table/filtering";
+import type { RowCardContent } from "@/components/table/RowCard";
 import { CopyMenuItem, RowMenu } from "@/components/table/RowMenu";
 import { useJustCreatedIds } from "@/components/table/useJustCreatedIds";
 import { useOptimisticRowRemoval } from "@/components/table/useOptimisticRowRemoval";
@@ -58,6 +59,17 @@ const getSpareRow = (spareRows: Row[], createdCount: number) => {
     }
   );
 };
+
+const getRowCard = (row: Row): RowCardContent => ({
+  avatar: { name: row.name, src: row.avatarUrl },
+  title: row.name,
+  subtitle: row.email,
+  badges: row.status ? [statusOptions[row.status]] : [],
+  details: [
+    { label: "Team", icon: UserGroupIcon, text: row.team },
+    { label: "Credits", icon: Coins01Icon, text: row.credits },
+  ],
+});
 
 const toLabelTag = (label: string): CustomTableEnumValue => ({
   label,
@@ -165,6 +177,7 @@ const columns: CustomTableColumn<Row>[] = [
     icon: APP_ICONS.calendar,
     type: ColumnType.Date,
     getDate: (row) => row.joinedAt,
+    showExact: true,
   },
   {
     id: "url",
@@ -302,6 +315,7 @@ export function TableDemo({
         onVisibleCountChange={setResultCount}
         defaultSort={DEFAULT_SORT}
         pinnedItemIds={justCreatedIds}
+        getCard={getRowCard}
         selectionActions={(rows) => <CopyEmailsButton {...{ rows }} />}
         getRowMenuItems={(row) => (
           <ContextMenuItem asChild>

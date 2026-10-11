@@ -3,7 +3,6 @@
 import type { IconSvgElement } from "@hugeicons/react";
 import type { ComponentProps, ReactNode, RefObject } from "react";
 import { IconChip } from "@/components/IconChip";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import {
   Popover,
   PopoverAnchor,
@@ -17,6 +16,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/shadcn/ui/sheet";
+import { useIsMobile } from "@/utils/useIsMobile";
 
 type PopoverContentProps = ComponentProps<typeof PopoverContent>;
 
@@ -88,6 +88,11 @@ export function ResponsivePopover({
       <PopoverContent
         {...{ side, align, sideOffset, className }}
         aria-label={title}
+        // a dialog locks scrolling everywhere outside itself and this popover
+        // portals outside it, so wheel and touch stop here instead of dying
+        // in that lock when it opens from inside a dialog
+        onWheel={(event) => event.stopPropagation()}
+        onTouchMove={(event) => event.stopPropagation()}
       >
         {children}
       </PopoverContent>

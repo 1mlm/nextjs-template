@@ -7,6 +7,7 @@ import {
   SortingNineOneIcon,
   SortingOneNineIcon,
   SortingZA01Icon,
+  ViewOffIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
@@ -22,7 +23,6 @@ import {
 import { type KeyboardEvent, type ReactNode, useId } from "react";
 import { Icon } from "@/components/Icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
-import { useIsMobile } from "@/shadcn/hooks/use-mobile";
 import { Button } from "@/shadcn/ui/button";
 import { Calendar } from "@/shadcn/ui/calendar";
 import { Checkbox } from "@/shadcn/ui/checkbox";
@@ -50,6 +50,7 @@ import { cn } from "@/shadcn/utils";
 import { toggleListItem } from "@/utils/array";
 import { triggerHaptic } from "@/utils/haptics";
 import { APP_ICONS } from "@/utils/icons";
+import { useIsMobile } from "@/utils/useIsMobile";
 import { EnumBadge } from "./CustomTableCell";
 import {
   ColumnType,
@@ -480,9 +481,10 @@ function SortSubmenuContent({
   );
 }
 
-// a faint ghost-button fill so it reads as clickable before you ever hover it
+// no fill until hover, so a row of headers reads as one even bar instead of a
+// row of pills
 const HEADER_TRIGGER_CLASS =
-  "flex w-full justify-center rounded-md bg-foreground/4 px-3 py-1.5 text-foreground/70 transition-colors hover:bg-foreground/8 hover:text-foreground aria-expanded:bg-foreground/10 aria-expanded:text-foreground active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
+  "flex w-full justify-center rounded-md px-3 py-1.5 text-foreground/70 transition-colors hover:bg-foreground/8 hover:text-foreground aria-expanded:bg-foreground/10 aria-expanded:text-foreground active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring/50";
 
 // radix menus eat arrow keys (left closes the submenu) and letters (typeahead
 // jumps focus to an item) even while you're typing in a filter input
@@ -529,6 +531,7 @@ export function CustomTableColumnHeader<T>({
   setField,
   sort,
   onSortChange,
+  onHide,
 }: {
   column: CustomTableColumn<T>;
   items: T[];
@@ -538,6 +541,8 @@ export function CustomTableColumnHeader<T>({
   setField: SetFilterField;
   sort: SortDirection | null;
   onSortChange: (dir: SortDirection | null) => void;
+  // present when this column may be hidden right now, e.g. never the last visible one
+  onHide?: () => void;
 }) {
   const isMobile = useIsMobile();
   const columnEligible = isColumnFilterableOrSortable(column);
@@ -578,7 +583,7 @@ export function CustomTableColumnHeader<T>({
     </span>
   );
 
-  if (!canFilter && !canSort)
+  if (!canFilter && !canSort && !onHide)
     return (
       <span className="flex justify-center px-3 py-1.5 text-foreground/70">
         {label}
@@ -680,6 +685,12 @@ export function CustomTableColumnHeader<T>({
               {filterContent}
             </section>
           )}
+          {onHide && (
+            <Button variant="outline" onClick={onHide}>
+              <Icon icon={ViewOffIcon} />
+              Hide column
+            </Button>
+          )}
         </SheetContent>
       </Sheet>
     );
@@ -722,7 +733,7 @@ export function CustomTableColumnHeader<T>({
             </DropdownMenuPortal>
           </DropdownMenuSub>
         )}
-        {(hasActiveFilter || sort) && <DropdownMenuSeparator />}
+        {(hasActiveFilter || sort || onHide) && <DropdownMenuSeparator />}
         {hasActiveFilter && (
           <DropdownMenuItem onClick={clearFilter}>
             <Icon icon={APP_ICONS.close} />
@@ -733,6 +744,12 @@ export function CustomTableColumnHeader<T>({
           <DropdownMenuItem onClick={() => onSortChange(null)}>
             <Icon icon={APP_ICONS.close} />
             Clear sort
+          </DropdownMenuItem>
+        )}
+        {onHide && (
+          <DropdownMenuItem onSelect={onHide}>
+            <Icon icon={ViewOffIcon} />
+            Hide column
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

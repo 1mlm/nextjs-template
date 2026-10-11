@@ -40,6 +40,9 @@ export type CustomTableColumn<T> = {
   // header shows just the icon and the label moves into a tooltip, for skinny
   // columns (a picture, a menu button) where the word would be wider than the content
   iconOnly?: boolean;
+  // false keeps it out of the "Hide column" menu. buttons columns are never
+  // hidable: hiding the only way to reach a row's actions would strand them
+  hideable?: boolean;
   // tints the cell red, e.g. an editable cell holding an invalid value
   getCellError?: (item: T) => boolean;
 } & (
@@ -75,7 +78,12 @@ export type CustomTableColumn<T> = {
       searchable?: boolean;
       getString: (item: T) => string;
     }
-  | { type: ColumnType.Date; getDate: (item: T) => Date | undefined }
+  | {
+      type: ColumnType.Date;
+      getDate: (item: T) => Date | undefined;
+      // short exact date under the relative one, for when "3 days ago" alone isn't enough to place it
+      showExact?: boolean;
+    }
   | {
       type: ColumnType.Boolean;
       getBoolean: (item: T) => boolean;

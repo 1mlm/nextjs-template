@@ -26,9 +26,12 @@ import { useSidebar } from "@/shadcn/ui/sidebar";
 import { copyToClipboard } from "@/utils/clipboard";
 import { triggerHaptic } from "@/utils/haptics";
 import { APP_ICONS } from "@/utils/icons";
+import { safeLocalStorage } from "@/utils/storage";
 import { NAV_ITEMS } from "../_sidebar/nav";
 
 const OPEN_SHORTCUT_KEY = "k";
+const RECENT_STORAGE_KEY = "kit.recentCommands";
+const RECENT_COUNT = 4;
 
 type PaletteCommand = {
   id: string;
@@ -74,6 +77,14 @@ function matchesEveryWord(value: string, search: string, keywords?: string[]) {
   return words.every((word) => searchableText.includes(word)) ? 1 : 0;
 }
 
+function readRecentIds(): string[] {
+  try {
+    return JSON.parse(safeLocalStorage.getItem(RECENT_STORAGE_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
 function NoMatchTitle() {
   const search = useCommandState((state) => state.search);
   return (
@@ -94,6 +105,8 @@ const FOOTER_HINTS = [
 export function CommandPaletteProvider({ children }: PropsWithChildren) {
   const [open, setOpen] = useState(false);
   const [showcaseEntries, setShowcaseEntries] = useState<ShowcaseEntry[]>([]);
+  const [search, setSearch] = useState("");
+  const [recentIds, setRecentIds] = useState<string[]>([]);
   const router = useRouter();
   const pathname = usePathname();
   const { toggleSidebar, isMobile } = useSidebar();
@@ -111,12 +124,23 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
   }, []);
 
   useEffect(() => {
+    if (!open) return;
+    setSearch("");
+    setRecentIds(readRecentIds());
+  }, [open]);
+
+  useEffect(() => {
     if (!open || showcaseEntries.length > 0) return;
     loadShowcaseEntries().then(setShowcaseEntries);
   }, [open, showcaseEntries.length]);
 
-  const runAndClose = (run: () => void) => {
+  const runAndClose = ({ id, run }: PaletteCommand) => {
     triggerHaptic("selection");
+    const nextRecentIds = [id, ...readRecentIds().filter((x) => x !== id)];
+    safeLocalStorage.setItem(
+      RECENT_STORAGE_KEY,
+      JSON.stringify(nextRecentIds.slice(0, RECENT_COUNT)),
+    );
     setOpen(false);
     run();
   };
@@ -175,11 +199,20 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
     }),
   );
 
-  const commandGroups = [
+  const hasSearch = search.trim().length > 0;
+  const allCommands = [...pageCommands, ...actionCommands, ...showcaseCommands];
+  const recentCommands = recentIds.flatMap((id) =>
+    allCommands.filter((command) => command.id === id),
+  );
+  // the showcase is a long list, so it only shows once you type, a short menu
+  // is more useful when the palette opens
+  const allGroups = [
+    ...(hasSearch ? [] : [{ heading: "Recent", commands: recentCommands }]),
     { heading: "Pages", commands: pageCommands },
     { heading: "Actions", commands: actionCommands },
-    { heading: "Showcase", commands: showcaseCommands },
+    ...(hasSearch ? [{ heading: "Showcase", commands: showcaseCommands }] : []),
   ];
+  const commandGroups = allGroups.filter(({ commands }) => commands.length > 0);
 
   return (
     <CommandPaletteContext.Provider value={() => setOpen(true)}>
@@ -193,7 +226,11 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
       >
         {/* CommandDialog doesn't bring its own cmdk root, the items need one */}
         <Command className="bg-transparent" filter={matchesEveryWord}>
-          <CommandInput placeholder="Search pages, actions, components..." />
+          <CommandInput
+            placeholder="Search pages, actions, components..."
+            value={search}
+            onValueChange={setSearch}
+          />
           <CommandList className="max-h-[min(24rem,60dvh)]">
             <CommandEmpty className="flex flex-col items-center gap-1 py-8">
               <Icon
@@ -207,28 +244,31 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
             </CommandEmpty>
             {commandGroups.map(({ heading, commands }) => (
               <CommandGroup key={heading} {...{ heading }}>
-                {commands.map(({ id, label, icon, hint, shortcut, run }) => (
-                  <CommandItem
-                    key={id}
-                    value={`${heading} ${label}`}
-                    keywords={hint ? [hint] : undefined}
-                    onSelect={() => runAndClose(run)}
-                    className="cursor-pointer rounded-lg"
-                  >
-                    <Icon {...{ icon }} className="text-muted-foreground" />
-                    <span className="flex-1 truncate">{label}</span>
-                    {hint && (
-                      <span className="truncate text-xs text-muted-foreground">
-                        {hint}
-                      </span>
-                    )}
-                    {shortcut && (
-                      <CommandShortcut>
-                        <Kbd keys={shortcut} />
-                      </CommandShortcut>
-                    )}
-                  </CommandItem>
-                ))}
+                {commands.map((command) => {
+                  const { id, label, icon, hint, shortcut } = command;
+                  return (
+                    <CommandItem
+                      key={id}
+                      value={`${heading} ${label}`}
+                      keywords={hint ? [hint] : undefined}
+                      onSelect={() => runAndClose(command)}
+                      className="cursor-pointer rounded-lg"
+                    >
+                      <Icon {...{ icon }} className="text-muted-foreground" />
+                      <span className="flex-1 truncate">{label}</span>
+                      {hint && (
+                        <span className="truncate text-xs text-muted-foreground">
+                          {hint}
+                        </span>
+                      )}
+                      {shortcut && (
+                        <CommandShortcut>
+                          <Kbd keys={shortcut} />
+                        </CommandShortcut>
+                      )}
+                    </CommandItem>
+                  );
+                })}
               </CommandGroup>
             ))}
           </CommandList>

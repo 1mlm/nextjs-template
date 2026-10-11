@@ -51,6 +51,16 @@ export function formatExactDate(date: Date | string | number): string {
   return `${month} ${day}${getOrdinalSuffix(day)}, ${year} ${time} ${offset}`;
 }
 
+// "Aug 12, 2:00 PM", enough to place something in the calendar without the full exact line
+export function formatShortDate(date: Date | string | number): string {
+  const target = new Date(date);
+  const day = target.toLocaleDateString("en", {
+    month: "short",
+    day: "numeric",
+  });
+  return `${day}, ${dateToTimeString(target)}`;
+}
+
 // "in 2 days" for future, "2 days ago" for past
 const formatRelativeLabel = (n: number, unit: string, future: boolean) => {
   const label = `${n} ${unit}${n > 1 ? "s" : ""}`;

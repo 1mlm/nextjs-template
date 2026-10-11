@@ -1,6 +1,20 @@
 "use client";
 
 import {
+  Award01Icon,
+  BalloonsIcon,
+  Basketball01Icon,
+  BikeIcon,
+  BookOpen01Icon,
+  Brain01Icon,
+  BulbIcon,
+  CakeIcon,
+  Camera01Icon,
+  CampfireIcon,
+  Chess01Icon,
+  Coffee01Icon,
+  CrownIcon,
+  Dumbbell01Icon,
   FileAttachmentIcon,
   Location01Icon,
   Money03Icon,
@@ -24,6 +38,7 @@ import { EditableText } from "@/components/EditableText";
 import { FieldLabel } from "@/components/FieldLabel";
 import { FileDropZone } from "@/components/FileDropZone";
 import { Icon } from "@/components/Icon";
+import { type IconGroup, IconPicker } from "@/components/IconPicker";
 import { NumberTextInput } from "@/components/NumberTextInput";
 import { SearchBar } from "@/components/SearchBar";
 import { SuggestionInput } from "@/components/SuggestionInput";
@@ -242,6 +257,45 @@ function SegmentedPickerDemo() {
   );
 }
 
+const DEMO_ICONS = {
+  balloons: BalloonsIcon,
+  cake: CakeIcon,
+  camera: Camera01Icon,
+  coffee: Coffee01Icon,
+  award: Award01Icon,
+  crown: CrownIcon,
+  basketball: Basketball01Icon,
+  bike: BikeIcon,
+  chess: Chess01Icon,
+  dumbbell: Dumbbell01Icon,
+  book: BookOpen01Icon,
+  brain: Brain01Icon,
+  bulb: BulbIcon,
+  campfire: CampfireIcon,
+};
+
+const DEMO_ICON_GROUPS: IconGroup[] = [
+  { label: "Celebrations", ids: ["balloons", "cake", "camera", "coffee"] },
+  { label: "Awards", ids: ["award", "crown"] },
+  {
+    label: "Games and sport",
+    ids: ["basketball", "bike", "chess", "dumbbell"],
+  },
+  { label: "Learning", ids: ["book", "brain", "bulb", "campfire"] },
+];
+
+function IconPickerDemo() {
+  const [iconId, setIconId] = useState("balloons");
+  return (
+    <IconPicker
+      value={iconId}
+      onChange={setIconId}
+      icons={DEMO_ICONS}
+      groups={DEMO_ICON_GROUPS}
+    />
+  );
+}
+
 function DatePickerDemo() {
   const [date, setDate] = useState<Date>();
   return <DatePicker value={date} onChange={setDate} />;
@@ -446,6 +500,13 @@ export const INPUT_ITEMS: ShowcaseItem[] = [
     description:
       "colored radio group using the same shape as table enum badges",
     Demo: SegmentedPickerDemo,
+  },
+  {
+    name: "IconPicker",
+    path: "src/components/IconPicker.tsx",
+    description:
+      "searchable icon grid behind one button, split under headings with groups, a sheet on phones",
+    Demo: IconPickerDemo,
   },
   {
     name: "DatePicker",

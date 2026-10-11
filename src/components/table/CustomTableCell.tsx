@@ -12,7 +12,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/ui/popover";
 import { cn } from "@/shadcn/utils";
 import { useCopyToClipboard } from "@/utils/clipboard";
 import { getColorStyle } from "@/utils/color";
+import { formatShortDate } from "@/utils/date";
 import { APP_ICONS } from "@/utils/icons";
+import { useNow } from "@/utils/useNow";
 import { useResizeObserver } from "@/utils/useResizeObserver";
 import { CornerCountBadge } from "./CornerCountBadge";
 import { CustomTableEmptyValue } from "./CustomTableEmptyValue";
@@ -59,10 +61,30 @@ function CopyButton({ value }: { value: string }) {
   );
 }
 
-export function DateCell({ date }: { date: Date | undefined }) {
+export function DateCell({
+  date,
+  showExact,
+}: {
+  date: Date | undefined;
+  showExact?: boolean;
+}) {
+  const nowMs = useNow();
   if (!date) return <CustomTableEmptyValue />;
 
-  return <RelativeTime {...{ date }} className="font-normal italic" />;
+  const relative = (
+    <RelativeTime {...{ date }} className="font-normal italic" />
+  );
+  if (!showExact) return relative;
+
+  return (
+    <span className="flex flex-col items-start leading-tight">
+      {relative}
+      {/* needs the browser's timezone, so like RelativeTime it waits for the client */}
+      <span className="min-h-[1em] text-[0.7rem] text-muted-foreground">
+        {nowMs !== null && formatShortDate(date)}
+      </span>
+    </span>
+  );
 }
 
 // keeps the start and a fixed-length tail visible, ellipsizing only the middle
@@ -216,7 +238,9 @@ export function CustomTableCell<T>({
   if (column.type === ColumnType.Copy)
     return <CopyButton value={column.getString(item)} />;
   if (column.type === ColumnType.Date)
-    return <DateCell date={column.getDate(item)} />;
+    return (
+      <DateCell date={column.getDate(item)} showExact={column.showExact} />
+    );
   if (column.type === ColumnType.Buttons) return <>{column.getButtons(item)}</>;
   if (column.type === ColumnType.Boolean)
     return column.getBoolean(item) ? (
