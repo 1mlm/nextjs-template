@@ -1,4 +1,5 @@
 allowBuilds:
+  '@ybouane/liquidglass': false
   sharp: true
 minimumReleaseAgeExclude:
   - '@animateicons/react@0.9.0'

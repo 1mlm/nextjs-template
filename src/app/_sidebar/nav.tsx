@@ -33,6 +33,7 @@ const NAV_LINKS: {
   { href: "/chat", label: "Chat", concept: "chat" },
   { href: "/table", label: "Table", concept: "table" },
   { href: "/blocks", label: "Blocks", concept: "blocks" },
+  { href: "/liquid-glass", label: "Liquid Glass", concept: "liquidGlass" },
 ];
 
 // a link only names its icon concept, both the static icon (palette, sheet)

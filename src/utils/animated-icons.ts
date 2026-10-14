@@ -1,6 +1,7 @@
 import { Cursor01Icon } from "@animateicons/react/huge/cursor-0-1-icon";
 import { Layers01Icon } from "@animateicons/react/huge/layers-0-1-icon";
 import { Message01Icon } from "@animateicons/react/huge/message-0-1-icon";
+import { SparklesIcon } from "@animateicons/react/huge/sparkles-icon";
 import { TableIcon } from "@animateicons/react/huge/table-icon";
 import type { APP_ICONS } from "./icons";
 
@@ -13,4 +14,5 @@ export const ANIMATED_APP_ICONS = {
   table: TableIcon,
   blocks: Layers01Icon,
   chat: Message01Icon,
+  liquidGlass: SparklesIcon,
 } satisfies Partial<Record<keyof typeof APP_ICONS, unknown>>;
