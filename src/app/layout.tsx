@@ -12,7 +12,7 @@ import { TapHaptics } from "@/utils/haptics";
 import { CommandPaletteProvider } from "./_command/CommandPalette";
 import { Maintenance } from "./_maintenance/Maintenance";
 import { AppSidebar } from "./_sidebar/AppSidebar";
-import { MobileTopBar } from "./_sidebar/MobileTopBar";
+import { MobileTabBar } from "./_sidebar/MobileTabBar";
 import { APP_INFO } from "./_sidebar/nav";
 import { KeyboardInset } from "./KeyboardInset";
 import { ServiceWorkerRegistration } from "./ServiceWorkerRegistration";
@@ -76,8 +76,8 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             <SidebarProvider defaultOpen={isSidebarOpen} style={SIDEBAR_SIZES}>
               <CommandPaletteProvider>
                 <AppSidebar />
-                <SidebarInset className="min-w-0 bg-muted md:ring-1 md:ring-border md:peer-data-[variant=inset]:shadow-lg">
-                  <MobileTopBar />
+                <SidebarInset className="min-w-0 bg-muted max-md:pb-20 md:ring-1 md:ring-border md:peer-data-[variant=inset]:shadow-lg">
+                  <MobileTabBar />
                   {children}
                 </SidebarInset>
               </CommandPaletteProvider>

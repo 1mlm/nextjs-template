@@ -108,10 +108,10 @@ function SidebarDemo() {
 
 export const DATA_ITEMS: ShowcaseItem[] = [
   {
-    name: "AppSidebar + MobileTopBar",
+    name: "AppSidebar + MobileTabBar",
     path: "src/app/_sidebar/",
     description:
-      "the shell around this page. collapses to icons (remembered in a cookie), phones get a top bar with a bottom sheet menu. links live in nav.tsx",
+      "the shell around this page. collapses to icons (remembered in a cookie), phones get a bottom tab bar with a sheet menu. links live in nav.tsx",
     Demo: SidebarDemo,
   },
   {

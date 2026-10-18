@@ -45,9 +45,9 @@ function useIsHiddenWhileScrollingDown() {
   return isHidden;
 }
 
-// phones get a tab bar at the top instead of the sidebar, "More" opens the
+// phones get a tab bar at the bottom instead of the sidebar, "More" opens the
 // full menu sheet (every page, profile, log out)
-export function MobileTopBar() {
+export function MobileTabBar() {
   const pathname = usePathname();
   const tabItems = getTabItems();
   const isHidden = useIsHiddenWhileScrollingDown();
@@ -55,8 +55,8 @@ export function MobileTopBar() {
   return (
     <nav
       className={cn(
-        "sticky top-2 z-20 m-2 flex rounded-2xl bg-sidebar/90 px-1 text-sidebar-foreground ring-1 ring-sidebar-border backdrop-blur-sm transition-transform duration-300 ease-out focus-within:translate-y-0 motion-reduce:transition-none md:hidden",
-        isHidden && "-translate-y-[calc(100%+1rem)]",
+        "fixed inset-x-2 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-20 flex rounded-2xl bg-sidebar/90 px-1 text-sidebar-foreground ring-1 ring-sidebar-border backdrop-blur-sm transition-transform duration-300 ease-out focus-within:translate-y-0 motion-reduce:transition-none md:hidden",
+        isHidden && "translate-y-[calc(100%+1.5rem)]",
       )}
     >
       {tabItems.map(({ href, label, icon, animatedIcon, badge }) => (
