@@ -93,7 +93,14 @@ export function ActivityHeatmap({
       style={{ "--cell": "0.75rem" } as React.CSSProperties}
       className={cn("flex flex-col gap-2", className)}
     >
-      <div ref={scrollRef} className="overflow-x-auto pt-8 pb-1">
+      <section
+        ref={scrollRef}
+        // a scrolling box has to be focusable or a keyboard can't scroll it
+        // biome-ignore lint/a11y/noNoninteractiveTabindex: scrollable region
+        tabIndex={0}
+        aria-label="Activity calendar"
+        className="overflow-x-auto pt-8 pb-1 outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      >
         <div
           role="img"
           aria-label={`${total} in the last ${weeks} weeks`}
@@ -126,7 +133,7 @@ export function ActivityHeatmap({
             </span>
           )}
         </div>
-      </div>
+      </section>
       <div className="flex items-center justify-end gap-1.5">
         {LEVEL_STRENGTH.map((strength, level) => (
           <span

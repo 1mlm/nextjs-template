@@ -70,6 +70,7 @@ export function OtpInput({
         maxLength={length}
         pattern={REGEXP_ONLY_DIGITS}
         autoComplete="one-time-code"
+        aria-label="Verification code"
         {...{ value, onComplete }}
         onChange={onValueChange}
         aria-invalid={isInvalid}
