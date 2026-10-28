@@ -93,6 +93,7 @@ export function ActionBar<T>({
   onDeleteSelected,
   columns,
   exportFilePrefix,
+  showPagination,
 }: {
   currentPage: number;
   setPage: (page: number) => void;
@@ -106,10 +107,13 @@ export function ActionBar<T>({
   onDeleteSelected?: (items: T[]) => Promise<void>;
   columns: CustomTableColumn<T>[];
   exportFilePrefix: string;
+  // off while the table is cards, the card list has its own pager at its end
+  showPagination: boolean;
 }) {
   const selectedCount = selectedItems.length;
   const hasSelection = selectable && selectedCount > 0;
-  if (!canResetTable && !hasSelection && pageCount <= 1) return null;
+  const hasPagination = showPagination && pageCount > 1;
+  if (!canResetTable && !hasSelection && !hasPagination) return null;
 
   return (
     <div className="fixed inset-x-4 bottom-4 z-30 flex justify-end rounded-full border border-border bg-sidebar px-2 py-2 shadow-[0_0_16px_rgba(0,0,0,0.35)] sm:inset-x-auto sm:right-8 sm:bottom-8 sm:max-w-[calc(100vw-4rem)]">

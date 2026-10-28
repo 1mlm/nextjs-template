@@ -26,6 +26,7 @@ import {
 } from "@/components/table/columns";
 import { DeleteRowMenuItem } from "@/components/table/DeleteRowMenuItem";
 import { SortDirection } from "@/components/table/filtering";
+import type { RowCardContent } from "@/components/table/RowCard";
 import { CopyMenuItem, RowMenu } from "@/components/table/RowMenu";
 import { useJustCreatedIds } from "@/components/table/useJustCreatedIds";
 import { useOptimisticRowRemoval } from "@/components/table/useOptimisticRowRemoval";
@@ -35,7 +36,41 @@ import { ContextMenuItem } from "@/shadcn/ui/context-menu";
 import { Input } from "@/shadcn/ui/input";
 import { useCopyToClipboard } from "@/utils/clipboard";
 import { APP_ICONS } from "@/utils/icons";
+import { runUndoableAction } from "@/utils/undoableAction";
 import { LABEL_COLORS, type Row, statusOptions } from "./data";
+
+// the row as a card on a phone. everything else is in the three dots sheet
+const getCard = (row: Row): RowCardContent => ({
+  avatar: { name: row.name, src: row.avatarUrl },
+  title: row.name,
+  subtitle: row.email,
+  badges: row.status ? [statusOptions[row.status]] : [],
+  details: [
+    { label: "Team", icon: UserGroupIcon, text: row.team },
+    {
+      label: "Credits",
+      icon: Coins01Icon,
+      text: row.credits.toLocaleString("en-US"),
+    },
+  ],
+});
+
+function CopyIdButton({ id, close }: { id: string; close: () => void }) {
+  const { copied, copy } = useCopyToClipboard();
+  return (
+    <Button
+      variant="ghost"
+      className="justify-start"
+      onClick={async () => {
+        await copy(id);
+        setTimeout(close, 600);
+      }}
+    >
+      <Icon icon={copied ? APP_ICONS.confirm : APP_ICONS.copy} />
+      {copied ? "Copied!" : "Copy ID"}
+    </Button>
+  );
+}
 
 const NOTE_MAX_LENGTH = 20;
 
@@ -315,6 +350,35 @@ export function TableDemo({
         defaultSort={DEFAULT_SORT}
         pinnedItemIds={justCreatedIds}
         selectionActions={(rows) => <CopyEmailsButton {...{ rows }} />}
+        {...{ getCard }}
+        getCardActions={(row, close) => (
+          <>
+            <CopyIdButton id={row.id} {...{ close }} />
+            <Button variant="ghost" className="justify-start" asChild>
+              <a href={`mailto:${row.email}`}>
+                <Icon icon={Mail01Icon} />
+                Email {row.name.split(" ")[0]}
+              </a>
+            </Button>
+            <Button
+              variant="ghost"
+              className="justify-start text-destructive hover:text-destructive"
+              onClick={() => {
+                close();
+                markRemoved(row.id);
+                runUndoableAction({
+                  message: `${row.name} deleted`,
+                  onRevert: () => unmarkRemoved(row.id),
+                  // demo only, nothing to persist
+                  commit: async () => ({ error: null }),
+                });
+              }}
+            >
+              <Icon icon={APP_ICONS.remove} />
+              Delete
+            </Button>
+          </>
+        )}
         getRowMenuItems={(row) => (
           <ContextMenuItem asChild>
             <a href={`mailto:${row.email}`}>
