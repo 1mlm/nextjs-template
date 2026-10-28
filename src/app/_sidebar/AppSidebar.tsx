@@ -15,6 +15,7 @@ import { Icon } from "@/components/Icon";
 import { Kbd } from "@/components/Kbd";
 import { ResponsivePopover } from "@/components/ResponsivePopover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
+import { ThemeSelector } from "@/components/theme/ThemeSelector";
 import { UserAvatar } from "@/components/UserAvatar";
 import { Badge } from "@/shadcn/ui/badge";
 import { Button } from "@/shadcn/ui/button";
@@ -290,7 +291,7 @@ function UserFooter() {
           {DEMO_USER.name}
         </TooltipContent>
       </Tooltip>
-      <DropdownMenuContent side="right" align="end" className="w-52">
+      <DropdownMenuContent side="right" align="end" className="w-72">
         <DropdownMenuLabel className="flex items-center gap-2 font-normal">
           <UserAvatar
             name={DEMO_USER.name}
@@ -306,6 +307,10 @@ function UserFooter() {
             </span>
           </span>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <div className="p-1">
+          <ThemeSelector className="flex w-full justify-between" />
+        </div>
         <DropdownMenuSeparator />
         {USER_MENU_ITEMS.map(({ label, icon, href, isDestructive }) => (
           <DropdownMenuItem

@@ -6,6 +6,7 @@ import "@/shadcn/styles/globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { CSSProperties, PropsWithChildren } from "react";
 import { TooltipProvider } from "@/components/Tooltip";
+import { ThemeInlineScript } from "@/components/theme/ThemeInlineScript";
 import { SidebarInset, SidebarProvider } from "@/shadcn/ui/sidebar";
 import { Toaster } from "@/shadcn/ui/sonner";
 import { TapHaptics } from "@/utils/haptics";
@@ -69,8 +70,9 @@ export default async function RootLayout({ children }: PropsWithChildren) {
     );
 
   return (
-    <html lang="en" className={outfit.className}>
+    <html lang="en" className={outfit.className} suppressHydrationWarning>
       <body className="antialiased">
+        <ThemeInlineScript />
         <NuqsAdapter>
           <TooltipProvider>
             <SidebarProvider defaultOpen={isSidebarOpen} style={SIDEBAR_SIZES}>

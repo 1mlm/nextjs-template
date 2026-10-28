@@ -12,6 +12,7 @@ import { useInstallPrompt } from "@/components/device/useInstallPrompt";
 import { Icon } from "@/components/Icon";
 import { IconChip } from "@/components/IconChip";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/Tooltip";
+import { ThemeSelector } from "@/components/theme/ThemeSelector";
 import { UserAvatar } from "@/components/UserAvatar";
 import {
   Drawer,
@@ -164,6 +165,7 @@ export function MenuSheet({ tabClassName }: { tabClassName: string }) {
               )}
             </div>
           )}
+          <ThemeSelector className="flex w-full justify-between" />
           <div className="flex items-center gap-2.5 rounded-lg p-2.5 ring-1 ring-sidebar-border">
             <UserAvatar name={DEMO_USER.name} src={DEMO_USER.avatarUrl} />
             <span className="min-w-0 flex-1 leading-tight">

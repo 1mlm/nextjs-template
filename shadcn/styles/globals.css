@@ -11,6 +11,29 @@
   --sidebar-ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* the theme picker (ThemeSelector) sets data-theme, no attribute means follow
+   the device */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* tailwind's dark: follows the same rule as color-scheme above, an explicit
+   data-theme wins, otherwise the device decides */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
 @theme inline {
     --background: light-dark(oklch(1 0 0), oklch(0.145 0 0));
     --foreground: light-dark(oklch(0.145 0 0), oklch(0.985 0 0));
