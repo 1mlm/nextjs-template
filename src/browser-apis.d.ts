@@ -25,3 +25,8 @@ interface NetworkInformation extends EventTarget {
 interface Navigator {
   connection?: NetworkInformation;
 }
+
+// web otp: chromium on android reads the code out of an incoming sms
+interface CredentialRequestOptions {
+  otp?: { transport: string[] };
+}

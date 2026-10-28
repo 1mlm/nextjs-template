@@ -10,6 +10,10 @@ import { StatCardLine } from "@/components/charts/stat-card-line";
 import { ChartTooltip } from "@/components/charts/tooltip";
 import { XAxis } from "@/components/charts/x-axis";
 import { YAxis } from "@/components/charts/y-axis";
+import { ActivityHeatmap } from "@/components/viz/ActivityHeatmap";
+import { ProgressRings } from "@/components/viz/progress-rings";
+import { SegmentedBar } from "@/components/viz/segmented-bar";
+import { Sparkline } from "@/components/viz/sparkline";
 import { Button } from "@/shadcn/ui/button";
 import { getColorSwatch } from "@/utils/color";
 import type { ShowcaseItem } from "./ShowcaseCard";
@@ -77,6 +81,33 @@ const TRAFFIC_SOURCES: PieSlice[] = [
   { id: "email", label: "Email", value: 860, color: getColorSwatch("amber") },
   { id: "other", label: "Other", value: 410, color: getColorSwatch("rose") },
 ];
+
+const SPARKLINE_ROWS = [
+  { label: "Revenue", values: [4, 5, 4, 6, 7, 6, 9, 8, 11] },
+  { label: "Churn", values: [9, 8, 9, 7, 6, 7, 5, 4, 4] },
+  { label: "Signups", values: [5, 5, 5, 5, 5, 5, 5, 5, 5] },
+  { label: "Latency", values: [3, 4, 3, 5, 4, 6, 8, 7, 9] },
+];
+
+const ACTIVITY_RINGS = [
+  { id: "move", label: "Move", value: 420, max: 600, color: "rose" },
+  { id: "exercise", label: "Exercise", value: 22, max: 30, color: "lime" },
+  { id: "stand", label: "Stand", value: 6, max: 12, color: "cyan" },
+] as const;
+
+const STORAGE_SEGMENTS = [
+  { id: "photos", label: "Photos", value: 48, color: getColorSwatch("sky") },
+  { id: "videos", label: "Videos", value: 31, color: getColorSwatch("violet") },
+  { id: "apps", label: "Apps", value: 14, color: getColorSwatch("amber") },
+  { id: "other", label: "Other", value: 6, color: getColorSwatch("rose") },
+];
+
+// local midnight on both sides, so server and browser draw the same weeks
+const HEATMAP_END = new Date(2026, 9, 28);
+const HEATMAP_DAYS = Array.from({ length: 280 }, (_, daysAgo) => ({
+  date: addDays(HEATMAP_END, -daysAgo),
+  value: (daysAgo * 37) % 11 > 4 ? ((daysAgo * 7) % 9) + 1 : 0,
+}));
 
 function TrafficChartDemo() {
   const [loadingStyle, setLoadingStyle] = useState<
@@ -165,6 +196,63 @@ export const CHART_ITEMS: ShowcaseItem[] = [
       "donut with the total in the middle, hover a slice or a legend row: it slides out and the middle shows its share",
     Demo: () => (
       <PieChart data={TRAFFIC_SOURCES} totalLabel="Visits" className="w-full" />
+    ),
+  },
+  {
+    name: "Sparkline",
+    path: "src/components/viz/sparkline.tsx",
+    description:
+      "a trend without axes or labels, for a table cell or next to a number. green when it ended higher than it started, red when lower, flat sits in the middle",
+    Demo: () => (
+      <ul className="flex w-full flex-col gap-2">
+        {SPARKLINE_ROWS.map(({ label, values }) => (
+          <li key={label} className="flex items-center justify-between text-sm">
+            {label}
+            <Sparkline {...{ values }} />
+          </li>
+        ))}
+      </ul>
+    ),
+  },
+  {
+    name: "ProgressRings",
+    path: "src/components/viz/progress-rings.tsx",
+    description:
+      "nested rings for how far along each goal is, readable without a word. one ring works as a plain circular progress, the middle takes anything",
+    Demo: () => (
+      <div className="flex items-center gap-6">
+        <ProgressRings rings={[...ACTIVITY_RINGS]} />
+        <ProgressRings
+          rings={[{ id: "upload", label: "Upload", value: 72, color: "sky" }]}
+          className="size-20"
+        >
+          <span className="text-sm font-semibold tabular-nums">72%</span>
+        </ProgressRings>
+      </div>
+    ),
+  },
+  {
+    name: "SegmentedBar",
+    path: "src/components/viz/segmented-bar.tsx",
+    description:
+      "one bar split by share, like storage by file type. with a max the rest stays an empty track. hover a segment or a legend dot and the others fade",
+    Demo: () => (
+      <SegmentedBar segments={STORAGE_SEGMENTS} max={128} className="w-full" />
+    ),
+  },
+  {
+    name: "ActivityHeatmap",
+    path: "src/components/viz/ActivityHeatmap.tsx",
+    wide: true,
+    description:
+      "the contribution calendar: a column per week, darker the busier the day (by quartile, so one huge day doesn't flatten the rest). hover or tap a day, scrolls sideways on phones",
+    Demo: () => (
+      <ActivityHeatmap
+        data={HEATMAP_DAYS}
+        until={HEATMAP_END}
+        weeks={40}
+        className="w-full"
+      />
     ),
   },
 ];

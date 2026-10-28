@@ -7,6 +7,7 @@ import {
   UnavailableIcon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
+import { AvatarStack } from "@/components/AvatarStack";
 import { EmptyState, EmptyStateVariant } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import { Icon } from "@/components/Icon";
@@ -38,6 +39,16 @@ import {
 import { cn } from "@/shadcn/utils";
 import { APP_ICONS } from "@/utils/icons";
 import type { ShowcaseItem } from "./ShowcaseCard";
+
+const STACK_USERS = [
+  { name: "Malik", src: "https://github.com/1mlm.png" },
+  { name: "Amina Idrissi" },
+  { name: "Youssef Alami" },
+  { name: "Sara Benani" },
+  { name: "Omar Tazi" },
+  { name: "Lina Berrada" },
+  { name: "Hamza Fassi" },
+];
 
 function LabelTagDemo() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -359,6 +370,18 @@ export const STATE_ITEMS: ShowcaseItem[] = [
         <CornerCountBadge>
           +2 <Icon icon={APP_ICONS.tag} />
         </CornerCountBadge>
+      </div>
+    ),
+  },
+  {
+    name: "AvatarStack",
+    path: "src/components/AvatarStack.tsx",
+    description:
+      "who's on this in one avatar's width: overlapping faces with a name on hover, and a +N that opens the full list (a sheet on phones)",
+    Demo: () => (
+      <div className="flex flex-col items-center gap-4">
+        <AvatarStack users={STACK_USERS} />
+        <AvatarStack users={STACK_USERS.slice(0, 3)} />
       </div>
     ),
   },

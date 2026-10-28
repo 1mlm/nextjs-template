@@ -23,8 +23,11 @@ import {
 import { EditableText } from "@/components/EditableText";
 import { FieldLabel } from "@/components/FieldLabel";
 import { FileDropZone } from "@/components/FileDropZone";
+import { SaveStatus } from "@/components/form/SaveStatus";
+import { useAutosave } from "@/components/form/useAutosave";
 import { Icon } from "@/components/Icon";
 import { NumberTextInput } from "@/components/NumberTextInput";
+import { OtpInput } from "@/components/OtpInput";
 import { SearchBar } from "@/components/SearchBar";
 import { SuggestionInput } from "@/components/SuggestionInput";
 import type { CustomTableEnumValue } from "@/components/table/columns";
@@ -38,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shadcn/ui/select";
+import { Textarea } from "@/shadcn/ui/textarea";
 import { cn } from "@/shadcn/utils";
 import { triggerHaptic } from "@/utils/haptics";
 import { APP_ICONS } from "@/utils/icons";
@@ -257,6 +261,65 @@ function DateTimePickerDemo({ hour12 }: { hour12: boolean }) {
   return <DateTimePicker value={date} onChange={setDate} {...{ hour12 }} />;
 }
 
+function OtpInputDemo() {
+  const [code, setCode] = useState("");
+  const [isInvalid, setIsInvalid] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+
+  // the right code is 123456, anything else shakes and clears
+  const verify = (entered: string) => {
+    const isCorrect = entered === "123456";
+    setIsInvalid(!isCorrect);
+    setIsVerified(isCorrect);
+    if (!isCorrect) setTimeout(() => setCode(""), 500);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <OtpInput
+        value={code}
+        onValueChange={(next) => {
+          setCode(next);
+          setIsInvalid(false);
+          setIsVerified(false);
+        }}
+        onComplete={verify}
+        {...{ isInvalid }}
+      />
+      <span className="text-xs text-muted-foreground">
+        {isVerified ? "verified" : "the code is 123456"}
+      </span>
+    </div>
+  );
+}
+
+function AutosaveDemo() {
+  const [note, setNote] = useState("");
+  // typing "fail" makes the save throw, to see the retry state
+  const { state, retry } = useAutosave({
+    value: note,
+    save: async (value) => {
+      await wait(700);
+      if (value.includes("fail")) throw new Error("demo save failed");
+    },
+  });
+
+  return (
+    <div className="flex w-full flex-col gap-1">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Notes</span>
+        <SaveStatus {...{ state }} onRetry={retry} />
+      </div>
+      <Textarea
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+        placeholder="type something"
+        className="min-h-20"
+      />
+    </div>
+  );
+}
+
 const TAKEN_USERNAMES = ["admin", "malik", "root"];
 
 enum CheckStatus {
@@ -470,5 +533,19 @@ export const INPUT_ITEMS: ShowcaseItem[] = [
     path: "src/components/DatePicker.tsx",
     description: "same thing with hour12={false}, no AM/PM column",
     Demo: () => <DateTimePickerDemo hour12={false} />,
+  },
+  {
+    name: "OtpInput",
+    path: "src/components/OtpInput.tsx",
+    description:
+      "verification code boxes. paste a whole code, the phone offers the one from your sms (and chrome on android reads it for you with the web otp api), a wrong code shakes. here the right one is 123456",
+    Demo: OtpInputDemo,
+  },
+  {
+    name: "useAutosave + SaveStatus",
+    path: "src/components/form/useAutosave.ts",
+    description:
+      "no save button: it saves a moment after you stop typing and the state is one small icon (tooltip has the words). offline it waits and saves when you're back, typing the word fail shows the retry state",
+    Demo: AutosaveDemo,
   },
 ];
