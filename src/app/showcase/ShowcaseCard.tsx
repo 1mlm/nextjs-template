@@ -30,7 +30,12 @@ export function ShowcaseCard({
   return (
     <Card
       id={getShowcaseSlug(name)}
-      className={cn("scroll-mt-24", wide && "sm:col-span-2")}
+      // offscreen cards skip layout and paint until you scroll near them,
+      // "auto" in the size remembers the real height once one has rendered
+      className={cn(
+        "scroll-mt-24 [contain-intrinsic-size:auto_320px] [content-visibility:auto]",
+        wide && "sm:col-span-2",
+      )}
     >
       <CardHeader>
         <CardTitle className="font-mono text-sm">{name}</CardTitle>

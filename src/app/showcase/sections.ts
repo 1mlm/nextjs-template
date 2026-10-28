@@ -35,6 +35,12 @@ export function flashShowcaseCard(slug: string) {
   const card = document.getElementById(slug);
   if (!card) return;
   card.scrollIntoView({ behavior: "smooth", block: "center" });
+  // cards passed on the way render late (content-visibility, lazy demos) and
+  // shift the target, so land on it again once that scroll has settled
+  window.setTimeout(
+    () => card.scrollIntoView({ behavior: "smooth", block: "center" }),
+    900,
+  );
   card.animate(
     [
       { boxShadow: "0 0 0 0 transparent" },
