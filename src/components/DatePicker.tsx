@@ -5,7 +5,7 @@ import {
   CalendarRangeIcon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
-import { format, set, setHours, setMinutes, startOfDay } from "date-fns";
+import { format, set, startOfDay } from "date-fns";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { Icon } from "@/components/Icon";
@@ -137,28 +137,61 @@ export function DateRangePicker({
   );
 }
 
-type TimeOption = { label: string; date: Date };
+// every part starts empty. the picker only reports a date once the day, the
+// hour, the minute (and am/pm on 12h) were each picked, so nobody ends up
+// with a time they never looked at
+type TimeDraft = {
+  day?: Date;
+  hour?: number;
+  minutes?: number;
+  isPm?: boolean;
+};
 
-// every option is the full date it would produce, so "is this one selected"
-// is just comparing it to the current value
-function getTimeColumns(base: Date, hour12: boolean) {
-  const isPm = base.getHours() >= 12;
-  const hourOptions: TimeOption[] = hour12
-    ? HOURS_12.map((hour) => ({
-        label: padTwoDigits(hour),
-        date: setHours(base, (hour % 12) + (isPm ? 12 : 0)),
-      }))
-    : HOURS_24.map((hour) => ({
-        label: padTwoDigits(hour),
-        date: setHours(base, hour),
-      }));
-  const minuteOptions = MINUTES.map((minute) => ({
-    label: padTwoDigits(minute),
-    date: setMinutes(base, minute),
+type TimeOption = {
+  label: string;
+  patch: TimeDraft;
+  isSelected: boolean;
+};
+
+function dateToTimeDraft(date: Date | undefined, hour12: boolean): TimeDraft {
+  if (!date) return {};
+  return {
+    day: startOfDay(date),
+    hour: hour12 ? date.getHours() % 12 : date.getHours(),
+    minutes: date.getMinutes(),
+    isPm: date.getHours() >= 12,
+  };
+}
+
+function timeDraftToDate(
+  { day, hour, minutes, isPm }: TimeDraft,
+  hour12: boolean,
+) {
+  const isMissingPart =
+    day === undefined ||
+    hour === undefined ||
+    minutes === undefined ||
+    (hour12 && isPm === undefined);
+  if (isMissingPart) return undefined;
+  return set(day, { hours: hour12 && isPm ? hour + 12 : hour, minutes });
+}
+
+function getTimeColumns(draft: TimeDraft, hour12: boolean) {
+  const hourOptions: TimeOption[] = (hour12 ? HOURS_12 : HOURS_24).map(
+    (hour) => ({
+      label: padTwoDigits(hour),
+      patch: { hour: hour12 ? hour % 12 : hour },
+      isSelected: draft.hour === (hour12 ? hour % 12 : hour),
+    }),
+  );
+  const minuteOptions: TimeOption[] = MINUTES.map((minutes) => ({
+    label: padTwoDigits(minutes),
+    patch: { minutes },
+    isSelected: draft.minutes === minutes,
   }));
-  const meridiemOptions = [
-    { label: "AM", date: setHours(base, base.getHours() % 12) },
-    { label: "PM", date: setHours(base, (base.getHours() % 12) + 12) },
+  const meridiemOptions: TimeOption[] = [
+    { label: "AM", patch: { isPm: false }, isSelected: draft.isPm === false },
+    { label: "PM", patch: { isPm: true }, isSelected: draft.isPm === true },
   ];
 
   const columns = [
@@ -168,9 +201,7 @@ function getTimeColumns(base: Date, hour12: boolean) {
   ];
   return columns.map((column) => ({
     ...column,
-    selectedIndex: column.options.findIndex(
-      (option) => option.date.getTime() === base.getTime(),
-    ),
+    selectedIndex: column.options.findIndex((option) => option.isSelected),
   }));
 }
 
@@ -186,19 +217,19 @@ function WheelColumn({
   name: string;
   options: TimeOption[];
   selectedIndex: number;
-  onSelect: (date: Date) => void;
+  onSelect: (patch: TimeDraft) => void;
 }) {
   const columnRef = useRef<HTMLDivElement>(null);
   const scrollSettleTimeout = useRef<number>(undefined);
   // the settle timer reads these fresh, another wheel may have changed the
-  // date (and so every option here) while this one was still scrolling
+  // draft (and so every option here) while this one was still scrolling
   const latestProps = useRef({ options, selectedIndex, onSelect });
   useEffect(() => {
     latestProps.current = { options, selectedIndex, onSelect };
   });
 
   useEffect(() => {
-    if (columnRef.current)
+    if (columnRef.current && selectedIndex >= 0)
       columnRef.current.scrollTop = selectedIndex * WHEEL_ITEM_HEIGHT_PX;
   }, [selectedIndex]);
 
@@ -208,7 +239,7 @@ function WheelColumn({
     const option = options[index];
     if (!option || index === selectedIndex) return;
     triggerHaptic("selection");
-    onSelect(option.date);
+    onSelect(option.patch);
   };
 
   const selectCenteredOptionOnceSettled = () => {
@@ -223,7 +254,7 @@ function WheelColumn({
       const centeredOption = options[centeredIndex];
       if (!centeredOption || centeredIndex === selectedIndex) return;
       triggerHaptic("selection");
-      onSelect(centeredOption.date);
+      onSelect(centeredOption.patch);
     }, 80);
   };
 
@@ -242,7 +273,10 @@ function WheelColumn({
       aria-label={name}
       tabIndex={0}
       onScroll={selectCenteredOptionOnceSettled}
-      className="relative w-12 snap-y snap-mandatory overflow-y-auto overscroll-contain rounded-lg outline-none [container-type:size] [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-ring/50"
+      className={cn(
+        "relative w-12 snap-y snap-mandatory overflow-y-auto overscroll-contain rounded-lg outline-none [container-type:size] [scrollbar-width:none] focus-visible:ring-2 focus-visible:ring-ring/50",
+        selectedIndex < 0 && "text-muted-foreground",
+      )}
     >
       {edgeSpacer}
       {options.map(({ label }, index) => (
@@ -275,10 +309,32 @@ export function DateTimePicker({
   hour12?: boolean;
   placeholder?: string;
 }) {
-  const base = value ?? startOfDay(new Date());
-  const label =
-    value && format(value, hour12 ? "MM/dd/yyyy hh:mm aa" : "MM/dd/yyyy HH:mm");
-  const timeColumns = getTimeColumns(base, hour12);
+  const valueTime = value?.getTime();
+  const [draft, setDraft] = useState(() => dateToTimeDraft(value, hour12));
+
+  // a parent clearing or replacing the value resets what was half picked
+  useEffect(() => {
+    setDraft(
+      dateToTimeDraft(
+        valueTime === undefined ? undefined : new Date(valueTime),
+        hour12,
+      ),
+    );
+  }, [valueTime, hour12]);
+
+  const updateDraft = (patch: TimeDraft) => {
+    const nextDraft = { ...draft, ...patch };
+    setDraft(nextDraft);
+    const nextDate = timeDraftToDate(nextDraft, hour12);
+    if (nextDate) onChange(nextDate);
+  };
+
+  const dayLabel = draft.day && format(draft.day, "MM/dd/yyyy");
+  const emptyTimeLabel = hour12 ? "--:-- --" : "--:--";
+  const label = value
+    ? format(value, hour12 ? "MM/dd/yyyy hh:mm aa" : "MM/dd/yyyy HH:mm")
+    : dayLabel && `${dayLabel} ${emptyTimeLabel}`;
+  const timeColumns = getTimeColumns(draft, hour12);
 
   return (
     <PickerPopover
@@ -291,13 +347,9 @@ export function DateTimePicker({
           mode="single"
           required
           className={CALENDAR_CLASS}
-          selected={value}
-          defaultMonth={value}
-          onSelect={(day) =>
-            onChange(
-              set(day, { hours: base.getHours(), minutes: base.getMinutes() }),
-            )
-          }
+          selected={draft.day}
+          defaultMonth={draft.day}
+          onSelect={(day) => updateDraft({ day: startOfDay(day) })}
         />
         {/* the wheels have size containment, so on desktop the calendar alone decides the height */}
         <div className="relative flex h-40 w-full justify-center [mask-image:linear-gradient(transparent,black_20%,black_80%,transparent)] md:h-auto md:w-auto md:border-l md:px-1">
@@ -307,7 +359,7 @@ export function DateTimePicker({
             className="pointer-events-none absolute inset-x-1 top-1/2 -translate-y-1/2 rounded-lg bg-muted"
           />
           {timeColumns.map((column) => (
-            <WheelColumn key={column.name} {...column} onSelect={onChange} />
+            <WheelColumn key={column.name} {...column} onSelect={updateDraft} />
           ))}
         </div>
       </div>

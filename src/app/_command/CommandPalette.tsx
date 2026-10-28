@@ -189,12 +189,13 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
         onOpenChange={setOpen}
         title="Command palette"
         description="jump to a page, run an action or find a component"
-        className="sm:max-w-lg"
+        className="sm:top-1/2 sm:max-w-lg sm:-translate-y-1/2"
       >
         {/* CommandDialog doesn't bring its own cmdk root, the items need one */}
         <Command className="bg-transparent" filter={matchesEveryWord}>
           <CommandInput placeholder="Search pages, actions, components..." />
-          <CommandList className="max-h-[min(24rem,60dvh)]">
+          {/* fixed height so the centered box doesn't jump while you type */}
+          <CommandList className="h-[min(24rem,60dvh)] max-h-none">
             <CommandEmpty className="flex flex-col items-center gap-1 py-8">
               <Icon
                 icon={APP_ICONS.searchEmpty}
