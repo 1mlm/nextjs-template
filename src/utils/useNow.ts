@@ -22,10 +22,14 @@ const subscribeToClock = (onTick: () => void) => {
 };
 
 // null on the server and during hydration: "now" and the timezone differ
-// between the two, so anything built from it only renders in the browser
-export const useNow = () =>
+// between the two, so anything built from it only renders in the browser.
+// takes a selector so a component that only shows "3 hours ago" re-renders
+// when that text changes, not every second like the clock does
+export const useNowSelector = <T>(select: (now: number) => T) =>
   useSyncExternalStore(
     subscribeToClock,
-    () => clock.now,
+    () => select(clock.now),
     () => null,
   );
+
+export const useNow = () => useNowSelector((now) => now);
