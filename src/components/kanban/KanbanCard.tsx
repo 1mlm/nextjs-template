@@ -26,7 +26,8 @@ function KanbanCardRow<T>({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+    // dnd-kit's default role is button, which a list item can't be
+  } = useSortable({ id, attributes: { role: "listitem" } });
 
   return (
     <li
