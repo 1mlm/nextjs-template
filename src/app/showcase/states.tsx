@@ -64,7 +64,7 @@ function LabelTagDemo() {
       <LabelTag
         icon={SourceCodeIcon}
         label="README.md"
-        href="https://github.com/1mlm/nextjs-template/blob/main/.github/README.md"
+        href="https://github.com/1mlm/malik-kit/blob/main/.github/README.md"
       />{" "}
       to <LabelTag icon={APP_ICONS.tag} label="finance" />
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>

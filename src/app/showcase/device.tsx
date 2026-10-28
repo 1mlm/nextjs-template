@@ -105,7 +105,7 @@ export const DEVICE_ITEMS: ShowcaseItem[] = [
       <ShareButton
         title="Malik Kit"
         text="a component kit with playful bits"
-        url="https://github.com/1mlm/nextjs-template"
+        url="https://github.com/1mlm/malik-kit"
       />
     ),
   },

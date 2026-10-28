@@ -44,7 +44,7 @@ export function ShowcaseCard({
           <LabelTag
             icon={SourceCodeIcon}
             label={path}
-            href={`https://github.com/1mlm/nextjs-template/blob/main/${path}`}
+            href={`https://github.com/1mlm/malik-kit/blob/main/${path}`}
           />
         </span>
       </CardHeader>
