@@ -21,6 +21,7 @@ import {
 import { APP_ICONS } from "@/utils/icons";
 import { safeLocalStorage } from "@/utils/storage";
 import { useIsClient } from "@/utils/useIsClient";
+import { KanbanDemo } from "./kanban";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
 const DEMO_PAGES: { href: string; label: string; icon: IconSvgElement }[] = [
@@ -107,6 +108,14 @@ function SidebarDemo() {
 }
 
 export const DATA_ITEMS: ShowcaseItem[] = [
+  {
+    name: "KanbanBoard",
+    path: "src/components/kanban/",
+    wide: true,
+    description:
+      "drag cards between columns and within them with a mouse, a finger (hold a moment, so swiping still scrolls) or the keyboard (space, arrows, space). screen readers hear every move. right click a card to delete with undo, the in progress column has a limit of 3",
+    Demo: KanbanDemo,
+  },
   {
     name: "AppSidebar + MobileTopBar",
     path: "src/app/_sidebar/",
