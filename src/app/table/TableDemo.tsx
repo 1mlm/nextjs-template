@@ -12,7 +12,7 @@ import {
   StarIcon,
   UserGroupIcon,
 } from "@hugeicons/core-free-icons";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ErrorTooltip } from "@/components/ErrorTooltip";
 import { Icon } from "@/components/Icon";
 import { SearchBar } from "@/components/SearchBar";
@@ -205,6 +205,13 @@ export function TableDemo({
   const [createdRows, setCreatedRows] = useState<Row[]>([]);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (!isRefreshing) return;
+    const finishTimeout = setTimeout(() => setIsRefreshing(false), 1200);
+    return () => clearTimeout(finishTimeout);
+  }, [isRefreshing]);
 
   const allRows = useMemo(
     () =>
@@ -287,6 +294,10 @@ export function TableDemo({
           placeholder="Search people..."
           trailing={`${resultCount} ${resultCount === 1 ? "person" : "people"}`}
         />
+        <Button variant="outline" onClick={() => setIsRefreshing(true)}>
+          <Icon icon={APP_ICONS.reload} />
+          <span className="max-sm:sr-only">Refresh</span>
+        </Button>
         <Button onClick={addPerson}>
           <Icon icon={APP_ICONS.add} />
           <span className="max-sm:sr-only">Add person</span>
@@ -296,6 +307,7 @@ export function TableDemo({
         columns={columnsWithActions}
         items={visibleItems}
         getItemId={getRowId}
+        loading={isRefreshing}
         selectable
         emptyLabel="people"
         exportFilePrefix="people"
