@@ -84,8 +84,8 @@ export function ActionBar<T>({
   currentPage,
   setPage,
   pageCount,
-  canResetFilterAndSort,
-  resetFilterAndSort,
+  canResetTable,
+  resetTable,
   selectable,
   selectedItems,
   clearSelection,
@@ -97,8 +97,8 @@ export function ActionBar<T>({
   currentPage: number;
   setPage: (page: number) => void;
   pageCount: number;
-  canResetFilterAndSort: boolean;
-  resetFilterAndSort: () => void;
+  canResetTable: boolean;
+  resetTable: () => void;
   selectable: boolean;
   selectedItems: T[];
   clearSelection: () => void;
@@ -109,7 +109,7 @@ export function ActionBar<T>({
 }) {
   const selectedCount = selectedItems.length;
   const hasSelection = selectable && selectedCount > 0;
-  if (!canResetFilterAndSort && !hasSelection && pageCount <= 1) return null;
+  if (!canResetTable && !hasSelection && pageCount <= 1) return null;
 
   return (
     <div className="fixed inset-x-4 bottom-4 z-30 flex justify-end rounded-full border border-border bg-sidebar px-2 py-2 shadow-[0_0_16px_rgba(0,0,0,0.35)] sm:inset-x-auto sm:right-8 sm:bottom-8 sm:max-w-[calc(100vw-4rem)]">
@@ -152,12 +152,8 @@ export function ActionBar<T>({
             />
           </>
         )}
-        {canResetFilterAndSort && (
-          <Button
-            variant="outline"
-            className="shadow-lg"
-            onClick={resetFilterAndSort}
-          >
+        {canResetTable && (
+          <Button variant="outline" className="shadow-lg" onClick={resetTable}>
             <Icon icon={BrushCleaningIcon} />
             <span className="hidden sm:inline">
               Reset filters &amp; sorting

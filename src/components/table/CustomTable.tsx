@@ -27,6 +27,7 @@ import {
 } from "./filtering";
 import { getMergeRuns } from "./mergeRuns";
 import { RowContextMenu } from "./RowContextMenu";
+import { useHiddenColumns } from "./useHiddenColumns";
 import { useRowSelection } from "./useRowSelection";
 import { useScrollFade } from "./useScrollFade";
 import { useTableFilterSort } from "./useTableFilterSort";
@@ -190,13 +191,19 @@ export function CustomTable<T>({
     getItemId,
   });
 
-  const canResetFilterAndSort =
-    (filterable || sortable) && hasActiveFilterOrSort;
+  const { visibleColumns, hiddenCount, getHideHandler, showAllColumns } =
+    useHiddenColumns(columns);
+  const canResetTable =
+    ((filterable || sortable) && hasActiveFilterOrSort) || hiddenCount > 0;
+  const resetTable = () => {
+    resetFilterAndSort();
+    showAllColumns();
+  };
 
   const sortedByColumnId = sort?.columnId ?? defaultSort[0]?.columnId;
   const mergeRuns = useMemo(
-    () => getMergeRuns(columns, paginatedItems, sortedByColumnId),
-    [columns, paginatedItems, sortedByColumnId],
+    () => getMergeRuns(visibleColumns, paginatedItems, sortedByColumnId),
+    [visibleColumns, paginatedItems, sortedByColumnId],
   );
   // a leaving row still holding a tall merged cell shoves the other columns
   // sideways while it fades, so with merged cells rows just vanish
@@ -239,7 +246,7 @@ export function CustomTable<T>({
                   </div>
                 </TableHead>
               )}
-              {columns.map((column) => (
+              {visibleColumns.map((column) => (
                 <TableHead key={column.id}>
                   <CustomTableColumnHeader
                     {...{ column, items, filterable, sortable }}
@@ -251,6 +258,7 @@ export function CustomTable<T>({
                     onSortChange={(dir: SortDirection | null) =>
                       setColumnSort(column.id, dir)
                     }
+                    onHide={getHideHandler(column)}
                   />
                 </TableHead>
               ))}
@@ -258,7 +266,10 @@ export function CustomTable<T>({
           </TableHeader>
           <TableBody>
             {loading && (
-              <CustomTableSkeletonRows {...{ columns, selectable }} />
+              <CustomTableSkeletonRows
+                columns={visibleColumns}
+                {...{ selectable }}
+              />
             )}
             {/* keyed by page so flipping pages swaps rows instantly, only rows
             that leave or join the page you're on animate */}
@@ -305,7 +316,7 @@ export function CustomTable<T>({
                             </div>
                           </TableCell>
                         )}
-                        {columns.map((column) => {
+                        {visibleColumns.map((column) => {
                           const run = mergeRuns.get(column.id)?.[index];
                           // swallowed by the tall cell of the row that started the run
                           if (run && !run.isStart) return null;
@@ -361,8 +372,8 @@ export function CustomTable<T>({
           currentPage,
           setPage,
           pageCount,
-          canResetFilterAndSort,
-          resetFilterAndSort,
+          canResetTable,
+          resetTable,
           selectedItems,
           clearSelection,
           selectionActions,
