@@ -229,29 +229,48 @@ export function MultiCombobox({
         align="start"
         className="w-(--radix-popover-trigger-width) p-1 max-md:px-4 max-md:pb-6"
         trigger={
-          <Button variant="outline" className={TRIGGER_CLASS}>
-            {selectedOptions.length > 0 ? (
-              <span className="-ml-1 flex flex-wrap gap-1">
-                {selectedOptions.map((option) => (
-                  <RemovableChip
-                    key={option.value}
-                    onRemove={() => toggleValue(option.value)}
-                    removeLabel={`Remove ${option.label}`}
-                  >
-                    <OptionLabel {...{ option }} />
-                  </RemovableChip>
-                ))}
-              </span>
-            ) : (
-              <span className="flex items-center gap-2 text-muted-foreground">
-                <Icon {...{ icon }} />
-                {placeholder}
-              </span>
-            )}
-            <Icon
-              icon={ArrowDown01Icon}
-              className="shrink-0 text-muted-foreground"
-            />
+          <Button asChild variant="outline" className={TRIGGER_CLASS}>
+            {/* not a button, the chips inside have their own remove buttons
+            and a button can't hold buttons */}
+            <div
+              // biome-ignore lint/a11y/useAriaPropsForRole: the popover trigger above injects aria-expanded
+              role="combobox"
+              aria-label={title}
+              tabIndex={0}
+              onKeyDown={(event) => {
+                const isOnTrigger = event.target === event.currentTarget;
+                if (
+                  isOnTrigger &&
+                  (event.key === "Enter" || event.key === " ")
+                ) {
+                  event.preventDefault();
+                  event.currentTarget.click();
+                }
+              }}
+            >
+              {selectedOptions.length > 0 ? (
+                <span className="-ml-1 flex flex-wrap gap-1">
+                  {selectedOptions.map((option) => (
+                    <RemovableChip
+                      key={option.value}
+                      onRemove={() => toggleValue(option.value)}
+                      removeLabel={`Remove ${option.label}`}
+                    >
+                      <OptionLabel {...{ option }} />
+                    </RemovableChip>
+                  ))}
+                </span>
+              ) : (
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <Icon {...{ icon }} />
+                  {placeholder}
+                </span>
+              )}
+              <Icon
+                icon={ArrowDown01Icon}
+                className="shrink-0 text-muted-foreground"
+              />
+            </div>
           </Button>
         }
       >

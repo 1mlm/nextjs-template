@@ -9,7 +9,10 @@ import { APP_ICONS } from "@/utils/icons";
 export function ErrorTooltip({ message }: { message: string }) {
   return (
     <Tooltip>
-      <TooltipTrigger className="flex items-center text-destructive">
+      <TooltipTrigger
+        aria-label={message}
+        className="flex items-center text-destructive"
+      >
         <Icon icon={APP_ICONS.warning} className="size-4" />
       </TooltipTrigger>
       <TooltipContent sideOffset={6} className="max-w-56 text-center">

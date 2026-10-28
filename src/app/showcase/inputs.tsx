@@ -339,7 +339,7 @@ function CenteredSelectDemo() {
   const [semester, setSemester] = useState("Summer 2026");
   return (
     <Select value={semester} onValueChange={setSemester}>
-      <SelectTrigger className="w-60">
+      <SelectTrigger className="w-60" aria-label="Semester">
         <Icon icon={APP_ICONS.calendar} />
         <SelectValue />
       </SelectTrigger>

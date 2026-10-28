@@ -57,8 +57,11 @@ export default function Page() {
   const rows = faker.helpers.multiple(makeRow, { count: 43 });
   const spareRows = faker.helpers.multiple(makeRow, { count: 20 });
   return (
-    <Suspense>
-      <TableDemo {...{ rows, spareRows }} />
-    </Suspense>
+    <>
+      <h1 className="sr-only">Table</h1>
+      <Suspense>
+        <TableDemo {...{ rows, spareRows }} />
+      </Suspense>
+    </>
   );
 }

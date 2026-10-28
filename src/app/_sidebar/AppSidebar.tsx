@@ -266,7 +266,7 @@ function UserFooter() {
             >
               <span className="flex items-center gap-1.5 text-sm font-semibold">
                 {DEMO_USER.name}
-                <span className="flex -rotate-6 items-center gap-0.5 rounded-md bg-amber-400/15 px-1 text-[0.6rem] font-bold text-amber-600 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/user:rotate-3 group-hover/user:scale-110 dark:text-amber-400">
+                <span className="flex -rotate-6 items-center gap-0.5 rounded-md bg-amber-400/15 px-1 text-[0.6rem] font-bold text-amber-800 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/user:rotate-3 group-hover/user:scale-110 dark:text-amber-400">
                   <Icon
                     icon={CrownIcon}
                     className="size-2.5 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover/user:-translate-y-px group-hover/user:-rotate-12"

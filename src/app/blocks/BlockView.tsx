@@ -156,12 +156,14 @@ const PART_ROW_CLASS =
 const BOOLEAN_SHAPE = "rounded-[12px] corner-superellipse/0.5";
 
 function FieldSelect({
+  label,
   value,
   options,
   slotClassName,
   isStatic,
   onChange,
 }: {
+  label: string;
   value: string;
   options: string[];
   slotClassName: string;
@@ -173,6 +175,7 @@ function FieldSelect({
       {/* the raw radix trigger, shadcn's one brings borders and dark mode
       tints that fight the block colors */}
       <SelectPrimitive.Trigger
+        aria-label={label}
         className={cn(
           SLOT_CLASS,
           slotClassName,
@@ -268,6 +271,7 @@ function InlinePart({
     return <InputSlot {...{ node, part, slotClassName, isStatic }} />;
   return (
     <FieldSelect
+      label={part.kind === PartKind.Variable ? "Variable" : part.id}
       value={node.fields[part.id] ?? ""}
       options={part.kind === PartKind.Variable ? VARIABLE_NAMES : part.options}
       onChange={(value) => setField(node.id, part.id, value)}

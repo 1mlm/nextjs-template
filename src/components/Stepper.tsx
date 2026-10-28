@@ -1,7 +1,6 @@
 "use client";
 
 import type { IconSvgElement } from "@hugeicons/react";
-import { Fragment } from "react";
 import { Icon } from "@/components/Icon";
 import { IconChip } from "@/components/IconChip";
 import { cn } from "@/shadcn/utils";
@@ -82,7 +81,10 @@ export function Stepper({
           const state = getStepState(index, currentIndex);
           const isClickable = state === StepState.Done && Boolean(onStepClick);
           return (
-            <Fragment key={step.id}>
+            <li
+              key={step.id}
+              className={cn("flex items-center", index > 0 && "flex-1")}
+            >
               {index > 0 && (
                 <span className="mx-2 h-0.5 min-w-4 flex-1 overflow-hidden rounded-full bg-muted">
                   <span
@@ -93,37 +95,33 @@ export function Stepper({
                   />
                 </span>
               )}
-              <li>
-                <button
-                  type="button"
-                  disabled={!isClickable}
-                  onClick={() => onStepClick?.(index)}
-                  aria-current={
-                    state === StepState.Current ? "step" : undefined
+              <button
+                type="button"
+                disabled={!isClickable}
+                onClick={() => onStepClick?.(index)}
+                aria-current={state === StepState.Current ? "step" : undefined}
+                className="group/step flex items-center gap-2 rounded-lg p-1 pr-2 enabled:cursor-pointer enabled:hover:bg-muted"
+              >
+                <IconChip
+                  icon={
+                    state === StepState.Done ? APP_ICONS.confirm : step.icon
                   }
-                  className="group/step flex items-center gap-2 rounded-lg p-1 pr-2 enabled:cursor-pointer enabled:hover:bg-muted"
+                  className={cn(
+                    "transition-all duration-300",
+                    STEP_CHIP_CLASS[state],
+                  )}
+                />
+                <span
+                  className={cn(
+                    "text-sm whitespace-nowrap transition-colors",
+                    state === StepState.Current && "font-semibold",
+                    state === StepState.Upcoming && "text-muted-foreground",
+                  )}
                 >
-                  <IconChip
-                    icon={
-                      state === StepState.Done ? APP_ICONS.confirm : step.icon
-                    }
-                    className={cn(
-                      "transition-all duration-300",
-                      STEP_CHIP_CLASS[state],
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "text-sm whitespace-nowrap transition-colors",
-                      state === StepState.Current && "font-semibold",
-                      state === StepState.Upcoming && "text-muted-foreground",
-                    )}
-                  >
-                    {step.label}
-                  </span>
-                </button>
-              </li>
-            </Fragment>
+                  {step.label}
+                </span>
+              </button>
+            </li>
           );
         })}
       </ol>

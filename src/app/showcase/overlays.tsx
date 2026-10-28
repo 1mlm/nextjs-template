@@ -306,7 +306,7 @@ export const OVERLAY_ITEMS: ShowcaseItem[] = [
     Demo: () => (
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" aria-label="More info">
             <Icon icon={InformationSquareIcon} />
           </Button>
         </TooltipTrigger>
