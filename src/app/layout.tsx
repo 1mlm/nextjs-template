@@ -16,6 +16,7 @@ import { Maintenance } from "./_maintenance/Maintenance";
 import { AppSidebar } from "./_sidebar/AppSidebar";
 import { MobileTopBar } from "./_sidebar/MobileTopBar";
 import { APP_INFO } from "./_sidebar/nav";
+import { AppTourProvider } from "./_tour/AppTour";
 import { KeyboardInset } from "./KeyboardInset";
 import { ServiceWorkerRegistration } from "./ServiceWorkerRegistration";
 
@@ -77,13 +78,15 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         <NuqsAdapter>
           <TooltipProvider>
             <SidebarProvider defaultOpen={isSidebarOpen} style={SIDEBAR_SIZES}>
-              <CommandPaletteProvider>
-                <AppSidebar />
-                <SidebarInset className="min-w-0 bg-muted md:ring-1 md:ring-border md:peer-data-[variant=inset]:shadow-lg">
-                  <MobileTopBar />
-                  {children}
-                </SidebarInset>
-              </CommandPaletteProvider>
+              <AppTourProvider>
+                <CommandPaletteProvider>
+                  <AppSidebar />
+                  <SidebarInset className="min-w-0 bg-muted md:ring-1 md:ring-border md:peer-data-[variant=inset]:shadow-lg">
+                    <MobileTopBar />
+                    {children}
+                  </SidebarInset>
+                </CommandPaletteProvider>
+              </AppTourProvider>
             </SidebarProvider>
           </TooltipProvider>
         </NuqsAdapter>

@@ -106,6 +106,7 @@ function SearchRow() {
       <TooltipTrigger asChild>
         <button
           type="button"
+          data-tour="search"
           onClick={openCommandPalette}
           className={cn(
             NAV_ROW_CLASS,
@@ -172,7 +173,7 @@ function NavLinks() {
   const { state } = useSidebar();
 
   return (
-    <nav className="flex flex-col gap-1">
+    <nav data-tour="nav" className="flex flex-col gap-1">
       {NAV_ITEMS.map(({ href, label, icon, animatedIcon, badge }) => {
         const isActive = pathname === href;
         return (

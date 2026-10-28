@@ -4,6 +4,7 @@ import {
   Calendar03Icon,
   Cancel01Icon,
   Clock01Icon,
+  Compass01Icon,
   Copy01Icon,
   Cursor01Icon,
   Delete02Icon,
@@ -55,4 +56,5 @@ export const APP_ICONS = {
   undo: UndoIcon,
   logout: Logout01Icon,
   tag: Tag01Icon,
+  tour: Compass01Icon,
 } as const;

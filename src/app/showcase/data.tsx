@@ -21,6 +21,7 @@ import {
 import { APP_ICONS } from "@/utils/icons";
 import { safeLocalStorage } from "@/utils/storage";
 import { useIsClient } from "@/utils/useIsClient";
+import { useStartAppTour } from "../_tour/AppTour";
 import { KanbanDemo } from "./kanban";
 import type { ShowcaseItem } from "./ShowcaseCard";
 
@@ -107,7 +108,24 @@ function SidebarDemo() {
   );
 }
 
+function TourDemo() {
+  const startTour = useStartAppTour();
+  return (
+    <Button onClick={startTour}>
+      <Icon icon={APP_ICONS.tour} />
+      Start the tour
+    </Button>
+  );
+}
+
 export const DATA_ITEMS: ShowcaseItem[] = [
+  {
+    name: "Tour",
+    path: "src/components/tour/",
+    description:
+      "a product tour you can drop into any app: steps point at things with a css selector, wait for them to exist (a step can change page or open a menu first), follow them while the page scrolls or animates, skip or replace a target that's gone, and dock the card at the bottom on phones. keyboard: arrows, escape. the steps for this app are in src/app/_tour/",
+    Demo: TourDemo,
+  },
   {
     name: "KanbanBoard",
     path: "src/components/kanban/",

@@ -27,6 +27,7 @@ import { copyToClipboard } from "@/utils/clipboard";
 import { triggerHaptic } from "@/utils/haptics";
 import { APP_ICONS } from "@/utils/icons";
 import { NAV_ITEMS } from "../_sidebar/nav";
+import { useStartAppTour } from "../_tour/AppTour";
 
 const OPEN_SHORTCUT_KEY = "k";
 
@@ -97,6 +98,7 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
   const router = useRouter();
   const pathname = usePathname();
   const { toggleSidebar, isMobile } = useSidebar();
+  const startTour = useStartAppTour();
 
   useEffect(() => {
     const toggleOnShortcut = (event: KeyboardEvent) => {
@@ -157,6 +159,13 @@ export function CommandPaletteProvider({ children }: PropsWithChildren) {
 
   const actionCommands: PaletteCommand[] = [
     ...(isMobile ? [] : desktopOnlyActionCommands),
+    {
+      id: "take-tour",
+      label: "Take the tour",
+      icon: APP_ICONS.tour,
+      hint: "tour",
+      run: startTour,
+    },
     {
       id: "copy-link",
       label: "Copy link to this page",

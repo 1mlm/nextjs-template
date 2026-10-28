@@ -298,7 +298,7 @@ export function TableDemo({
           <Icon icon={APP_ICONS.reload} />
           <span className="max-sm:sr-only">Refresh</span>
         </Button>
-        <Button onClick={addPerson}>
+        <Button data-tour="table-add" onClick={addPerson}>
           <Icon icon={APP_ICONS.add} />
           <span className="max-sm:sr-only">Add person</span>
         </Button>
