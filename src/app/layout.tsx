@@ -5,6 +5,7 @@ import { env } from "@/env";
 import "@/shadcn/styles/globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { CSSProperties, PropsWithChildren } from "react";
+import { OfflineBanner } from "@/components/device/OfflineBanner";
 import { TooltipProvider } from "@/components/Tooltip";
 import { ThemeInlineScript } from "@/components/theme/ThemeInlineScript";
 import { SidebarInset, SidebarProvider } from "@/shadcn/ui/sidebar";
@@ -91,6 +92,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         window (runUndoableAction). everything else gets inline feedback
         right next to whatever you clicked */}
         <Toaster />
+        <OfflineBanner />
         <TapHaptics />
         <KeyboardInset />
         <ServiceWorkerRegistration />

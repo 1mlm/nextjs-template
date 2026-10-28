@@ -7,9 +7,11 @@ import {
   Tablet01Icon,
 } from "@hugeicons/core-free-icons";
 import { useState } from "react";
+import { AppBadgeButton } from "@/components/device/AppBadgeButton";
 import { EyeDropperButton } from "@/components/device/EyeDropperButton";
 import { FocusTimer } from "@/components/device/FocusTimer";
 import { InstallSteps } from "@/components/device/InstallSteps";
+import { NetworkStatus } from "@/components/device/NetworkStatus";
 import { PianoKeys } from "@/components/device/PianoKeys";
 import { ShareButton } from "@/components/device/ShareButton";
 import { TiltCard } from "@/components/device/TiltCard";
@@ -106,5 +108,19 @@ export const DEVICE_ITEMS: ShowcaseItem[] = [
         url="https://github.com/1mlm/nextjs-template"
       />
     ),
+  },
+  {
+    name: "NetworkStatus",
+    path: "src/components/device/NetworkStatus.tsx",
+    description:
+      "live online or offline from the browser, plus connection type, speed and data saver where the network information api exists (chromium). flip your network off in devtools and the OfflineBanner pill (src/components/device/OfflineBanner.tsx, mounted in the root layout) shows up, a reload then lands on the offline page",
+    Demo: () => <NetworkStatus />,
+  },
+  {
+    name: "AppBadgeButton",
+    path: "src/components/device/AppBadgeButton.tsx",
+    description:
+      "puts a number on the installed app's icon with the badging api. install the app first, in a normal tab it does nothing",
+    Demo: () => <AppBadgeButton />,
   },
 ];
