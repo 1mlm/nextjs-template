@@ -25,14 +25,24 @@ const percentFormat = new Intl.NumberFormat("en-US", {
 });
 const valueFormat = new Intl.NumberFormat("en-US");
 
-const makeSliceAngles = pie<PieSlice>()
-  .value((slice) => slice.value)
-  .sort(null)
-  .padAngle(0.025);
-const drawSlicePath = arc<{ startAngle: number; endAngle: number }>()
+// the gap between slices, as a width. with padRadius the gap stays this wide
+// from the inner edge to the outer one instead of pinching shut at the center
+const SLICE_GAP_PX = 5;
+const makeSliceAngles = (sliceCount: number) =>
+  pie<PieSlice>()
+    .value((slice) => slice.value)
+    .sort(null)
+    // one slice alone is a full ring, a gap in it would be a bite
+    .padAngle(sliceCount > 1 ? SLICE_GAP_PX / OUTER_RADIUS : 0);
+const drawSlicePath = arc<{
+  startAngle: number;
+  endAngle: number;
+  padAngle?: number;
+}>()
   .innerRadius(INNER_RADIUS)
   .outerRadius(OUTER_RADIUS)
-  .cornerRadius(5);
+  .padRadius(OUTER_RADIUS)
+  .cornerRadius(4);
 
 // the point halfway along a slice, as a unit vector from the center, so a
 // hovered slice can slide straight outward
@@ -55,7 +65,14 @@ export function PieChart({
 }) {
   const [activeId, setActiveId] = useState<string>();
   const total = data.reduce((sum, slice) => sum + slice.value, 0);
-  const slices = makeSliceAngles(data);
+  // a zero slice has no angle, but its legend row stays
+  const drawnData = data.filter((slice) => slice.value > 0);
+  const slices = makeSliceAngles(drawnData.length)(drawnData);
+  // 0.2% would round to a misleading "0%" next to a slice you can see
+  const formatShare = (value: number) => {
+    const share = total > 0 ? value / total : 0;
+    return share > 0 && share < 0.005 ? "<1%" : percentFormat.format(share);
+  };
   const activeSlice = data.find((slice) => slice.id === activeId);
 
   const activate = (id: string | undefined) => {
@@ -90,13 +107,20 @@ export function PieChart({
           transition={{ type: "spring", bounce: 0.3, duration: 0.8 }}
           onPointerLeave={hoverWithMouse(undefined)}
         >
-          {slices.map(({ data: slice, startAngle, endAngle }) => {
+          {total === 0 && (
+            <circle
+              r={(OUTER_RADIUS + INNER_RADIUS) / 2}
+              strokeWidth={OUTER_RADIUS - INNER_RADIUS}
+              className="fill-none stroke-foreground/10"
+            />
+          )}
+          {slices.map(({ data: slice, startAngle, endAngle, padAngle }) => {
             const direction = getSliceDirection(startAngle, endAngle);
             const isActive = slice.id === activeId;
             return (
               <motion.path
                 key={slice.id}
-                d={drawSlicePath({ startAngle, endAngle }) ?? undefined}
+                d={drawSlicePath({ startAngle, endAngle, padAngle }) ?? undefined}
                 fill={slice.color}
                 animate={{
                   x: isActive ? direction.x * POP_DISTANCE : 0,
@@ -121,7 +145,7 @@ export function PieChart({
             </span>
             {activeSlice && (
               <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                {percentFormat.format(activeSlice.value / total)}
+                {formatShare(activeSlice.value)}
               </span>
             )}
           </span>
@@ -147,7 +171,7 @@ export function PieChart({
               />
               <span className="flex-1 truncate text-left">{slice.label}</span>
               <span className="text-muted-foreground tabular-nums">
-                {percentFormat.format(slice.value / total)}
+                {formatShare(slice.value)}
               </span>
             </button>
           </li>
